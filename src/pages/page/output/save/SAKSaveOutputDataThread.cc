@@ -3,8 +3,8 @@
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project. The project is a open source project, you can get the source from:
- *     https://github.com/wuuhii/QtSwissArmyKnife
- *     https://gitee.com/wuuhii/QtSwissArmyKnife
+ *     https://github.com/qsak/QtSwissArmyKnife
+ *     https://gitee.com/qsak/QtSwissArmyKnife
  *
  * For more information about the project, please join our QQ group(952218522).
  * In addition, the email address of the project author is wuuhii@outlook.com.
@@ -12,7 +12,7 @@
 #include <QFile>
 #include <QTextStream>
 
-#include "SAKCommonInterface.hh"
+#include "SAKInterface.hh"
 #include "SAKSaveOutputDataThread.hh"
 #include "SAKSaveOutputDataSettings.hh"
 
@@ -46,7 +46,13 @@ void SAKSaveOutputDataThread::writeDataToFile(QByteArray data, SAKSaveOutputData
         break;
     case SAKSaveOutputDataSettings::SaveOutputDataParamters::Hex:
         if (file.open(QFile::WriteOnly | QFile::Text | QFile::Append)){
+            /// @brief  QByteArray::toHex(char separator)是Qt5.9中引入的
+#if (QT_VERSION < QT_VERSION_CHECK(5,9,0))
+            SAKInterface interface;
+            textStream << QString(interface.byteArrayToHex(data, ' ')) << QString("\n");
+#else
             textStream << QString(data.toHex(' ')) << QString("\n");
+#endif
             file.close();
         }
         break;

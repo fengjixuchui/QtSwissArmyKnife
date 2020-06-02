@@ -1,10 +1,10 @@
 ﻿/*
- * Copyright (C) 2018-2019 wuuhii. All rights reserved.
+ * Copyright (C) 2018-2020 wuuhii. All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project. The project is a open source project, you can get the source from:
- *     https://github.com/wuuhii/QtSwissArmyKnife
- *     https://gitee.com/wuuhii/QtSwissArmyKnife
+ *     https://github.com/qsak/QtSwissArmyKnife
+ *     https://gitee.com/qsak/QtSwissArmyKnife
  *
  * For more information about the project, please join our QQ group(952218522).
  * In addition, the email address of the project author is wuuhii@outlook.com.
@@ -25,6 +25,7 @@
 #include <QNetworkInterface>
 
 #include "SAKGlobal.hh"
+#include "SAKDataStruct.hh"
 #include "SAKCRCInterface.hh"
 
 #ifdef SAK_IMPORT_COM_MODULE
@@ -82,26 +83,32 @@ QString SAKGlobal::mkMutiDir(const QString path){
     return parentDir + "/" + dirname;
 }
 
-QString SAKGlobal::getIODeviceTypeName(int type)
+QString SAKGlobal::getNameOfDebugPage(int type)
 {
     QString name;
     switch (type) {
-    case SAKEnumDebugPageTypeUDP:
+    case SAKDataStruct::DebugPageTypeUDP:
         name = tr("UDP调试");
         break;
-    case SAKEnumDebugPageTypeTCPClient:
+    case SAKDataStruct::DebugPageTypeTCPClient:
         name = tr("TCP客户端");
         break;
-    case SAKEnumDebugPageTypeTCPServer:
+    case SAKDataStruct::DebugPageTypeTCPServer:
         name = tr("TCP服务器");
         break;
 #ifdef SAK_IMPORT_COM_MODULE
-    case SAKEnumDebugPageTypeCOM:
+    case SAKDataStruct::DebugPageTypeCOM:
         name = tr("串口调试");
+        break;
+#endif
+#ifdef SAK_IMPORT_HID_MODULE
+    case SAKDataStruct::DebugPageTypeHID:
+        name = tr("HID调试");
         break;
 #endif
     default:
         Q_ASSERT_X(false, __FUNCTION__, "Unknow debug page type");
+        name = QString("Unknow");
         break;
     }
 
@@ -169,7 +176,7 @@ void SAKGlobal::initParityComboBox(QComboBox *comboBox)
 {
     if (comboBox){
         comboBox->clear();
-        comboBox->addItem(tr("无校验位"), QVariant::fromValue(QSerialPort::NoParity));
+        comboBox->addItem(tr("无"), QVariant::fromValue(QSerialPort::NoParity));
         comboBox->addItem(tr("偶校验"), QVariant::fromValue(QSerialPort::EvenParity));
         comboBox->addItem(tr("奇校验"), QVariant::fromValue(QSerialPort::OddParity));
         comboBox->addItem(tr("空格检验"), QVariant::fromValue(QSerialPort::SpaceParity));
@@ -208,13 +215,13 @@ void SAKGlobal::initInputTextFormatComboBox(QComboBox *comboBox)
     if (comboBox){
         comboBox->clear();
 
-        comboBox->addItem(tr("二进制"), Ibin);
-        comboBox->addItem(tr("八进制"), Ioct);
-        comboBox->addItem(tr("十进制"), Idec);
-        comboBox->addItem(tr("十六进制"), Ihex);
-        comboBox->addItem(QString("ASCII"), Iascii);
-        comboBox->addItem(QString("UTF8"), Iutf8);
-        comboBox->addItem(tr("系统编码"), Ilocal);
+        comboBox->addItem(tr("二进制"), SAKDataStruct::InputFormatBin);
+        comboBox->addItem(tr("八进制"), SAKDataStruct::InputFormatOct);
+        comboBox->addItem(tr("十进制"), SAKDataStruct::InputFormatDec);
+        comboBox->addItem(tr("十六进制"), SAKDataStruct::InputFormatHex);
+        comboBox->addItem(QString("ASCII"), SAKDataStruct::InputFormatAscii);
+        comboBox->addItem(QString("UTF8"), SAKDataStruct::InputFormatUtf8);
+        comboBox->addItem(tr("系统编码"), SAKDataStruct::InputFormatLocal);
 
         comboBox->setCurrentIndex(4);
     }
@@ -222,16 +229,16 @@ void SAKGlobal::initInputTextFormatComboBox(QComboBox *comboBox)
 
 void SAKGlobal::initOutputTextFormatComboBox(QComboBox *comboBox)
 {
-    comboBox->addItem(tr("二进制"), Obin);
-    comboBox->addItem(tr("八进制"), Ooct);
-    comboBox->addItem(tr("十进制"), Odec);
-    comboBox->addItem(tr("十六进制"), Ohex);
-    comboBox->addItem(QString("ASCII"), Oascii);
-    comboBox->addItem(QString("UTF8"), Outf8);
-    comboBox->addItem(QString("UTF16"), Outf16);
-    comboBox->addItem(QString("UCS4"), Oucs4);
-    comboBox->addItem(tr("宽字符"), Ostdwstring);
-    comboBox->addItem(tr("系统编码"), Olocal);
+    comboBox->addItem(tr("二进制"), SAKDataStruct::OutputFormatBin);
+    comboBox->addItem(tr("八进制"), SAKDataStruct::OutputFormatOct);
+    comboBox->addItem(tr("十进制"), SAKDataStruct::OutputFormatDec);
+    comboBox->addItem(tr("十六进制"), SAKDataStruct::OutputFormatHex);
+    comboBox->addItem(QString("ASCII"), SAKDataStruct::OutputFormatAscii);
+    comboBox->addItem(QString("UTF8"), SAKDataStruct::OutputFormatUtf8);
+    comboBox->addItem(QString("UTF16"), SAKDataStruct::OutputFormatUtf16);
+    comboBox->addItem(QString("UCS4"), SAKDataStruct::OutputFormatUcs4);
+    comboBox->addItem(tr("宽字符"), SAKDataStruct::OutputFormatStdwstring);
+    comboBox->addItem(tr("系统编码"), SAKDataStruct::OutputFormatLocal);
 }
 
 void SAKGlobal::initCRCComboBox(QComboBox *comboBox)

@@ -1,10 +1,10 @@
 ﻿/*
- * Copyright (C) 2018-2019 wuuhii. All rights reserved.
+ * Copyright (C) 2018-2020 wuuhii. All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project. The project is a open source project, you can get the source from:
- *     https://github.com/wuuhii/QtSwissArmyKnife
- *     https://gitee.com/wuuhii/QtSwissArmyKnife
+ *     https://github.com/qsak/QtSwissArmyKnife
+ *     https://gitee.com/qsak/QtSwissArmyKnife
  *
  * For more information about the project, please join our QQ group(952218522).
  * In addition, the email address of the project author is wuuhii@outlook.com.
@@ -16,39 +16,26 @@
 #include <QThread>
 #include <QUdpSocket>
 
-class SAKDebugPage;
-class SAKUdpDevice:public QThread
+#include "SAKDevice.hh"
+
+class SAKUdpDebugPage;
+class SAKUdpDevice:public SAKDevice
 {
     Q_OBJECT
 public:
-    SAKUdpDevice(QString localHost, quint16 localPort,
-                 bool enableCustomLocalSetting,
-                 QString targetHost, quint16 targetPort,
-                 SAKDebugPage *debugPage,
-                 QObject *parent = Q_NULLPTR);
+    SAKUdpDevice(SAKUdpDebugPage *debugPage, QObject *parent = Q_NULLPTR);
     ~SAKUdpDevice();
-
-    /**
-     * @brief readBytes 读取数据
-     */
-    void readBytes();
-
-    /**
-     * @brief writeBytes 写数据
-     * @param data 代写数据
-     */
-    void writeBytes(QByteArray data);
 
     /**
      * @brief 参数上下文
      */
     struct ParametersContext{
-        bool enableUnicast;
-        bool enableMulticast;
-        bool enableBroadcast;
-        quint16 broadcastPort;
+        bool enableUnicast;     // 允许单播
+        bool enableMulticast;   // 允许组播
+        bool enableBroadcast;   // 允许广播
+        quint16 broadcastPort;  // 广播端口
 
-        struct MulticastInfo{
+        struct MulticastInfo{   // 组播信息
             QString address;
             quint16 port;
         };
@@ -92,28 +79,20 @@ public:
      * @param enable 该值为true是，使能组播功能，否则禁止全部组播。
      */
     void setMulticastEnable(bool enable);
+protected:
+    void run() final;
 private:
     QMutex parametersContextMutex;
-    ParametersContext parametersContext;
-    const ParametersContext parametersContextInstance();
-
-private:
-    void run();    
-private:
+    ParametersContext parametersContext;    
     QString localHost;
     quint16 localPort;
     bool enableCustomLocalSetting;
     QString targetHost;
     quint16 targetPort;
-    SAKDebugPage *debugPage;
+    SAKUdpDebugPage *debugPage;
     QUdpSocket *udpSocket;
-
-signals:
-    void bytesRead(QByteArray);
-    void bytesWriten(QByteArray);
-
-    void deviceStatuChanged(bool opened);
-    void messageChanged(QString message, bool isInfo);
+private:
+    const ParametersContext parametersContextInstance();
 };
 Q_DECLARE_METATYPE(SAKUdpDevice::ParametersContext::MulticastInfo)
 #endif

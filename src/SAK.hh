@@ -1,10 +1,10 @@
 ﻿/*
- * Copyright (C) 2019 wuuhii. All rights reserved.
+ * Copyright (C) 2019-2020 Qter. All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project. The project is a open source project, you can get the source from:
- *     https://github.com/wuuhii/QtSwissArmyKnife
- *     https://gitee.com/wuuhii/QtSwissArmyKnife
+ *     https://github.com/qsak/QtSwissArmyKnife
+ *     https://gitee.com/qsak/QtSwissArmyKnife
  *
  * For more information about the project, please join our QQ group(952218522).
  * In addition, the email address of the project author is wuuhii@outlook.com.
@@ -14,7 +14,7 @@
 
 #include <QObject>
 
-class SAKApplicationInformation:public QObject
+class SAK:public QObject
 {
     Q_OBJECT
 public:
@@ -22,7 +22,7 @@ public:
      * @brief instance 获取app信息示例
      * @return App信息示例
      */
-    static SAKApplicationInformation* instance();
+    static SAK* instance();
 
     QString email();
     QString qqGroupNumber();
@@ -35,10 +35,10 @@ public:
     QString copyright();
     QString business();
 private:
-    SAKApplicationInformation(QObject *parent = Q_NULLPTR);
-    ~SAKApplicationInformation();
+    SAK(QObject *parent = Q_NULLPTR);
+    ~SAK();
 
-    static SAKApplicationInformation *thisInstance;
+    static SAK *thisInstance;
 };
 
 #endif

@@ -3,8 +3,8 @@
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project. The project is a open source project, you can get the source from:
- *     https://github.com/wuuhii/QtSwissArmyKnife
- *     https://gitee.com/wuuhii/QtSwissArmyKnife
+ *     https://github.com/qsak/QtSwissArmyKnife
+ *     https://gitee.com/qsak/QtSwissArmyKnife
  *
  * For more information about the project, please join our QQ group(952218522).
  * In addition, the email address of the project author is wuuhii@outlook.com.
@@ -36,6 +36,7 @@
 #include "SAKGlobal.hh"
 #include "SAKSettings.hh"
 #include "SAKSettings.hh"
+#include "SAKDataStruct.hh"
 #include "SAKMainWindow.hh"
 #include "QtAppStyleApi.hh"
 #include "SAKApplication.hh"
@@ -47,7 +48,7 @@
 #include "SAKMoreInformation.hh"
 #include "SAKTcpClientDebugPage.hh"
 #include "SAKTcpServerDebugPage.hh"
-#include "SAKApplicationInformation.hh"
+#include "SAK.hh"
 #ifdef SAK_IMPORT_FILECHECKER_MODULE
 #include "QtCryptographicHashController.hh"
 #endif
@@ -100,8 +101,8 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
     centralWidget->layout()->setContentsMargins(6, 6, 6, 6);
 #endif
     setWindowTitle(tr("瑞士军刀--开发调试工具集")
-                   + " v" + SAKApplicationInformation::instance()->version()
-                   + " " + tr("用户交流QQ群") + " " + SAKApplicationInformation::instance()->qqGroupNumber());
+                   + " v" + SAK::instance()->version()
+                   + " " + tr("用户交流QQ群") + " " + SAK::instance()->qqGroupNumber());
 
     tabWidget->setTabsClosable(true);
     connect(tabWidget, &QTabWidget::tabCloseRequested, this, &SAKMainWindow::closeDebugPage);
@@ -155,15 +156,16 @@ bool SAKMainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void SAKMainWindow::addTab()
 {
-    /*
-     * 添加调试页面
-     */
+    /// @brief 添加调试页面
 #ifdef SAK_IMPORT_COM_MODULE
-    this->tabWidget->addTab( new SAKSerialPortDebugPage,  tr("串口调试"));
+    this->tabWidget->addTab( new SAKSerialPortDebugPage, tr("串口调试"));
 #endif
-    this->tabWidget->addTab(new SAKUdpDebugPage,          tr("UDP调试"));
-    this->tabWidget->addTab(new SAKTcpClientDebugPage,    tr("TCP客户端"));
-    this->tabWidget->addTab(new SAKTcpServerDebugPage,    tr("TCP服务器"));
+#ifdef SAK_IMPORT_HID_MODULE
+    this->tabWidget->addTab( new SAKHidDebugPage, tr("HID调试(Beta)"));
+#endif
+    this->tabWidget->addTab(new SAKUdpDebugPage, tr("UDP调试"));
+    this->tabWidget->addTab(new SAKTcpClientDebugPage, tr("TCP客户端"));
+    this->tabWidget->addTab(new SAKTcpServerDebugPage, tr("TCP服务器"));
 
     /*
      * 隐藏关闭按钮（必须在调用setTabsClosable()函数后设置，否则不生效）
@@ -186,7 +188,7 @@ void SAKMainWindow::addTool()
     connect(action, &QAction::triggered, this, &SAKMainWindow::createCRCCalculator);
 }
 
-void SAKMainWindow::About()
+void SAKMainWindow::about()
 {
     QMessageBox::information(this, tr("关于"), QString("<font color=green>%1</font><br />%2<br />"
                                                      "<font color=green>%3</font><br />%4<br />"
@@ -198,16 +200,16 @@ void SAKMainWindow::About()
                                                      "<font color=green>%15</font><br />%16<br />"
                                                      "<font color=green>%17</font><br />%18<br />"
                                                      "<font color=red>%19</font><br />%20")
-                             .arg(tr("软件版本")).arg(SAKApplicationInformation::instance()->version())
-                             .arg(tr("软件作者")).arg(SAKApplicationInformation::instance()->authorName())
-                             .arg(tr("作者昵称")).arg(SAKApplicationInformation::instance()->authorNickname())
-                             .arg(tr("发布网站")).arg(SAKApplicationInformation::instance()->officeUrl())
-                             .arg(tr("联系邮箱")).arg(SAKApplicationInformation::instance()->email())
-                             .arg(tr("QQ账号")).arg(SAKApplicationInformation::instance()->qqNumber())
-                             .arg(tr("QQ交流群")).arg(SAKApplicationInformation::instance()->qqGroupNumber())
-                             .arg(tr("编译时间")).arg(SAKApplicationInformation::instance()->buildTime())
-                             .arg(tr("版权信息")).arg(SAKApplicationInformation::instance()->copyright())
-                             .arg(tr("业务合作")).arg(SAKApplicationInformation::instance()->business()));
+                             .arg(tr("软件版本")).arg(SAK::instance()->version())
+                             .arg(tr("软件作者")).arg(SAK::instance()->authorName())
+                             .arg(tr("作者昵称")).arg(SAK::instance()->authorNickname())
+                             .arg(tr("发布网站")).arg(SAK::instance()->officeUrl())
+                             .arg(tr("联系邮箱")).arg(SAK::instance()->email())
+                             .arg(tr("QQ账号")).arg(SAK::instance()->qqNumber())
+                             .arg(tr("QQ交流群")).arg(SAK::instance()->qqGroupNumber())
+                             .arg(tr("编译时间")).arg(SAK::instance()->buildTime())
+                             .arg(tr("版权信息")).arg(SAK::instance()->copyright())
+                             .arg(tr("业务合作")).arg(SAK::instance()->business()));
 }
 
 void SAKMainWindow::addTool(QString toolName, QWidget *toolWidget)
@@ -247,10 +249,10 @@ void SAKMainWindow::initFileMenu()
 
     QMenu *tabMenu = new QMenu(tr("新建页面"), this);
     fileMenu->addMenu(tabMenu);
-    QMetaEnum enums = QMetaEnum::fromType<SAKGlobal::SAKEnumDebugPageType>();
+    QMetaEnum enums = QMetaEnum::fromType<SAKDataStruct::SAKEnumDebugPageType>();
     for (int i = 0; i < enums.keyCount(); i++){
-        QAction *a = new QAction(SAKGlobal::getIODeviceTypeName(i), this);
-        a->setObjectName(SAKGlobal::getIODeviceTypeName(i));
+        QAction *a = new QAction(SAKGlobal::getNameOfDebugPage(i), this);
+        a->setObjectName(SAKGlobal::getNameOfDebugPage(i));
         QVariant var = QVariant::fromValue<int>(enums.value(i));
         a->setData(var);
         connect(a, &QAction::triggered, this, &SAKMainWindow::addRemovablePage);
@@ -260,8 +262,8 @@ void SAKMainWindow::initFileMenu()
     QMenu *windowMenu = new QMenu(tr("新建窗口"), this);
     fileMenu->addMenu(windowMenu);
     for (int i = 0; i < enums.keyCount(); i++){
-        QAction *a = new QAction(SAKGlobal::getIODeviceTypeName(i), this);
-        a->setObjectName(SAKGlobal::getIODeviceTypeName(i));
+        QAction *a = new QAction(SAKGlobal::getNameOfDebugPage(i), this);
+        a->setObjectName(SAKGlobal::getNameOfDebugPage(i));
         QVariant var = QVariant::fromValue<int>(enums.value(i));
         connect(a, &QAction::triggered, this, &SAKMainWindow::openIODeviceWindow);
         a->setData(var);
@@ -383,15 +385,15 @@ void SAKMainWindow::initHelpMenu()
 
     QAction *aboutAction = new QAction(tr("关于软件"), this);
     helpMenu->addAction(aboutAction);
-    connect(aboutAction, &QAction::triggered, this, &SAKMainWindow::About);
+    connect(aboutAction, &QAction::triggered, this, &SAKMainWindow::about);
 
     QMenu *srcMenu = new QMenu(tr("获取源码"), this);
     helpMenu->addMenu(srcMenu);
     QAction *visitGitHubAction = new QAction(QIcon(":/resources/images/GitHub.png"), tr("GitHub"), this);
-    connect(visitGitHubAction, &QAction::triggered, [](){QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/wuuhii/QtSwissArmyKnife")));});
+    connect(visitGitHubAction, &QAction::triggered, [](){QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/qsak/QtSwissArmyKnife")));});
     srcMenu->addAction(visitGitHubAction);
     QAction *visitGiteeAction = new QAction(QIcon(":/resources/images/Gitee.png"), tr("Gitee"), this);
-    connect(visitGiteeAction, &QAction::triggered, [](){QDesktopServices::openUrl(QUrl(QLatin1String("https://gitee.com/wuuhii/QtSwissArmyKnife")));});
+    connect(visitGiteeAction, &QAction::triggered, [](){QDesktopServices::openUrl(QUrl(QLatin1String("https://gitee.com/qsak/QtSwissArmyKnife")));});
     srcMenu->addAction(visitGiteeAction);
 
     QAction *updateAction = new QAction(tr("检查更新"), this);
@@ -471,30 +473,30 @@ QWidget *SAKMainWindow::getDebugPage(int type)
 {
     QWidget *widget = Q_NULLPTR;
     switch (type) {
-    case SAKGlobal::SAKEnumDebugPageTypeUDP:
+    case SAKDataStruct::DebugPageTypeUDP:
         widget = new SAKUdpDebugPage;
         break;
-    case SAKGlobal::SAKEnumDebugPageTypeTCPClient:
+    case SAKDataStruct::DebugPageTypeTCPClient:
         widget = new SAKTcpClientDebugPage;
         break;
-    case SAKGlobal::SAKEnumDebugPageTypeTCPServer:
+    case SAKDataStruct::DebugPageTypeTCPServer:
         widget = new SAKTcpServerDebugPage;
         break;
 
 #ifdef SAK_IMPORT_COM_MODULE
-    case SAKGlobal::SAKEnumDebugPageTypeCOM:
+    case SAKDataStruct::DebugPageTypeCOM:
         widget = new SAKSerialPortDebugPage;
         break;
 #endif
 
 #ifdef SAK_IMPORT_HID_MODULE
-    case SAKGlobal::SAKEnumDebugPageTypeHID:
+    case SAKDataStruct::DebugPageTypeHID:
         widget = new SAKSerialPortDebugPage;
         break;
 #endif
 
 #ifdef SAK_IMPORT_USB_MODULE
-    case SAKGlobal::SAKEnumDebugPageTypeUSB:
+    case SAKDataStruct::DebugPageTypeUSB:
         widget = new SAKSerialPortDebugPage;
         break;
 #endif
