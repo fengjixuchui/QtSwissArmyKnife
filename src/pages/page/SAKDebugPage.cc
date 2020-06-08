@@ -67,9 +67,9 @@ SAKDebugPage::SAKDebugPage(int type, QWidget *parent)
     _readWriteParameters.waitForReadyReadTime = MINI_READ_WRITE_WATINGT_TIME;
     _readWriteParameters.waitForBytesWrittenTime = MINI_READ_WRITE_WATINGT_TIME;
     _readWriteParameters.runIntervalTime = 25;
-
+#if 0
     resize(800, 600);
-
+#endif
     clearInfoTimer.setInterval(8*1000);
     connect(&clearInfoTimer, &QTimer::timeout, this, &SAKDebugPage::cleanInfo);
 
@@ -88,11 +88,16 @@ SAKDebugPage::~SAKDebugPage()
         device = Q_NULLPTR;
     }
 
-    delete databaseInterface;
-    delete ui;
+    if (ui){
+        delete ui;
+        ui = Q_NULLPTR;
+    }
+
 #ifdef SAK_IMPORT_CHARTS_MODULE
-    delete dataVisualizationManager;
-    dataVisualizationManager = Q_NULLPTR;
+    if (dataVisualizationManager){
+        delete dataVisualizationManager;
+        dataVisualizationManager = Q_NULLPTR;
+    }
 #endif
 }
 
@@ -159,6 +164,11 @@ SAKDebugPageDatabaseInterface *SAKDebugPage::databaseInterfaceInstance()
    return databaseInterface;
 }
 
+quint32 SAKDebugPage::pageType()
+{
+    return debugPageType;
+}
+
 void SAKDebugPage::refreshDevice()
 {
 
@@ -206,6 +216,11 @@ void SAKDebugPage::initSettingKey()
         case SAKDataStruct::DebugPageTypeHID:
         settingKey = QString("HID");
         break;
+#endif
+#ifdef SAK_IMPORT_USB_MODULE
+    case SAKDataStruct::DebugPageTypeUSB:
+    settingKey = QString("USB");
+    break;
 #endif
     case SAKDataStruct::DebugPageTypeUDP:
         settingKey = QString("UDP");

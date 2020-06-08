@@ -9,21 +9,31 @@
  * For more information about the project, please join our QQ group(952218522).
  * In addition, the email address of the project author is wuuhii@outlook.com.
  */
-#ifndef SAKQRCODECREATOR_HH
-#define SAKQRCODECREATOR_HH
+#ifndef SAKUsbDEVICE_HH
+#define SAKUsbDEVICE_HH
 
-#include <QWidget>
-namespace Ui {
-    class SAKQRCodeCreator;
+#include <QTimer>
+#include <QThread>
+
+#include "SAKDevice.hh"
+
+extern "C" {
+#include "hidapi.h"
 }
-class SAKQRCodeCreator:public QWidget
+
+class SAKUsbDebugPage;
+class SAKUsbDevice:public SAKDevice
 {
     Q_OBJECT
 public:
-    SAKQRCodeCreator(QWidget *parent = Q_NULLPTR);
-    ~SAKQRCodeCreator();
+    SAKUsbDevice(SAKUsbDebugPage *debugPage, QObject *parent = Q_NULLPTR);
+    ~SAKUsbDevice();
 private:
-    Ui::SAKQRCodeCreator *ui;
+    void run();    
+private:    
+    SAKUsbDebugPage *debugPage;
+    QString path;
+    hid_device *hidDevice;
 };
 
 #endif

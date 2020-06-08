@@ -21,55 +21,63 @@
 #include <QCheckBox>
 #include <QRegExpValidator>
 
-class SAKDebugPage;
-
 namespace Ui {
     class SAKAutoResponseItemWidget;
 }
 
+class SAKDebugPage;
+/// @brief 自动回复条目
 class SAKAutoResponseItemWidget:public QWidget
 {
     Q_OBJECT
 public:
     SAKAutoResponseItemWidget(SAKDebugPage *debugPage, QWidget *parent = Q_NULLPTR);
+    SAKAutoResponseItemWidget(SAKDebugPage *debugPage,
+                              quint64 id,
+                              QString name,
+                              QString referenceData,
+                              QString responseData,
+                              bool enabled,
+                              quint32 referenceFormat,
+                              quint32 responseFormat,
+                              QWidget *parent = Q_NULLPTR);
     ~SAKAutoResponseItemWidget();
-
-    enum AutoResponseOption{
-        Equivalence,    // 相等
-        Contain,        // 包含
-        Notcontain,     // 不包含
-    };
 
     /**
      * @brief setAllAutoResponseDisable 禁止所有自动回复
      * @param disAbel 该值为true时，禁止所有回复，否则更具回复示例的使能判断是否自动回复
      */
-    void setAllAutoResponseDisable(bool disAbel);
-private:
-    Ui::SAKAutoResponseItemWidget *ui;
-    QLineEdit   *remarkLineEdit;
-    QLineEdit   *referenceLineEdit;
-    QLineEdit   *responseLineEdit;
-    QCheckBox   *enableCheckBox;
-    QComboBox   *optionComboBox;
-    QComboBox   *referenceDataFromatComboBox;
-    QComboBox   *responseDataFormatComboBox;
+    void setAllAutoResponseDisable(bool disable);
 
-    /// 禁止所有自动回复标志
+    quint64 parameterID();
+    QString parameterName();
+    QString parameterRefernceData();
+    QString parameterResponseData();
+    bool parameterEnable();
+    quint32 parameterReferenceFormat();
+    quint32 parameterResponseFormat();
+private:
     bool forbiddenAllAutoResponse;
     SAKDebugPage *debugPage;
+    quint64 id;
 private:
-    /// 设置输入框文本格式(详情SAKGlobal::EDTextFormat)
     void setLineEditFormat(QLineEdit *lineEdit, int format);
-
-    void dataRead(QByteArray data);
+    void bytesRead(QByteArray bytes);
     QByteArray string2array(QString str, int format);
-    bool response(QByteArray receiveData, QByteArray referenceData, int option);    
+    bool response(QByteArray receiveData, QByteArray referenceData, int option);
+    void initUi();
+private:
+    Ui::SAKAutoResponseItemWidget *ui;
+    QLineEdit *remarkLineEdit;
+    QLineEdit *referenceLineEdit;
+    QLineEdit *responseLineEdit;
+    QCheckBox *enableCheckBox;
+    QComboBox *optionComboBox;
+    QComboBox *referenceDataFromatComboBox;
+    QComboBox *responseDataFormatComboBox;
 private slots:
     void on_referenceDataFromatComboBox_currentTextChanged();
     void on_responseDataFormatComboBox_currentTextChanged();
-signals:
-    void requestWrite(QByteArray data);
 };
 
 #endif

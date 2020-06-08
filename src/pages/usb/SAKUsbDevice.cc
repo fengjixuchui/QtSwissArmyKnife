@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2019-2020 wuuhii. All rights reserved.
+ * Copyright (C) 2020 wuuhii. All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project. The project is a open source project, you can get the source from:
@@ -13,11 +13,11 @@
 #include <QEventLoop>
 
 #include <QApplication>
-#include "SAKHidDevice.hh"
-#include "SAKHidDebugPage.hh"
-#include "SAKHidDeviceController.hh"
+#include "SAKUsbDevice.hh"
+#include "SAKUsbDebugPage.hh"
+#include "SAKUsbDeviceController.hh"
 
-SAKHidDevice::SAKHidDevice(SAKHidDebugPage *debugPage, QObject *parent)
+SAKUsbDevice::SAKUsbDevice(SAKUsbDebugPage *debugPage, QObject *parent)
     :SAKDevice(parent)
     ,debugPage (debugPage)
     ,hidDevice (nullptr)
@@ -25,15 +25,15 @@ SAKHidDevice::SAKHidDevice(SAKHidDebugPage *debugPage, QObject *parent)
 
 }
 
-SAKHidDevice::~SAKHidDevice()
+SAKUsbDevice::~SAKUsbDevice()
 {
 
 }
 
-void SAKHidDevice::run()
+void SAKUsbDevice::run()
 {
     QEventLoop eventLoop;
-    SAKHidDeviceController *deviceController = debugPage->controllerInstance();
+    SAKUsbDeviceController *deviceController = debugPage->controllerInstance();
     path = deviceController->devicePath();
     hidDevice = hid_open_path(path.toLatin1().constData());
     if (!hidDevice){
@@ -64,6 +64,10 @@ void SAKHidDevice::run()
         while (true) {
             QByteArray bytes = takeWaitingForWrittingBytes();
             if (bytes.length()){
+                quint8 endpoint = deviceController->endpoint();
+                quint8 cmd = deviceController->cmd();
+                bytes.prepend(reinterpret_cast<char*>(&cmd), 1);
+                bytes.prepend(reinterpret_cast<char*>(&endpoint), 1);
                 int ret = hid_write(hidDevice, reinterpret_cast<const unsigned char*>(bytes.constData()), static_cast<size_t>(bytes.length()));
                 if (ret == -1){
                     emit messageChanged(tr("发送数据失败：")+QString::fromWCharArray(hid_error(hidDevice)), false);

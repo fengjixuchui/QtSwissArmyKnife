@@ -20,11 +20,13 @@
 
 #include "SAKAutoResponseItemWidget.hh"
 #include "SAKAutoResponseSettingsWidget.hh"
+#include "SAKDebugPageDatabaseInterface.hh"
+
 #include "ui_SAKAutoResponseSettingsWidget.h"
 
 SAKAutoResponseSettingsWidget::SAKAutoResponseSettingsWidget(SAKDebugPage *debugPage, QWidget *parent)
     :QWidget (parent)
-    ,_debugPage (debugPage)
+    ,debugPage (debugPage)
     ,ui (new Ui::SAKAutoResponseSettingsWidget)
 {
     ui->setupUi(this);
@@ -35,9 +37,12 @@ SAKAutoResponseSettingsWidget::SAKAutoResponseSettingsWidget(SAKDebugPage *debug
     msgLabel = ui->msgLabel;
 
     setWindowTitle(tr("自动回复设置"));
+    databaseInterface = SAKDebugPageDatabaseInterface::instance();
 
     clearMessageInfoTimer.setInterval(5*1000);
     connect(&clearMessageInfoTimer, &QTimer::timeout, this, &SAKAutoResponseSettingsWidget::clearMessage);
+
+    readInRecord();
 }
 
 SAKAutoResponseSettingsWidget::~SAKAutoResponseSettingsWidget()
@@ -71,11 +76,10 @@ void SAKAutoResponseSettingsWidget::on_addItemPushButton_clicked()
 {
     QListWidgetItem *item = new QListWidgetItem(listWidget);
     listWidget->addItem(item);
-    SAKAutoResponseItemWidget *itemWidget = new SAKAutoResponseItemWidget(_debugPage, listWidget);
+    SAKAutoResponseItemWidget *itemWidget = new SAKAutoResponseItemWidget(debugPage, listWidget);
     item->setSizeHint(QSize(itemWidget->width(), itemWidget->height()));
     listWidget->setItemWidget(item, itemWidget);
 }
-
 
 void SAKAutoResponseSettingsWidget::outputMessage(QString msg, bool isInfo)
 {
@@ -94,4 +98,25 @@ void SAKAutoResponseSettingsWidget::clearMessage()
 {
     clearMessageInfoTimer.stop();
     msgLabel->clear();
+}
+
+void SAKAutoResponseSettingsWidget::readInRecord()
+{
+    QString tableName = SAKDataStruct::autoResponseTableName(debugPage->pageType());
+    QList<SAKDataStruct::SAKStructAutoResponseItem> itemList = databaseInterface->selectAutoResponseItem(tableName);
+    for (auto var : itemList){
+        QListWidgetItem *item = new QListWidgetItem(listWidget);
+        listWidget->addItem(item);
+        SAKAutoResponseItemWidget *itemWidget = new SAKAutoResponseItemWidget(debugPage,
+                                                                              var.id,
+                                                                              var.name,
+                                                                              var.referenceData,
+                                                                              var.responseData,
+                                                                              var.enabled,
+                                                                              var.referenceFormat,
+                                                                              var.responseFormat,
+                                                                              listWidget);
+        item->setSizeHint(QSize(itemWidget->width(), itemWidget->height()));
+        listWidget->setItemWidget(item, itemWidget);
+    }
 }
