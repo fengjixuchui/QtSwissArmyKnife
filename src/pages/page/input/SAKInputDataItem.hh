@@ -1,13 +1,11 @@
 ﻿/*
- * Copyright (C) 2019 wuuhii. All rights reserved.
+ * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project. The project is a open source project, you can get the source from:
- *     https://github.com/qsak/QtSwissArmyKnife
- *     https://gitee.com/qsak/QtSwissArmyKnife
- *
- * For more information about the project, please join our QQ group(952218522).
- * In addition, the email address of the project author is wuuhii@outlook.com.
+ * project(https://www.qsak.pro). The project is an open source project. You can
+ * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
+ * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
+ * group which number is 952218522 to have a communication.
  */
 #ifndef SAKINPUTDATAITEM_HH
 #define SAKINPUTDATAITEM_HH
@@ -37,20 +35,11 @@ class SAKInputDataItem:public QWidget
 public:
     SAKInputDataItem(SAKDebugPage *debugPage, SAKDebugPageInputManager *inputManager, QWidget *parent = Q_NULLPTR);
     ~SAKInputDataItem();
-
-private:
-    Ui::SAKInputDataItem *ui;
-
-    QComboBox   *textFormatComboBox;
-    QLineEdit   *descriptionLineEdit;
-    QTextEdit   *inputDataTextEdit;
-
 private:
     QPushButton *menuPushButton;
     QAction *action;
     SAKDebugPage *debugPage;
     SAKDebugPageInputManager *inputManager;
-
     SAKDebugPageInputManager::InputParameters inputParameters;
 private:
     void addDataAction(QPushButton *menuPushButton);
@@ -58,9 +47,16 @@ private:
     void updateActionTitle(const QString &title);
     void updateTextFormat();
     void sendRawData();
-
 signals:
     void rawDataChanged(QString rawData, SAKDebugPageInputManager::InputParameters parameters);
+private:
+    Ui::SAKInputDataItem *ui;
+    QComboBox *textFormatComboBox;
+    QLineEdit *descriptionLineEdit;
+    QTextEdit *inputDataTextEdit;
+    QPushButton *updatePushButton;
+private slots:
+    void on_updatePushButton_clicked();
 };
 
 #endif

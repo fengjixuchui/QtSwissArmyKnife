@@ -1,13 +1,11 @@
 ﻿/*
- * Copyright (C) 2018-2020 wuuhii. All rights reserved.
+ * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project. The project is a open source project, you can get the source from:
- *     https://github.com/qsak/QtSwissArmyKnife
- *     https://gitee.com/qsak/QtSwissArmyKnife
- *
- * For more information about the project, please join our QQ group(952218522).
- * In addition, the email address of the project author is wuuhii@outlook.com
+ * project(https://www.qsak.pro). The project is an open source project. You can
+ * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
+ * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
+ * group which number is 952218522 to have a communication.
  */
 #ifndef SAKAUTORESPONSEITEMWIDGET_HH
 #define SAKAUTORESPONSEITEMWIDGET_HH
@@ -40,6 +38,7 @@ public:
                               bool enabled,
                               quint32 referenceFormat,
                               quint32 responseFormat,
+                              quint32 option,
                               QWidget *parent = Q_NULLPTR);
     ~SAKAutoResponseItemWidget();
 
@@ -56,6 +55,7 @@ public:
     bool parameterEnable();
     quint32 parameterReferenceFormat();
     quint32 parameterResponseFormat();
+    quint32 parameterOption();
 private:
     bool forbiddenAllAutoResponse;
     SAKDebugPage *debugPage;
@@ -75,9 +75,11 @@ private:
     QComboBox *optionComboBox;
     QComboBox *referenceDataFromatComboBox;
     QComboBox *responseDataFormatComboBox;
+    QPushButton *updatePushButton;
 private slots:
     void on_referenceDataFromatComboBox_currentTextChanged();
     void on_responseDataFormatComboBox_currentTextChanged();
+    void on_updatePushButton_clicked();
 };
 
 #endif

@@ -1,19 +1,18 @@
 ﻿/*
- * Copyright (C) 2018-2020 wuuhii. All rights reserved.
+ * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project. The project is a open source project, you can get the source from:
- *     https://github.com/qsak/QtSwissArmyKnife
- *     https://gitee.com/qsak/QtSwissArmyKnife
- *
- * For more information about the project, please join our QQ group(952218522).
- * In addition, the email address of the project author is wuuhii@outlook.com.
+ * project(https://www.qsak.pro). The project is an open source project. You can
+ * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
+ * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
+ * group which number is 952218522 to have a communication.
  */
 #include <QDateTime>
 
 #include "SAKGlobal.hh"
 #include "SAKDataStruct.hh"
 #include "SAKAutoResponseItemWidget.hh"
+#include "SAKDebugPageDatabaseInterface.hh"
 
 #include "ui_SAKAutoResponseItemWidget.h"
 
@@ -25,6 +24,7 @@ SAKAutoResponseItemWidget::SAKAutoResponseItemWidget(SAKDebugPage *debugPage, QW
 {
     initUi();
     id = QDateTime::currentMSecsSinceEpoch();
+    remarkLineEdit->setText(QString::number(id));
 }
 
 SAKAutoResponseItemWidget::SAKAutoResponseItemWidget(SAKDebugPage *debugPage,
@@ -35,6 +35,7 @@ SAKAutoResponseItemWidget::SAKAutoResponseItemWidget(SAKDebugPage *debugPage,
                                                      bool enabled,
                                                      quint32 referenceFormat,
                                                      quint32 responseFormat,
+                                                     quint32 option,
                                                      QWidget *parent)
     :QWidget(parent)
     ,forbiddenAllAutoResponse(false)
@@ -49,6 +50,7 @@ SAKAutoResponseItemWidget::SAKAutoResponseItemWidget(SAKDebugPage *debugPage,
     enableCheckBox->setChecked(enabled);
     referenceDataFromatComboBox->setCurrentIndex(referenceFormat);
     responseDataFormatComboBox->setCurrentIndex(responseFormat);
+    optionComboBox->setCurrentIndex(option);
 }
 
 SAKAutoResponseItemWidget::~SAKAutoResponseItemWidget()
@@ -94,6 +96,11 @@ quint32 SAKAutoResponseItemWidget::parameterReferenceFormat()
 quint32 SAKAutoResponseItemWidget::parameterResponseFormat()
 {
     return responseDataFormatComboBox->currentIndex();
+}
+
+quint32 SAKAutoResponseItemWidget::parameterOption()
+{
+    return optionComboBox->currentIndex();
 }
 
 void SAKAutoResponseItemWidget::setLineEditFormat(QLineEdit *lineEdit, int format)
@@ -228,11 +235,12 @@ bool SAKAutoResponseItemWidget::response(QByteArray receiveData, QByteArray refe
 void SAKAutoResponseItemWidget::initUi()
 {
     ui->setupUi(this);
-    remarkLineEdit              = ui->remarkLineEdit;
-    referenceLineEdit           = ui->referenceLineEdit;
-    responseLineEdit            = ui->responseLineEdit;
-    enableCheckBox              = ui->enableCheckBox;
-    optionComboBox              = ui->optionComboBox;
+    remarkLineEdit = ui->remarkLineEdit;
+    referenceLineEdit = ui->referenceLineEdit;
+    responseLineEdit = ui->responseLineEdit;
+    enableCheckBox = ui->enableCheckBox;
+    optionComboBox = ui->optionComboBox;
+    updatePushButton = ui->updatePushButton;
     referenceDataFromatComboBox = ui->referenceDataFromatComboBox;
     responseDataFormatComboBox  = ui->responseDataFormatComboBox;
 
@@ -255,4 +263,19 @@ void SAKAutoResponseItemWidget::on_referenceDataFromatComboBox_currentTextChange
 void SAKAutoResponseItemWidget::on_responseDataFormatComboBox_currentTextChanged()
 {
     setLineEditFormat(responseLineEdit, responseDataFormatComboBox->currentData().toInt());
+}
+
+void SAKAutoResponseItemWidget::on_updatePushButton_clicked()
+{
+    QString tableName = SAKDataStruct::autoResponseTableName(debugPage->pageType());
+    SAKDataStruct::SAKStructAutoResponseItem item;
+    item.id = parameterID();
+    item.name = parameterName();
+    item.enable = parameterEnable();
+    item.responseData = parameterResponseData();
+    item.referenceData = parameterRefernceData();
+    item.responseFormat = parameterResponseFormat();
+    item.referenceFormat = parameterReferenceFormat();
+    item.option = parameterOption();
+    SAKDebugPageDatabaseInterface::instance()->updateAutoResponseItem(tableName, item);
 }

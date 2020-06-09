@@ -1,15 +1,11 @@
 ﻿/*
- * Copyright 2020 Qter. All rights reserved.
+ * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
  *
- * This file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project, which is an open source project. you can get the source from:
- *     https://github.com/qsak/QtSwissArmyKnife
- * or
- *     https://gitee.com/qsak/QtSwissArmyKnife
- * ----------------------------------------------------------------------------
- * QQ Group     : 952218522
- * Bug Report   : qsak@foxmail.com
- * Official Web : https://qsak.pro
+ * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
+ * project(https://www.qsak.pro). The project is an open source project. You can
+ * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
+ * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
+ * group which number is 952218522 to have a communication.
  */
 #include <QDebug>
 #include <QMetaEnum>
@@ -56,7 +52,7 @@ SAKDebugPageDatabaseInterface* SAKDebugPageDatabaseInterface::instance()
 void SAKDebugPageDatabaseInterface::insertAutoResponseItem(QString tableName, SAKDataStruct::SAKStructAutoResponseItem item)
 {
     AutoResponseTable table = tableNmaeToAutoResponseTable(tableName);
-    bool ret = sakDatabaseQuery.exec(QString("INSERT INTO %1(%2,%3,%4,%5,%6,%7,%8,%9) VALUES(%10,%11,%12,%13,%14,%15,%16)")
+    bool ret = sakDatabaseQuery.exec(QString("INSERT INTO %1(%2,%3,%4,%5,%6,%7,%8,%9) VALUES(%10,'%11','%12','%13',%14,%15,%16,%17)")
                                      .arg(table.tableName)
                                      .arg(table.column.id)
                                      .arg(table.column.name)
@@ -65,13 +61,15 @@ void SAKDebugPageDatabaseInterface::insertAutoResponseItem(QString tableName, SA
                                      .arg(table.column.enable)
                                      .arg(table.column.referenceFormat)
                                      .arg(table.column.responseFormat)
+                                     .arg(table.column.option)
                                      .arg(item.id)
                                      .arg(item.name)
                                      .arg(item.referenceData)
                                      .arg(item.responseData)
-                                     .arg(item.enabled)
+                                     .arg(item.enable)
                                      .arg(item.referenceFormat)
-                                     .arg(item.responseFormat));
+                                     .arg(item.responseFormat)
+                                     .arg(item.option));
     if (!ret){
         qWarning() << __FUNCTION__ << "Insert record to " << table.tableName << " table failed: " << sakDatabaseQuery.lastError().text();
     }
@@ -85,7 +83,7 @@ void SAKDebugPageDatabaseInterface::deleteAutoResponseItem(QString tableName, SA
 void SAKDebugPageDatabaseInterface::updateAutoResponseItem(QString tableName, SAKDataStruct::SAKStructAutoResponseItem item)
 {
     AutoResponseTable table = tableNmaeToAutoResponseTable(tableName);
-    bool ret = sakDatabaseQuery.exec(QString("UPDATE %1 SET %2=%3, %4=%5, %6=%7, %8=%9, %10=%11, %12=%13 ,%14=%15, WHERE ID=%16")
+    bool ret = sakDatabaseQuery.exec(QString("UPDATE %1 SET %2=%3,%4='%5',%6='%7',%8='%9',%10=%11,%12=%13,%14=%15,%16=%17 WHERE ID=%18")
                                      .arg(table.tableName)
                                      .arg(table.column.id)
                                      .arg(item.id)
@@ -96,11 +94,14 @@ void SAKDebugPageDatabaseInterface::updateAutoResponseItem(QString tableName, SA
                                      .arg(table.column.responseData)
                                      .arg(item.responseData)
                                      .arg(table.column.enable)
-                                     .arg(item.enabled)
+                                     .arg(item.enable)
                                      .arg(table.column.referenceFormat)
                                      .arg(item.referenceFormat)
                                      .arg(table.column.responseFormat)
-                                     .arg(item.responseFormat));
+                                     .arg(item.responseFormat)
+                                     .arg(table.column.option)
+                                     .arg(item.option)
+                                     .arg(item.id));
     if (!ret){
         qWarning() << __FUNCTION__ << "Update record form " << table.tableName << " table failed: " << sakDatabaseQuery.lastError().text();
     }
@@ -119,9 +120,10 @@ QList<SAKDataStruct::SAKStructAutoResponseItem> SAKDebugPageDatabaseInterface::s
             item.name = sakDatabaseQuery.value(table.column.name).toString();
             item.referenceData = sakDatabaseQuery.value(table.column.referenceData).toString();
             item.responseData = sakDatabaseQuery.value(table.column.responseData).toString();
-            item.enabled = sakDatabaseQuery.value(table.column.enable).toBool();
+            item.enable = sakDatabaseQuery.value(table.column.enable).toBool();
             item.referenceFormat = sakDatabaseQuery.value(table.column.referenceFormat).toUInt();
             item.responseFormat = sakDatabaseQuery.value(table.column.responseFormat).toUInt();
+            item.option = sakDatabaseQuery.value(table.column.option).toUInt();
 
             itemList.append(item);
         }
@@ -135,7 +137,7 @@ QList<SAKDataStruct::SAKStructAutoResponseItem> SAKDebugPageDatabaseInterface::s
 void SAKDebugPageDatabaseInterface::insertTimingSendingItem(QString tableName, SAKDataStruct::SAKStructTimingSendingItem item)
 {
     TimingSendingTable table = tableNameToTimingSendingTable(tableName);
-    bool ret = sakDatabaseQuery.exec(QString("INSERT INTO %1(%2,%3,%4,%5,%6) VALUES(%7,%8,%9,%10,%11)")
+    bool ret = sakDatabaseQuery.exec(QString("INSERT INTO %1(%2,%3,%4,%5,%6) VALUES(%7,%8,%9,'%10','%11')")
                                      .arg(table.tableName)
                                      .arg(table.column.id)
                                      .arg(table.column.interval)
@@ -160,7 +162,7 @@ void SAKDebugPageDatabaseInterface::deleteTimingSendingItem(QString tableName, S
 void SAKDebugPageDatabaseInterface::updateTimingSendingItem(QString tableName, SAKDataStruct::SAKStructTimingSendingItem item)
 {
     TimingSendingTable table = tableNameToTimingSendingTable(tableName);
-    bool ret = sakDatabaseQuery.exec(QString("UPDATE %1 SET %2=%3, %4=%5, %6=%7, %8=%9, %10=%11, WHERE ID=%17")
+    bool ret = sakDatabaseQuery.exec(QString("UPDATE '%1' SET %2=%3,%4=%5,%6=%7,%8='%9',%10='%11' WHERE ID=%12")
                                      .arg(table.tableName)
                                      .arg(table.column.id)
                                      .arg(item.id)
@@ -171,7 +173,8 @@ void SAKDebugPageDatabaseInterface::updateTimingSendingItem(QString tableName, S
                                      .arg(table.column.comment)
                                      .arg(item.comment)
                                      .arg(table.column.data)
-                                     .arg(item.data));
+                                     .arg(item.data)
+                                     .arg(item.id));
     if (!ret){
         qWarning() << __FUNCTION__ << "Update record form " << table.tableName << " table failed: " << sakDatabaseQuery.lastError().text();
     }
@@ -190,7 +193,7 @@ QList<SAKDataStruct::SAKStructTimingSendingItem> SAKDebugPageDatabaseInterface::
             item.interval = sakDatabaseQuery.value(table.column.interval).toUInt();
             item.format = sakDatabaseQuery.value(table.column.format).toUInt();
             item.comment = sakDatabaseQuery.value(table.column.comment).toString();
-            item.data = sakDatabaseQuery.value(table.column.data).toBool();
+            item.data = sakDatabaseQuery.value(table.column.data).toString();
 
             itemList.append(item);
         }
@@ -313,8 +316,9 @@ void SAKDebugPageDatabaseInterface::createAutoResponseTables()
         autoResponseTable.column.referenceData = QString("ReferenceData");
         autoResponseTable.column.responseData = QString("ResponseData");
         autoResponseTable.column.enable = QString("Enable");
-        autoResponseTable.column.referenceFormat = QString(QString("ReferenceFormat"));
-        autoResponseTable.column.responseFormat = QString(QString("ResponseFormat"));
+        autoResponseTable.column.referenceFormat = QString("ReferenceFormat");
+        autoResponseTable.column.responseFormat = QString("ResponseFormat");
+        autoResponseTable.column.option = QString("Option");
         autoResponseTableList.append(autoResponseTable);
     }
 
@@ -339,7 +343,8 @@ bool SAKDebugPageDatabaseInterface::createAutoResponseTable(const AutoResponseTa
                                               %5 TEXT NOT NULL, \
                                               %6 BOOL NOT NULL, \
                                               %7 INTEGER NOT NULL, \
-                                              %8 INTEGER NOT NULL \
+                                              %8 INTEGER NOT NULL, \
+                                              %9 INTEGER NOT NULL \
                                               )")
                                              .arg(table.tableName)
                                              .arg(table.column.id)
@@ -348,7 +353,8 @@ bool SAKDebugPageDatabaseInterface::createAutoResponseTable(const AutoResponseTa
                                              .arg(table.column.responseData)
                                              .arg(table.column.enable)
                                              .arg(table.column.referenceFormat)
-                                             .arg(table.column.responseFormat));
+                                             .arg(table.column.responseFormat)
+                                             .arg(table.column.option));
     return ret;
 }
 
@@ -384,14 +390,16 @@ bool SAKDebugPageDatabaseInterface::createTimingSendingTable(const TimingSending
     bool ret = sakDatabaseQuery.exec(QString("CREATE TABLE %1 \
                                               ( \
                                               %2 INTEGER PRIMARY KEY NOT NULL, \
-                                              %3 TEXT NOT NULL, \
-                                              %4 TEXT NOT NULL, \
-                                              %5 TEXT NOT NULL \
+                                              %3 INTEGER NOT NULL, \
+                                              %4 INTEGER NOT NULL, \
+                                              %5 TEXT NOT NULL, \
+                                              %6 TEXT NOT NULL \
                                               )")
                                              .arg(table.tableName)
                                              .arg(table.column.id)
                                              .arg(table.column.interval)
                                              .arg(table.column.format)
+                                             .arg(table.column.comment)
                                              .arg(table.column.data));
     return ret;
 }

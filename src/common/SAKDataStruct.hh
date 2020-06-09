@@ -1,13 +1,11 @@
 ﻿/*
- * Copyright (C) 2020 wuuhii. All rights reserved.
+ * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project. The project is a open source project, you can get the source from:
- *     https://github.com/qsak/QtSwissArmyKnife
- *     https://gitee.com/qsak/QtSwissArmyKnife
- *
- * For more information about the project, please join our QQ group(952218522).
- * In addition, the email address of the project author is wuuhii@outlook.com.
+ * project(https://www.qsak.pro). The project is an open source project. You can
+ * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
+ * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
+ * group which number is 952218522 to have a communication.
  */
 #ifndef SAKDATASTRUCT_HH
 #define SAKDATASTRUCT_HH
@@ -78,9 +76,10 @@ public:
         QString name;               /// 该自动回复数据名称
         QString referenceData;      /// 参考数据
         QString responseData;       /// 回复数据
-        bool enabled;               /// 该自动回复是否生效
+        bool enable;                /// 该自动回复是否生效
         quint32 referenceFormat;    /// 参考数据格式，详情查看SAKEnumTextInputFormat
         quint32 responseFormat;     /// 回复数据格式，详情查看SAKEnumTextInputFormat
+        quint32 option;             /// 回复选项
     };
 
     /// @brief 调试页面定时发送数的据结构

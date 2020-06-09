@@ -1,50 +1,107 @@
 ﻿/*
- * Copyright (C) 2018-2020 wuuhii. All rights reserved.
+ * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project. The project is a open source project, you can get the source from:
- *     https://github.com/qsak/QtSwissArmyKnife
- *     https://gitee.com/qsak/QtSwissArmyKnife
- *
- * For more information about the project, please join our QQ group(952218522).
- * In addition, the email address of the project author is wuuhii@outlook.com.
+ * project(https://www.qsak.pro). The project is an open source project. You can
+ * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
+ * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
+ * group which number is 952218522 to have a communication.
  */
 #include <QDebug>
 #include <QDateTime>
 
 #include "SAKGlobal.hh"
 #include "SAKDebugPage.hh"
+#include "SAKDataStruct.hh"
 #include "SAKTimingSendingItemWidget.hh"
+#include "SAKDebugPageDatabaseInterface.hh"
 
 #include "ui_SAKTimingSendingItemWidget.h"
 
 SAKTimingSendingItemWidget::SAKTimingSendingItemWidget(SAKDebugPage *debugPage, QWidget *parent)
     :QWidget(parent)
-    ,ui (new Ui::SAKTimingSendingItemWidget)
-    ,timingCheckBox (Q_NULLPTR)
-    ,timingTimeLineEdit (Q_NULLPTR)
-    ,textFormatComboBox (Q_NULLPTR)
-    ,remarkLineEdit (Q_NULLPTR)
-    ,inputDataTextEdit (Q_NULLPTR)
-    ,debugPage (debugPage)
+    ,debugPage(debugPage)
+    ,ui(new Ui::SAKTimingSendingItemWidget)
 {
-    ui->setupUi(this);
+    initUi();
+    id = QDateTime::currentMSecsSinceEpoch();
+}
 
-    timingCheckBox      = ui->timingCheckBox;
-    timingTimeLineEdit  = ui->timingTimeLineEdit;
-    textFormatComboBox  = ui->textFormatComboBox;
-    remarkLineEdit      = ui->remarkLineEdit;
-    inputDataTextEdit   = ui->inputDataTextEdit;
+SAKTimingSendingItemWidget::SAKTimingSendingItemWidget(SAKDebugPage *debugPage,
+                                                       quint64 id,
+                                                       quint32 interval,
+                                                       quint32 format,
+                                                       QString comment,
+                                                       QString data,
+                                                       QWidget *parent)
+    :QWidget(parent)
+    ,debugPage(debugPage)
+    ,id(id)
+    ,ui(new Ui::SAKTimingSendingItemWidget)
+{
+    initUi();
 
-    writeTimer.setInterval(timingTimeLineEdit->text().toInt());
-    connect(&writeTimer, &QTimer::timeout, this, &SAKTimingSendingItemWidget::write);
-
-    SAKGlobal::initInputTextFormatComboBox(textFormatComboBox);
+    timingTimeLineEdit->setText(QString::number(interval));
+    textFormatComboBox->setCurrentIndex(format);
+    remarkLineEdit->setText(comment);
+    inputDataTextEdit->setText(data);
 }
 
 SAKTimingSendingItemWidget::~SAKTimingSendingItemWidget()
 {
     delete ui;
+}
+
+quint64 SAKTimingSendingItemWidget::parameterID()
+{
+    return id;
+}
+
+quint32 SAKTimingSendingItemWidget::parameterInterval()
+{
+    return timingTimeLineEdit->text().toUInt();
+}
+
+quint32 SAKTimingSendingItemWidget::parameterFormat()
+{
+    return textFormatComboBox->currentIndex();
+}
+
+QString SAKTimingSendingItemWidget::parameterComment()
+{
+    return remarkLineEdit->text();
+}
+
+QString SAKTimingSendingItemWidget::parameterData()
+{
+    return inputDataTextEdit->toPlainText();
+}
+
+void SAKTimingSendingItemWidget::write()
+{
+    QString data = inputDataTextEdit->toPlainText();
+
+    if (!data.isEmpty()){
+        int textFormat = this->textFormatComboBox->currentData().toInt();
+        debugPage->writeRawData(data, textFormat);
+    }
+}
+
+void SAKTimingSendingItemWidget::initUi()
+{
+    ui->setupUi(this);
+
+    timingCheckBox = ui->timingCheckBox;
+    timingTimeLineEdit = ui->timingTimeLineEdit;
+    textFormatComboBox = ui->textFormatComboBox;
+    remarkLineEdit = ui->remarkLineEdit;
+    inputDataTextEdit = ui->inputDataTextEdit;
+    updatePushButton = ui->updatePushButton;
+
+    writeTimer.setInterval(timingTimeLineEdit->text().toInt());
+    connect(&writeTimer, &QTimer::timeout, this, &SAKTimingSendingItemWidget::write);
+
+    SAKGlobal::initInputTextFormatComboBox(textFormatComboBox);
 }
 
 void SAKTimingSendingItemWidget::on_timingCheckBox_clicked()
@@ -60,13 +117,15 @@ void SAKTimingSendingItemWidget::on_timingTimeLineEdit_textChanged(const QString
     writeTimer.setInterval(interval == 0 ? 1000 : interval);
 }
 
-void SAKTimingSendingItemWidget::write()
+void SAKTimingSendingItemWidget::on_updatePushButton_clicked()
 {
-    QString data = inputDataTextEdit->toPlainText();
-
-    if (!data.isEmpty()){
-        int textFormat = this->textFormatComboBox->currentData().toInt();
-        debugPage->writeRawData(data, textFormat);
-    }
+    QString tableName = SAKDataStruct::timingSendingTableName(debugPage->pageType());
+    SAKDataStruct::SAKStructTimingSendingItem sendingItem;
+    sendingItem.id = parameterID();
+    sendingItem.data = parameterData();
+    sendingItem.format = parameterFormat();
+    sendingItem.comment = parameterComment();
+    sendingItem.interval = parameterInterval();
+    SAKDebugPageDatabaseInterface *databaseInterface = SAKDebugPageDatabaseInterface::instance();
+    databaseInterface->updateTimingSendingItem(tableName, sendingItem);
 }
-
