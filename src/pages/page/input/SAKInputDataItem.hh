@@ -34,24 +34,41 @@ class SAKInputDataItem:public QWidget
     Q_OBJECT
 public:
     SAKInputDataItem(SAKDebugPage *debugPage, SAKDebugPageInputManager *inputManager, QWidget *parent = Q_NULLPTR);
+    SAKInputDataItem(quint64 id,
+                     quint32 format,
+                     QString comment,
+                     quint32 classify,
+                     QString data,
+                     SAKDebugPage *debugPage,
+                     SAKDebugPageInputManager *inputManager,
+                     QWidget *parent = Q_NULLPTR);
     ~SAKInputDataItem();
+
+    quint64 parameterID();
+    quint32 parameterFormat();
+    QString parameterComment();
+    quint32 parameterClassify();
+    QString parameterData();
 private:
     QPushButton *menuPushButton;
     QAction *action;
     SAKDebugPage *debugPage;
     SAKDebugPageInputManager *inputManager;
     SAKDebugPageInputManager::InputParameters inputParameters;
+    quint64 id;
 private:
     void addDataAction(QPushButton *menuPushButton);
     void removeDataAction(QPushButton *menuPushButton);
     void updateActionTitle(const QString &title);
     void updateTextFormat();
     void sendRawData();
+    void initUi();
 signals:
     void rawDataChanged(QString rawData, SAKDebugPageInputManager::InputParameters parameters);
 private:
     Ui::SAKInputDataItem *ui;
     QComboBox *textFormatComboBox;
+    QComboBox *classifyComboBox;
     QLineEdit *descriptionLineEdit;
     QTextEdit *inputDataTextEdit;
     QPushButton *updatePushButton;

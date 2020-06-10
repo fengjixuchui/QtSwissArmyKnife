@@ -12,9 +12,11 @@
 
 #include "SAKGlobal.hh"
 #include "SAKDebugPage.hh"
-#include "SAKInputDataItem.hh"
+#include "SAKDataStruct.hh"
 #include "SAKCRCInterface.hh"
+#include "SAKInputDataItem.hh"
 #include "SAKInputDataFactory.hh"
+#include "SAKDebugPageDatabaseInterface.hh"
 
 #include "ui_SAKInputDataItem.h"
 
@@ -24,31 +26,65 @@ SAKInputDataItem::SAKInputDataItem(SAKDebugPage *debugPage, SAKDebugPageInputMan
     ,inputManager(inputManager)
     ,ui(new Ui::SAKInputDataItem)
 {
-    ui->setupUi(this);
+    initUi();
+    id = QDateTime::currentMSecsSinceEpoch();
+}
 
-    textFormatComboBox = ui->textFormatComboBox;
-    descriptionLineEdit = ui->descriptionLineEdit;
-    inputDataTextEdit = ui->inputDataTextEdit;
-    updatePushButton = ui->updatePushButton;
-    SAKGlobal::initInputTextFormatComboBox(textFormatComboBox);
-
-    menuPushButton = inputManager->sendPresetPushButton;
-    addDataAction(menuPushButton);
-    connect(descriptionLineEdit, &QLineEdit::textChanged, this, &SAKInputDataItem::updateActionTitle);
-    connect(inputDataTextEdit, &QTextEdit::textChanged, this, &SAKInputDataItem::updateTextFormat);
-#if 1
-    connect(textFormatComboBox, &QComboBox::currentTextChanged, inputDataTextEdit, &QTextEdit::clear);
-#else
-    connect(textFormatComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index){
-        Q_UNUSED(index)
-        inputDataTextEdit->clear();
-    });
-#endif
+SAKInputDataItem::SAKInputDataItem(quint64 id,
+                                   quint32 format,
+                                   QString comment,
+                                   quint32 classify,
+                                   QString data,
+                                   SAKDebugPage *debugPage,
+                                   SAKDebugPageInputManager *inputManager,
+                                   QWidget *parent)
+    :QWidget(parent)
+    ,debugPage(debugPage)
+    ,inputManager(inputManager)
+    ,id(id)
+    ,ui(new Ui::SAKInputDataItem)
+{
+    initUi();
+    textFormatComboBox->setCurrentIndex(format);
+    descriptionLineEdit->setText(comment);
+    classifyComboBox->setCurrentIndex(classify);
+    inputDataTextEdit->setText(data);
 }
 
 SAKInputDataItem::~SAKInputDataItem()
 {
     removeDataAction(inputManager->presetPushButton);
+}
+
+quint64 SAKInputDataItem::parameterID()
+{
+    return id;
+}
+
+quint32 SAKInputDataItem::parameterFormat()
+{
+    return textFormatComboBox->currentIndex();
+}
+
+QString SAKInputDataItem::parameterComment()
+{
+    return descriptionLineEdit->text();
+}
+
+quint32 SAKInputDataItem::parameterClassify()
+{
+    quint32 ret;
+    if (classifyComboBox->count()){
+        ret = classifyComboBox->currentIndex();
+    }else{
+        ret = 0;
+    }
+    return ret;
+}
+
+QString SAKInputDataItem::parameterData()
+{
+    return inputDataTextEdit->toPlainText();
 }
 
 void SAKInputDataItem::addDataAction(QPushButton *menuPushButton)
@@ -107,7 +143,33 @@ void SAKInputDataItem::sendRawData()
     }
 }
 
+void SAKInputDataItem::initUi()
+{
+    ui->setupUi(this);
+
+    textFormatComboBox = ui->textFormatComboBox;
+    descriptionLineEdit = ui->descriptionLineEdit;
+    inputDataTextEdit = ui->inputDataTextEdit;
+    updatePushButton = ui->updatePushButton;
+    classifyComboBox = ui->classifyComboBox;
+    classifyComboBox->addItem(tr("默认"));
+    SAKGlobal::initInputTextFormatComboBox(textFormatComboBox);
+
+    menuPushButton = inputManager->sendPresetPushButton;
+    addDataAction(menuPushButton);
+    connect(descriptionLineEdit, &QLineEdit::textChanged, this, &SAKInputDataItem::updateActionTitle);
+    connect(inputDataTextEdit, &QTextEdit::textChanged, this, &SAKInputDataItem::updateTextFormat);
+    connect(textFormatComboBox, &QComboBox::currentTextChanged, inputDataTextEdit, &QTextEdit::clear);
+}
+
 void SAKInputDataItem::on_updatePushButton_clicked()
 {
-
+    QString tableName = SAKDataStruct::presettingDataTableName(debugPage->pageType());
+    SAKDataStruct::SAKStructPresettingDataItem item;
+    item.id = parameterID();
+    item.data = parameterData();
+    item.format = parameterFormat();
+    item.comment = parameterComment();
+    item.classify = parameterClassify();
+    SAKDebugPageDatabaseInterface::instance()->updatePresettingDataItem(tableName, item);
 }

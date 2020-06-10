@@ -26,6 +26,7 @@ namespace Ui {
 }
 
 class SAKDebugPage;
+class SAKDebugPageDatabaseInterface;
 /// @brief 预设数据管理窗口
 class SAKInputDataItemManager:public QWidget
 {
@@ -33,6 +34,14 @@ class SAKInputDataItemManager:public QWidget
 public:
     SAKInputDataItemManager(SAKDebugPage *debugPage, SAKDebugPageInputManager *inputManager, QWidget *parent = Q_NULLPTR);
     ~SAKInputDataItemManager();
+
+    struct InputDataItemKey {
+        const QString id = QString("id");
+        const QString format = QString("format");
+        const QString comment = QString("comment");
+        const QString classify = QString("classify");
+        const QString data = QString("data");
+    };
 private:
     SAKDebugPage *debugPage;
     SAKCRCInterface *crcInterface;
@@ -40,14 +49,25 @@ private:
     SAKDebugPageInputManager *inputManager;
     QListWidget *listWidget;
     SAKDebugPageInputManager::InputParameters inputParameters;
+    QString tableName;
+    SAKDebugPageDatabaseInterface *databaseInterface;
+    QTimer clearMessageInfoTimer;
+private:
+    void readinRecord();
+    void outputMessage(QString msg, bool isError = false);
+    bool contains(quint64 paraID);
 private:
     Ui::SAKInputDataItemManager *ui;
     QPushButton *deletePushButton;
     QPushButton *addPushButton;
+    QPushButton *outportPushButton;
+    QPushButton *importPushButton;
     QLabel *infoLabel;
 private slots:
     void on_deletePushButton_clicked();
     void on_addPushButton_clicked();
+    void on_outportPushButton_clicked();
+    void on_importPushButton_clicked();
 };
 
 #endif

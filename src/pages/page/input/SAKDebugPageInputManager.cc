@@ -25,14 +25,7 @@
 SAKDebugPageInputManager::SAKDebugPageInputManager(SAKDebugPage *debugPage, QObject *parent)
     :QObject (parent)
     ,debugPage (debugPage)
-{   
-    qRegisterMetaType<InputParameters>("InputParameters");
-    inputDataFactory = new SAKInputDataFactory;
-    inputDataFactory->start();
-
-    crcInterface = new SAKCRCInterface(this);
-    inputDataItemManager = new SAKInputDataItemManager(debugPage, this);
-
+{
     inputModelComboBox          = debugPage->inputModelComboBox;
     cycleEnableCheckBox         = debugPage->cycleEnableCheckBox;
     cycleTimeLineEdit           = debugPage->cycleTimeLineEdit;
@@ -47,6 +40,13 @@ SAKDebugPageInputManager::SAKDebugPageInputManager(SAKDebugPage *debugPage, QObj
     crcLabel                    = debugPage->crcLabel;
     presetPushButton            = debugPage->presetPushButton;
     sendPresetPushButton        = debugPage->sendPresetPushButton;
+
+    qRegisterMetaType<InputParameters>("InputParameters");
+    inputDataFactory = new SAKInputDataFactory;
+    inputDataFactory->start();
+
+    crcInterface = new SAKCRCInterface;
+    inputDataItemManager = new SAKInputDataItemManager(debugPage, this);
 
     sendPushButton->setEnabled(false);
     sendPresetPushButton->setEnabled(false);
@@ -79,16 +79,14 @@ SAKDebugPageInputManager::SAKDebugPageInputManager(SAKDebugPage *debugPage, QObj
 
 SAKDebugPageInputManager::~SAKDebugPageInputManager()
 {
-    inputDataFactory->terminate();
     delete inputDataFactory;
+    delete crcInterface;
     delete inputDataItemManager;
 }
 
 void SAKDebugPageInputManager::changeInputModel(const QString &text)
 {
-    /*
-     *  在ui初始化的时候，会出现text为empty的情况
-     */
+    /// @brief 在ui初始化的时候，会出现text为empty的情况
     if (text.isEmpty()){
         return;
     }
@@ -239,9 +237,7 @@ void SAKDebugPageInputManager::initParameters()
 void SAKDebugPageInputManager::setCycleEnable()
 {
     if (cycleEnableCheckBox->isChecked()){
-        /*
-         * 如果输入框输入内容不符合规范，默认循环周期为50ms
-         */
+        /// @brief 如果输入框输入内容不符合规范，默认循环周期为50ms
         bool ok = false;
         int cycleTime = cycleTimeLineEdit->text().toInt(&ok);
         if (ok){
@@ -325,8 +321,13 @@ void SAKDebugPageInputManager::formattingInputText(QTextEdit *textEdit, int mode
             textEdit->setText(strTemp.toUpper());
             textEdit->moveCursor(QTextCursor::End);
         }else if(model == SAKDataStruct::InputFormatAscii) {
-            plaintext.remove(QRegExp("[^\0u00-\u007f ]"));
-            textEdit->setText(plaintext);
+            QString newString;
+            for (int i = 0; i < plaintext.count(); i++){
+                if (plaintext.at(i).unicode() <= 127){
+                    newString.append(plaintext.at(i));
+                }
+            }
+            textEdit->setText(newString);
             textEdit->moveCursor(QTextCursor::End);
         }else if(model == SAKDataStruct::InputFormatUtf8) {
             /// nothing to do
