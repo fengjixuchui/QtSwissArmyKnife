@@ -31,7 +31,9 @@ public:
         DebugPageTypeUSB,
 #endif
         DebugPageTypeTCPClient,
-        DebugPageTypeTCPServer
+        DebugPageTypeTCPServer,
+        DebugPageTypeWebSocketClient,
+        DebugPageTypeWebSocketServer
     };
     Q_ENUM(SAKEnumDebugPageType)
 
@@ -69,6 +71,12 @@ public:
         AutoResponseOptionDoNotContain  // 接收数据不包含参考数据时回复
     };
     Q_ENUM(SAKEnumAutoResponseOption)
+
+    /// @brief web socket 发送接口类型
+    enum SAKEnumWebSocketSendingType {
+        WebSocketSendingTypeText,
+        WebSocketSendingTypeBin,
+    };
 
     /// @brief 调试页面自动回复数据的数据结构
     struct SAKStructAutoResponseItem {

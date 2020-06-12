@@ -45,6 +45,9 @@
 #ifdef SAK_IMPORT_HID_MODULE
 #include "SAKHidDebugPage.hh"
 #endif
+#ifdef SAK_IMPORT_USB_MODULE
+#include "SAKUsbDebugPage.hh"
+#endif
 #ifdef SAK_IMPORT_QRCODE_MODULE
 #include "SAKQRCodeCreator.hh"
 #endif
@@ -56,26 +59,25 @@
 #ifdef SAK_IMPORT_COM_MODULE
 #include "SAKSerialPortDebugPage.hh"
 #endif
+#ifdef SAK_IMPORT_WEBSOCKET_MODULE
+#include "SAKWebSocketClientDebugPage.hh"
+#include "SAKWebSocketServerDebugPage.hh"
+#endif
 #ifdef SAK_IMPORT_FILECHECKER_MODULE
 #include "QtCryptographicHashController.hh"
-#endif
-
-#ifdef SAK_IMPORT_USB_MODULE
-#include "SAKUsbDebugPage.hh"
 #endif
 
 #include "ui_SAKMainWindow.h"
 
 SAKMainWindow::SAKMainWindow(QWidget *parent)
-    :QMainWindow (parent)
-    ,tabWidget (new QTabWidget)
-    ,ui (new Ui::SAKMainWindow)
-    ,moreInformation (new SAKMoreInformation)
+    :QMainWindow(parent)
+    ,tabWidget(new QTabWidget)
+    ,moreInformation(new SAKMoreInformation)
+    ,ui(new Ui::SAKMainWindow)
 {
     ui->setupUi(this);
     updateManager = new SAKUpdateManager(this);
     qrCodeDialog = new SAKQRCodeDialog(this);
-
 
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(tabWidget);
@@ -105,7 +107,6 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
 
     tabWidget->setTabsClosable(true);
     connect(tabWidget, &QTabWidget::tabCloseRequested, this, &SAKMainWindow::closeDebugPage);
-
 
     /*
      * 以下代码是设置软件风格
@@ -168,10 +169,12 @@ void SAKMainWindow::addTab()
     this->tabWidget->addTab(new SAKUdpDebugPage, SAKGlobal::getNameOfDebugPage(SAKDataStruct::DebugPageTypeUDP));
     this->tabWidget->addTab(new SAKTcpClientDebugPage, SAKGlobal::getNameOfDebugPage(SAKDataStruct::DebugPageTypeTCPClient));
     this->tabWidget->addTab(new SAKTcpServerDebugPage, SAKGlobal::getNameOfDebugPage(SAKDataStruct::DebugPageTypeTCPServer));
+#ifdef SAK_IMPORT_WEBSOCKET_MODULE
+    this->tabWidget->addTab(new SAKWebSocketClientDebugPage, SAKGlobal::getNameOfDebugPage(SAKDataStruct::DebugPageTypeWebSocketClient));
+    this->tabWidget->addTab(new SAKWebSocketServerDebugPage, SAKGlobal::getNameOfDebugPage(SAKDataStruct::DebugPageTypeWebSocketServer));
+#endif
 
-    /*
-     * 隐藏关闭按钮（必须在调用setTabsClosable()函数后设置，否则不生效）
-     */
+    /// @brief 隐藏关闭按钮（必须在调用setTabsClosable()函数后设置，否则不生效）
     for (int i = 0; i < tabWidget->count(); i++){
         tabWidget->tabBar()->setTabButton(i, QTabBar::RightSide, Q_NULLPTR);
         tabWidget->tabBar()->setTabButton(i, QTabBar::LeftSide, Q_NULLPTR);
@@ -240,6 +243,8 @@ void SAKMainWindow::changeAppStyle(QString appStyle)
 
 void SAKMainWindow::initMenu()
 {
+    QMenuBar *menuBar = new QMenuBar(Q_NULLPTR);
+    setMenuBar(menuBar);
     initFileMenu();
     initToolMenu();
     initOptionMenu();    
@@ -426,7 +431,6 @@ void SAKMainWindow::initLinksMenu()
         QString url;
     };
     QList<Link> linkList;
-
     linkList << Link{tr("Qt官方下载"), QString("http://download.qt.io/official_releases/qt")}
              << Link{tr("Qt官方博客"), QString("https://www.qt.io/blog")}
              << Link{tr("Qt发布信息"), QString("https://wiki.qt.io/Qt_5.12_Release")};
@@ -455,8 +459,7 @@ void SAKMainWindow::installLanguage()
     QString name = action->data().toString();
     SAKSettings::instance()->setLanguage(language+"-"+name);
     reinterpret_cast<SAKApplication*>(qApp)->installLanguage();
-    QMessageBox::information(this, tr("重启生效"),
-                             tr("软件语言包已更改，重启软件生效！"));
+    QMessageBox::information(this, tr("重启生效"), tr("软件语言包已更改，重启软件生效！"));
 }
 
 void SAKMainWindow::addRemovablePage()
@@ -488,7 +491,14 @@ QWidget *SAKMainWindow::getDebugPage(int type)
     case SAKDataStruct::DebugPageTypeTCPServer:
         widget = new SAKTcpServerDebugPage;
         break;
-
+#ifdef SAK_IMPORT_WEBSOCKET_MODULE
+    case SAKDataStruct::DebugPageTypeWebSocketClient:
+        widget = new SAKWebSocketClientDebugPage;
+        break;
+    case SAKDataStruct::DebugPageTypeWebSocketServer:
+        widget = new SAKWebSocketServerDebugPage;
+        break;
+#endif
 #ifdef SAK_IMPORT_COM_MODULE
     case SAKDataStruct::DebugPageTypeCOM:
         widget = new SAKSerialPortDebugPage;

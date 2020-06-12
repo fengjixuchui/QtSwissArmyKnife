@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui xml network sql
+QT += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -26,17 +26,32 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 CONFIG += c++11
 
 # 子项目
-include(SAKHID.pri)
-include(SAKUSB.pri)
+#include(SAKHID.pri)
+#include(SAKUSB.pri)
 include(SAKSetup.pri)
 include(SAKTools.pri)
 include(SAKCommon.pri)
 include(SAKDataVis.pri)
 include(SAKModules.pri)
+include(SAKWebSocket.pri)
 include(SAKSerialPort.pri)
 
 exists(private/SAKPrivate.pri){
     include(private/SAKPrivate.pri)
+}
+
+QSAK_APP_NAME        = "QtSwissArmyKnife"
+QSAK_ORG_NAME        = "Qter"
+QSAK_ORG_DOMAIN      = "IT"
+QSAK_APP_DESCRIPTION = "Qt Swiss Army Knife is a multi-functional, cross-platform debugging tool based on Qt open source framework."
+QSAK_APP_COPYRIGHT   = "Copyright (C) 2020 Qter(qsak@foxmail.com). All rights reserved."
+
+win32 {
+    QMAKE_TARGET_COMPANY        = "$${QSAK_ORG_NAME}"
+    QMAKE_TARGET_DESCRIPTION    = "$${QSAK_APP_DESCRIPTION}"
+    QMAKE_TARGET_COPYRIGHT      = "$${QSAK_APP_COPYRIGHT}"
+    QMAKE_TARGET_PRODUCT        = "$${QSAK_APP_NAME}"
+    QMAKE_TARGET_VERSION        = "$${SAK_VERSION}"
 }
 
 #--------------------------------------------------------------------------------------------
@@ -101,6 +116,7 @@ INCLUDEPATH += \
     src/pages/tcpserver \
     src/pages/udp \
     src/qrcode \
+    src/startui \
     src/update
 
 FORMS += \
@@ -134,7 +150,6 @@ FORMS += \
 HEADERS += \
     src/SAK.hh \
     src/SAKApplication.hh \
-    src/SAKCodingStyle.hh \
     src/SAKGlobal.hh \
     src/SAKMainWindow.hh \
     src/SAKSettings.hh \
@@ -183,13 +198,13 @@ HEADERS += \
     src/pages/udp/SAKUdpMulticastEditingDialog.hh \
     src/qrcode/SAKQRCodeDialog.hh \
     src/qrcode/SAKQRCodeWidget.hh \
+    src/startui/SAKSplashScreen.hh \
     src/update/SAKDownloadItemWidget.hh \
     src/update/SAKUpdateManager.hh
 
 SOURCES += \
     src/SAK.cc \
     src/SAKApplication.cc \
-    src/SAKCodingStyle.cc \
     src/SAKGlobal.cc \
     src/SAKMainWindow.cc \
     src/SAKSettings.cc \
@@ -239,5 +254,6 @@ SOURCES += \
     src/pages/udp/SAKUdpMulticastEditingDialog.cc \
     src/qrcode/SAKQRCodeDialog.cc \
     src/qrcode/SAKQRCodeWidget.cc \
+    src/startui/SAKSplashScreen.cc \
     src/update/SAKDownloadItemWidget.cc \
     src/update/SAKUpdateManager.cc

@@ -62,8 +62,9 @@ public:
     /**
      * @brief initIpComboBox 获取本机所有ip v4地址，并添加至comboBox中
      * @param comboBox 需要初始化的comboBox实例指针
+     * @brief appendHostAny 是否添加QHostAddress::Any
      */
-    static void initIpComboBox(QComboBox *comboBox);
+    static void initIpComboBox(QComboBox *comboBox, bool appendHostAny = false);
 
     /**
      * @brief initTextFormatComboBox 初始化输入文本格式，格式详情查看SAKTextInputFormat
@@ -82,6 +83,12 @@ public:
      * @param comboBox 需要初始化的comboBox实例指针
      */
     static void initCRCComboBox(QComboBox *comboBox);
+
+    /**
+     * @brief initWebSocketSendingTypeComboBox 初始化web socket发送接口选择框
+     * @param comboBox 需要初始化的comboBox实例指针
+     */
+    static void initWebSocketSendingTypeComboBox(QComboBox *comboBox);
 };
 
 #endif

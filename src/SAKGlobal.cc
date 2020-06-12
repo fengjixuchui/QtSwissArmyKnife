@@ -94,6 +94,14 @@ QString SAKGlobal::getNameOfDebugPage(int type)
     case SAKDataStruct::DebugPageTypeTCPServer:
         name = tr("TCP服务器");
         break;
+#ifdef SAK_IMPORT_WEBSOCKET_MODULE
+    case SAKDataStruct::DebugPageTypeWebSocketClient:
+        name = tr("WebSocket客户端");
+        break;
+    case SAKDataStruct::DebugPageTypeWebSocketServer:
+        name = tr("WebSocket服务器");
+        break;
+#endif
 #ifdef SAK_IMPORT_COM_MODULE
     case SAKDataStruct::DebugPageTypeCOM:
         name = tr("串口调试");
@@ -200,18 +208,30 @@ void SAKGlobal::initFlowControlComboBox(QComboBox *comboBox)
 }
 #endif
 
-void SAKGlobal::initIpComboBox(QComboBox *comboBox)
+void SAKGlobal::initIpComboBox(QComboBox *comboBox, bool appendHostAny)
 {
+    QString localHost("127.0.0.1");
     if (comboBox){
         comboBox->clear();
+        comboBox->addItem(QString("::"));
+        comboBox->addItem(QString("::1"));
         comboBox->addItem(QString("0.0.0.0"));
+        comboBox->addItem(localHost);
         QList<QHostAddress> addresses = QNetworkInterface::allAddresses();
         for(auto var:addresses){
             if (var.protocol() == QAbstractSocket::IPv4Protocol) {
+                if (var.toString().compare(localHost) == 0){
+                    continue;
+                }
                 comboBox->addItem(var.toString());
             }
         }
-        comboBox->addItem(QString("::"));
+
+        comboBox->addItem(QString("255.255.255.255"));
+        if (appendHostAny){
+            comboBox->addItem(QString(SAK_HOST_ADDRESS_ANY));
+        }
+        comboBox->setCurrentText(localHost);
     }
 }
 
@@ -257,3 +277,10 @@ void SAKGlobal::initCRCComboBox(QComboBox *comboBox)
     }
 }
 
+void SAKGlobal::initWebSocketSendingTypeComboBox(QComboBox *comboBox)
+{
+    if (comboBox){
+        comboBox->addItem(tr("文本发送方式"), SAKDataStruct::WebSocketSendingTypeText);
+        comboBox->addItem(tr("二进制发送方式"), SAKDataStruct::WebSocketSendingTypeBin);
+    }
+}

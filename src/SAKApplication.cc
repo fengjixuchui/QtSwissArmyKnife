@@ -8,6 +8,7 @@
  * group which number is 952218522 to have a communication.
  */
 #include <QTimer>
+#include <QAction>
 #include <QSettings>
 #include <QTextCursor>
 #include <QTranslator>
@@ -16,16 +17,21 @@
 #include "SAKSettings.hh"
 #include "SAKMainWindow.hh"
 #include "SAKApplication.hh"
+#include "SAKSplashScreen.hh"
 
 SAKApplication::SAKApplication(int argc, char **argv)
     : QApplication (argc, argv)
-    , mainWindow (Q_NULLPTR)
 {
+    SAKSplashScreen *splashScreen = SAKSplashScreen::instance();
+    splashScreen->show();
+    processEvents();
+
+    setApplicationVersion(SAK_VERSION);
     SAKSettings::instance();
     installLanguage();
     setApplicationVersion(SAK::instance()->version());
 
-    /// 注册表选项
+    /// @brief 注册表选项
     setOrganizationName(QString("Qter"));
     setOrganizationDomain(QString("IT"));
     setApplicationName(QString("QtSwissArmyKnife"));
@@ -36,8 +42,9 @@ SAKApplication::SAKApplication(int argc, char **argv)
         }
     });
 
-    mainWindow = new SAKMainWindow;
+    QMainWindow *mainWindow = new SAKMainWindow;
     mainWindow->show();
+    splashScreen->finish(mainWindow);
 }
 
 SAKApplication::~SAKApplication()

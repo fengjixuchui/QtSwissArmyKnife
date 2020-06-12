@@ -12,29 +12,37 @@
 
 #include <QSettings>
 
+/// @brief 配置文件读写类，该类是一个单实例类，只能通过SAKSettings::instance()接口来穿件获取其实例
 class SAKSettings:public QSettings
 {
     Q_OBJECT
-public:
-    static SAKSettings* instance();
 private:
-    static SAKSettings* _instance;
     SAKSettings(const QString &fileName, QSettings::Format format, QObject *parent = Q_NULLPTR);
     ~SAKSettings();
+public:
+    /**
+     * @brief instance 获取配置文件读写类实例指针
+     * @return 配置文件读写类实例指针
+     */
+    static SAKSettings* instance();
 
     /// @brief 以下是软件自动更新使能设置的相关成员
-public:    
     bool enableAutoCheckForUpdate();
     void setEnableAutoCheckForUpdate(bool enable);
 
+    /// @brief 软件风格配置信息读写
     QString appStyle();
     void setAppStyle(QString style);
 
+    /// @brief 软件样式配置信息读写
     QString appStylesheet();
     void setAppStylesheet(QString stylesheet);
 
+    /// @brief 程序语言配置信息读写
     QString language();
     void setLanguage(QString language);
+private:
+    static SAKSettings* _instance;
 private:
     QString enableAutoCheckForUpdateKey;
     QString appStyleKey;

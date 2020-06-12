@@ -10,18 +10,17 @@
 #ifndef SAKCRCCALCULATOR_HH
 #define SAKCRCCALCULATOR_HH
 
+#include <QLabel>
 #include <QDialog>
 #include <QComboBox>
-
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonParseError>
-#include <QCheckBox>
-#include <QRadioButton>
 #include <QTextEdit>
+#include <QCheckBox>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QPushButton>
-#include <QLabel>
+#include <QRadioButton>
+#include <QJsonDocument>
+#include <QJsonParseError>
 
 #include "SAKCRCInterface.hh"
 
@@ -29,6 +28,7 @@ namespace Ui {
     class SAKCRCCalculator;
 }
 
+/// @brief crc计算器
 class SAKCRCCalculator:public QDialog
 {
     Q_OBJECT
@@ -38,35 +38,35 @@ public:
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 private:
-    const char *logCategory = "CRCCalculator";
+    const char *logCategory;
     SAKCRCInterface crcInterface;
-
-    Ui::SAKCRCCalculator* ui;
-    QComboBox* widthComboBox = Q_NULLPTR;
-    QComboBox* parameterComboBox = Q_NULLPTR;
-
-    QCheckBox* refinCheckBox = Q_NULLPTR;
-    QCheckBox* refoutCheckBox = Q_NULLPTR;
-    QLineEdit* polyLineEdit = Q_NULLPTR;
-    QLineEdit* initLineEdit = Q_NULLPTR;
-    QLineEdit* xorLineEdit = Q_NULLPTR;
-
-    QRadioButton* hexRadioBt = Q_NULLPTR;
-    QRadioButton* asciiRadioBt = Q_NULLPTR;
-
-    QLineEdit* hexCRCOutput = Q_NULLPTR;
-    QLineEdit* binCRCOutput = Q_NULLPTR;
-
-    QTextEdit* inputTextEdit = Q_NULLPTR;
-
-    QPushButton* calculatedBt = Q_NULLPTR;
-    QLabel *labelPolyFormula = Q_NULLPTR;
-    QLabel *labelInfo = Q_NULLPTR;
-
+private:
     void initParameterModel();
 private slots:
-    void changedParameterModel(int index);
     void calculate();
     void textFormatControl();
+    void changedParameterModel(int index);
+private:
+    Ui::SAKCRCCalculator* ui;
+    QComboBox* widthComboBox;
+    QComboBox* parameterComboBox;
+
+    QCheckBox* refinCheckBox;
+    QCheckBox* refoutCheckBox;
+    QLineEdit* polyLineEdit;
+    QLineEdit* initLineEdit;
+    QLineEdit* xorLineEdit;
+
+    QRadioButton* hexRadioBt;
+    QRadioButton* asciiRadioBt;
+
+    QLineEdit* hexCRCOutput;
+    QLineEdit* binCRCOutput;
+
+    QTextEdit* inputTextEdit;
+
+    QPushButton* calculatedBt;
+    QLabel *labelPolyFormula;
+    QLabel *labelInfo;
 };
 #endif
