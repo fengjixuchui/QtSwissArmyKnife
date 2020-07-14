@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -43,11 +43,18 @@ public:
     static QString mkMutiDir(const QString path);
 
     /**
-     * @brief getNameOfDebugPage    -- 获取设备调试页面的名称
+     * @brief debugPageNameFromType -- 获取设备调试页面的名称
      * @param type                  -- 设备类型，详见SAKDataStruct::SAKEnumDebugPageType
      * @return                      -- 设备类型名称
      */
-    static QString getNameOfDebugPage(int type);
+    static QString debugPageNameFromType(int type);
+
+    /**
+     * @brief toolNameFromType 获取使用工具名称
+     * @param type 工具类型，详情查看SAKDataStruct::SAKEnumToolType
+     * @return 工具名称
+     */
+    static QString toolNameFromType(int type);
 
 #ifdef SAK_IMPORT_COM_MODULE
     /// @brief 串口相关参数显示初始化

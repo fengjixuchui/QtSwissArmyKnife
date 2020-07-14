@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -40,7 +40,7 @@ class SAKDebugPageInputManager;
 class SAKDebugPageOutputManager;
 class SAKHighlightSettingsWidget;
 #ifdef SAK_IMPORT_CHARTS_MODULE
-class SAKDataVisualizationManager;
+class SAKChartsManager;
 #endif
 class SAKDebugPageDatabaseInterface;
 
@@ -68,7 +68,7 @@ public:
         int runIntervalTime;        // while循环执行时间间隔
     };
 
-    friend class SAKDataVisualizationManager;
+    friend class SAKChartsManager;
     friend class SAKOtherSettingsManager;
     friend class SAKStatisticsManager;
     friend class SAKDebugPageInputManager;
@@ -129,14 +129,14 @@ protected:
     /// @brief 初始化页面，子类在重新实现所有虚函数后，条用该函数即可
     void initPage();
 private:
-    SAKDevice *device;
-    bool isInitializing;
-    int debugPageType = -1;
-    QString settingKey;
-    QTimer clearInfoTimer;
-    struct ReadWriteParameters _readWriteParameters;
-    QMutex readWriteParametersQMutex;
-    SAKDebugPageDatabaseInterface *databaseInterface;
+    SAKDevice *mDevice;
+    bool mIsInitializing;
+    int mDebugPageType = -1;
+    QString mSettingKey;
+    QTimer mClearInfoTimer;
+    struct ReadWriteParameters mRreadWriteParameters;
+    QMutex mReadWriteParametersMutex;
+    SAKDebugPageDatabaseInterface *mDatabaseInterface;
 private:
     void initSettingKey();
     /// @brief 初始化配置选项名称
@@ -180,7 +180,7 @@ signals:
     /*************************************************************************/
     /// @brief ui文件初始化
 private:
-    Ui::SAKDebugPage *ui;
+    Ui::SAKDebugPage *mUi;
 private:
     /// @brief initUiPointer -- 初始化指向ui控件的数据成员（指针）
     void initUiPointer();
@@ -188,9 +188,9 @@ private:
     /*************************************************************************/
     /// @brief 设备设置
 protected:
-    QPushButton *refreshPushButton;
-    QPushButton *switchPushButton;
-    QFrame      *deviceSettingFrame;
+    QPushButton *mRefreshPushButton;
+    QPushButton *mSwitchPushButton;
+    QFrame *mDeviceSettingFrame;
 private slots:
     void on_refreshPushButton_clicked();
     void on_switchPushButton_clicked();
@@ -198,66 +198,66 @@ private slots:
     /*************************************************************************/
     /// @brief 输入设置组
 protected:
-    QComboBox   *inputModelComboBox;
-    QCheckBox   *cycleEnableCheckBox;
-    QLineEdit   *cycleTimeLineEdit;
-    QPushButton *readinFilePushButton;
-    QPushButton *saveInputDataPushButton;
-    QCheckBox   *addCRCCheckBox;
-    QCheckBox   *bigeEndianCheckBox;
-    QPushButton *clearInputPushButton;
-    QPushButton *sendPushButton;
-    QTextEdit   *inputTextEdit;
-    QComboBox   *crcParameterModelsComboBox;
-    QLabel      *crcLabel;
-    QPushButton *addInputItemPushButton;
-    QPushButton *deleteInputItemPushButton;
-    QListWidget *inputDataItemListWidget;
-    QPushButton *presetPushButton;
-    QPushButton *sendPresetPushButton;
+    QComboBox *mInputModelComboBox;
+    QCheckBox *mCycleEnableCheckBox;
+    QLineEdit *mCycleTimeLineEdit;
+    QPushButton *mReadinFilePushButton;
+    QPushButton *mSaveInputDataPushButton;
+    QCheckBox *mAddCRCCheckBox;
+    QPushButton *mCrcSettingsPushButton;
+    QPushButton *mClearInputPushButton;
+    QPushButton *mSendPushButton;
+    QTextEdit *mInputTextEdit;
+    QComboBox *mCrcParameterModelsComboBox;
+    QLabel *mCrcLabel;
+    QPushButton *mAddInputItemPushButton;
+    QPushButton *mDeleteInputItemPushButton;
+    QListWidget *mInputDataItemListWidget;
+    QPushButton *mPresetPushButton;
+    QPushButton *mSendPresetPushButton;
 
-    QString settingStringInputModel;
-    QString settingStringCycleTime;
-    QString settingStringAddCRC;
-    QString settingStringBigeEndian;
-    QString settingStringcrcParameterModel;
+    QString mSettingStringInputModel;
+    QString mSettingStringCycleTime;
+    QString mSettingStringAddCRC;
+    QString mSettingStringBigeEndian;
+    QString mSettingStringcrcParameterModel;
 private slots:
     void on_inputModelComboBox_currentIndexChanged(int index);
     void on_cycleTimeLineEdit_textChanged(const QString &text);
     void on_addCRCCheckBox_clicked();
-    void on_bigeEndianCheckBox_clicked();
+    void on_crcSettingsPushButton_clicked();
     void on_crcParameterModelsComboBox_currentIndexChanged(int index);
 
     /*************************************************************************/
     /// @brief 消息输出组管理
 protected:
-    QLabel *infoLabel;
+    QLabel *mInfoLabel;
 
     /*************************************************************************/
     /// @brief 数据输出组
 protected:
-    QLabel       *rxLabel;
-    QLabel       *txLabel;
-    QComboBox    *outputTextFormatComboBox;
-    QCheckBox    *showDateCheckBox;
-    QCheckBox    *autoWrapCheckBox;
-    QCheckBox    *showTimeCheckBox;
-    QCheckBox    *showMsCheckBox;
-    QCheckBox    *showRxDataCheckBox;
-    QCheckBox    *showTxDataCheckBox;
-    QCheckBox    *saveOutputFileToFilecheckBox;
-    QPushButton  *outputFilePathPushButton;
-    QPushButton  *clearOutputPushButton;
-    QPushButton  *saveOutputPushButton;
-    QTextBrowser *outputTextBroswer;
+    QLabel *mRxLabel;
+    QLabel *mTxLabel;
+    QComboBox *mOutputTextFormatComboBox;
+    QCheckBox *mShowDateCheckBox;
+    QCheckBox *mAutoWrapCheckBox;
+    QCheckBox *mShowTimeCheckBox;
+    QCheckBox *mShowMsCheckBox;
+    QCheckBox *mShowRxDataCheckBox;
+    QCheckBox *mShowTxDataCheckBox;
+    QCheckBox *mSaveOutputFileToFilecheckBox;
+    QPushButton *mOutputFilePathPushButton;
+    QPushButton *mClearOutputPushButton;
+    QPushButton *mSaveOutputPushButton;
+    QTextBrowser *mOutputTextBroswer;
 
-    QString settingStringOutputTextFormat;
-    QString settingStringShowDate;
-    QString settingStringAutoWrap;
-    QString settingStringShowTime;
-    QString settingStringShowMs;
-    QString settingStringShowRx;
-    QString settingStringShowTx;
+    QString mSettingStringOutputTextFormat;
+    QString mSettingStringShowDate;
+    QString mSettingStringAutoWrap;
+    QString mSettingStringShowTime;
+    QString mSettingStringShowMs;
+    QString mSettingStringShowRx;
+    QString mSettingStringShowTx;
 private slots:
     void on_outputTextFormatComboBox_currentIndexChanged(int index);
     void on_showDateCheckBox_clicked();
@@ -270,42 +270,42 @@ private slots:
     /*************************************************************************/
     /// @brief 数据统计
 protected:
-    bool        receivedFlag;
-    bool        sendFlag;
+    bool mReceivedFlag;
+    bool mSendFlag;
 
-    QLabel      *rxSpeedLabel;
-    QLabel      *txSpeedLabel;
-    QLabel      *rxFramesLabel;
-    QLabel      *txFramesLabel;
-    QLabel      *rxBytesLabel;
-    QLabel      *txBytesLabel;
-    QPushButton *resetTxCountPushButton;
-    QPushButton *resetRxCountPushButton;
+    QLabel *mRxSpeedLabel;
+    QLabel *mTxSpeedLabel;
+    QLabel *mRxFramesLabel;
+    QLabel *mTxFramesLabel;
+    QLabel *mRxBytesLabel;
+    QLabel *mTxBytesLabel;
+    QPushButton *mResetTxCountPushButton;
+    QPushButton *mResetRxCountPushButton;
 
     /*************************************************************************/
     /// @brief 其他设置
 protected:
-    QPushButton *transmissionSettingPushButton;
-    QPushButton *readWriteSettingPushButton;
-    QPushButton *autoResponseSettingPushButton;
-    QPushButton *timingSendingPushButton;
-    QPushButton *highlightSettingPushButton;
-    QPushButton *moreSettingsPushButton;
+    QPushButton *mTransmissionSettingPushButton;
+    QPushButton *mReadWriteSettingPushButton;
+    QPushButton *mAutoResponseSettingPushButton;
+    QPushButton *mTimingSendingPushButton;
+    QPushButton *mHighlightSettingPushButton;
+    QPushButton *mMoreSettingsPushButton;
 
     /*************************************************************************/
     /// @brief 数据可视化
 protected:
-    QPushButton *dataVisualizationPushButton;
+    QPushButton *mDataVisualizationPushButton;
 private slots:
     void on_dataVisualizationPushButton_clicked();
 private:
 #ifdef SAK_IMPORT_CHARTS_MODULE
-    SAKDataVisualizationManager *dataVisualizationManager;
+    SAKChartsManager *mDataVisualizationManager;
 #endif
-    SAKOtherSettingsManager *otherSettings;
-    SAKStatisticsManager *statisticsManager;
-    SAKDebugPageOutputManager *outputManager;
-    SAKDebugPageInputManager *debugPageInputManager;
+    SAKOtherSettingsManager *mOtherSettings;
+    SAKStatisticsManager *mStatisticsManager;
+    SAKDebugPageOutputManager *mOutputManager;
+    SAKDebugPageInputManager *mDebugPageInputManager;
 };
 
 #endif  // SAKTabPage_H

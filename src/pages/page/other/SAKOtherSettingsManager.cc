@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -24,17 +24,17 @@ SAKOtherSettingsManager::SAKOtherSettingsManager(SAKDebugPage *debugPage, QObjec
 {
     transmissionSettings        = new SAKTransmissionSettings(_debugPage);
     autoResponseSettingWidget   = new SAKAutoResponseSettingsWidget(_debugPage);
-    highlighterSettingPanel     = new SAKHighlightSettingsWidget(_debugPage->outputTextBroswer->document());
-    moreSettingsWidget          = new SAKMoreSettingsWidget(_debugPage);
+    highlighterSettingPanel     = new SAKHighlightSettingsWidget(_debugPage->mOutputTextBroswer->document());
+    mMoreSettingsWidget          = new SAKMoreSettingsWidget(_debugPage);
     readWriteSettingsWidget     = new SAKReadWriteSettingsWidget(_debugPage);
     timingSendingManager        = new SAKTimingSendingSettingsWidget(_debugPage);
 
-    autoResponseSettingPushButton   = _debugPage->autoResponseSettingPushButton;
-    highlightSettingPushButton      = _debugPage->highlightSettingPushButton;
-    readWriteSettingPushButton      = _debugPage->readWriteSettingPushButton;
-    transmissionSettingPushButton   = _debugPage->transmissionSettingPushButton;
-    moreSettingsPushButton          = _debugPage->moreSettingsPushButton;
-    timingSendingPushButton         = _debugPage->timingSendingPushButton;
+    autoResponseSettingPushButton   = _debugPage->mAutoResponseSettingPushButton;
+    highlightSettingPushButton      = _debugPage->mHighlightSettingPushButton;
+    readWriteSettingPushButton      = _debugPage->mReadWriteSettingPushButton;
+    transmissionSettingPushButton   = _debugPage->mTransmissionSettingPushButton;
+    moreSettingsPushButton          = _debugPage->mMoreSettingsPushButton;
+    timingSendingPushButton         = _debugPage->mTimingSendingPushButton;
 
     connect(autoResponseSettingPushButton, &QPushButton::clicked, this, &SAKOtherSettingsManager::onAutoresponseSettingPushbuttonClicked);
     connect(highlightSettingPushButton,    &QPushButton::clicked, this, &SAKOtherSettingsManager::onHighlightSettingPushButtonClicked);
@@ -49,16 +49,21 @@ SAKOtherSettingsManager::~SAKOtherSettingsManager()
     delete transmissionSettings;
     delete autoResponseSettingWidget;
     delete highlighterSettingPanel;
-    delete moreSettingsWidget;
+    delete mMoreSettingsWidget;
     delete readWriteSettingsWidget;
     delete timingSendingManager;
 
     transmissionSettings = Q_NULLPTR;
     autoResponseSettingWidget = Q_NULLPTR;
     highlighterSettingPanel = Q_NULLPTR;
-    moreSettingsWidget = Q_NULLPTR;
+    mMoreSettingsWidget = Q_NULLPTR;
     readWriteSettingsWidget = Q_NULLPTR;
     timingSendingManager = Q_NULLPTR;
+}
+
+SAKMoreSettingsWidget *SAKOtherSettingsManager::moreSettingsWidget()
+{
+    return mMoreSettingsWidget;
 }
 
 void SAKOtherSettingsManager::onAutoresponseSettingPushbuttonClicked()
@@ -100,10 +105,10 @@ void SAKOtherSettingsManager::onTransmissionSettingPushButtonClicked()
 
 void SAKOtherSettingsManager::onMoreSettingsPushButtonClicked()
 {
-    if (moreSettingsWidget->isHidden()){
-        moreSettingsWidget->show();
+    if (mMoreSettingsWidget->isHidden()){
+        mMoreSettingsWidget->show();
     }else {
-        moreSettingsWidget->activateWindow();
+        mMoreSettingsWidget->activateWindow();
     }
 }
 

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -13,19 +13,19 @@
 #include <QApplication>
 
 #include "QtCryptographicHashCalculator.hh"
-#include "QtCryptographicHashController.hh"
-QtCryptographicHashCalculator::QtCryptographicHashCalculator(QtCryptographicHashController *controller, QObject *parent)
+#include "SAKToolFileChecker.hh"
+QtCryptographicHashCalculator::QtCryptographicHashCalculator(SAKToolFileChecker *controller, QObject *parent)
     :QThread (parent)
     ,cryptographicHashController (controller)
 {
     connect(this, &QtCryptographicHashCalculator::updateResult,
-            controller, &QtCryptographicHashController::updateResult);
+            controller, &SAKToolFileChecker::updateResult);
     connect(this, &QtCryptographicHashCalculator::outputMessage,
-            controller, &QtCryptographicHashController::outputMessage);
+            controller, &SAKToolFileChecker::outputMessage);
     connect(this, &QtCryptographicHashCalculator::updateProgressBar,
-            controller, &QtCryptographicHashController::updateProgressBar);
+            controller, &SAKToolFileChecker::updateProgressBar);
     connect(this, &QtCryptographicHashCalculator::remainTimeChanged,
-            controller, &QtCryptographicHashController::changeRemainTime);
+            controller, &SAKToolFileChecker::changeRemainTime);
 }
 
 void QtCryptographicHashCalculator::run()

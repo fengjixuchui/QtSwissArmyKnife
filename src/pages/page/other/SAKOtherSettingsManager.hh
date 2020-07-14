@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -29,6 +29,11 @@ public:
     SAKOtherSettingsManager(SAKDebugPage *debugPage, QObject *parent = Q_NULLPTR);
     ~SAKOtherSettingsManager();
 
+    /**
+     * @brief moreSettingsWidget 获取“更多设置”控制面板
+     * @return “更多设置控制面板”
+     */
+    SAKMoreSettingsWidget *moreSettingsWidget();
 private:
     QPushButton *transmissionSettingPushButton;
     QPushButton *readWriteSettingPushButton;
@@ -43,7 +48,7 @@ private:
     SAKAutoResponseSettingsWidget   *autoResponseSettingWidget;
     SAKTimingSendingSettingsWidget     *timingSendingManager;
     SAKHighlightSettingsWidget     *highlighterSettingPanel;
-    SAKMoreSettingsWidget       *moreSettingsWidget;
+    SAKMoreSettingsWidget *mMoreSettingsWidget;
 
     SAKDebugPage                *_debugPage;
 private slots:

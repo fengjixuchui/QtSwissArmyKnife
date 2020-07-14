@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -12,15 +12,15 @@
 
 #include <QThread>
 
-class QtCryptographicHashController;
+class SAKToolFileChecker;
 
 class QtCryptographicHashCalculator:public QThread
 {
     Q_OBJECT
 public:
-    QtCryptographicHashCalculator(QtCryptographicHashController *controller, QObject *parent = Q_NULLPTR);
+    QtCryptographicHashCalculator(SAKToolFileChecker *controller, QObject *parent = Q_NULLPTR);
 private:
-    QtCryptographicHashController *cryptographicHashController;
+    SAKToolFileChecker *cryptographicHashController;
     // ------------------------------------------------------------------------
     void run() final;
 signals:

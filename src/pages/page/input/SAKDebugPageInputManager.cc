@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -21,25 +21,25 @@
 #include "SAKInputDataFactory.hh"
 #include "SAKInputDataItemManager.hh"
 #include "SAKDebugPageInputManager.hh"
+#include "SAKInputCrcSettingsDialog.hh"
 
 SAKDebugPageInputManager::SAKDebugPageInputManager(SAKDebugPage *debugPage, QObject *parent)
     :QObject (parent)
     ,debugPage (debugPage)
 {
-    inputModelComboBox          = debugPage->inputModelComboBox;
-    cycleEnableCheckBox         = debugPage->cycleEnableCheckBox;
-    cycleTimeLineEdit           = debugPage->cycleTimeLineEdit;
-    saveInputDataPushButton     = debugPage->saveInputDataPushButton;
-    readinFilePushButton        = debugPage->readinFilePushButton;
-    addCRCCheckBox              = debugPage->addCRCCheckBox;
-    bigeEndianCheckBox          = debugPage->bigeEndianCheckBox;
-    clearInputPushButton        = debugPage->clearInputPushButton;
-    sendPushButton              = debugPage->sendPushButton;
-    inputTextEdit               = debugPage->inputTextEdit;
-    crcParameterModelsComboBox  = debugPage->crcParameterModelsComboBox;
-    crcLabel                    = debugPage->crcLabel;
-    presetPushButton            = debugPage->presetPushButton;
-    sendPresetPushButton        = debugPage->sendPresetPushButton;
+    inputModelComboBox          = debugPage->mInputModelComboBox;
+    cycleEnableCheckBox         = debugPage->mCycleEnableCheckBox;
+    cycleTimeLineEdit           = debugPage->mCycleTimeLineEdit;
+    saveInputDataPushButton     = debugPage->mSaveInputDataPushButton;
+    readinFilePushButton        = debugPage->mReadinFilePushButton;
+    addCRCCheckBox              = debugPage->mAddCRCCheckBox;
+    clearInputPushButton        = debugPage->mClearInputPushButton;
+    sendPushButton              = debugPage->mSendPushButton;
+    inputTextEdit               = debugPage->mInputTextEdit;
+    crcParameterModelsComboBox  = debugPage->mCrcParameterModelsComboBox;
+    crcLabel                    = debugPage->mCrcLabel;
+    presetPushButton            = debugPage->mPresetPushButton;
+    sendPresetPushButton        = debugPage->mSendPresetPushButton;
 
     qRegisterMetaType<InputParameters>("InputParameters");
     inputDataFactory = new SAKInputDataFactory;
@@ -47,6 +47,19 @@ SAKDebugPageInputManager::SAKDebugPageInputManager(SAKDebugPage *debugPage, QObj
 
     crcInterface = new SAKCRCInterface;
     inputDataItemManager = new SAKInputDataItemManager(debugPage, this);
+    crcSettingsDialog = new SAKInputCrcSettingsDialog;
+    SAKInputCrcSettingsDialog::ParameterContext ctx = crcSettingsDialog->parametersContext();
+    inputParameters.bigEndian = ctx.bigEndianCRC;
+    inputParameters.startByte = ctx.startByte;
+    inputParameters.endByte = ctx.endByte;
+
+    /// @brief 弹窗参数更新后，更新输入参数
+    connect(crcSettingsDialog, &SAKInputCrcSettingsDialog::parametersChanged, this, [&](){
+        SAKInputCrcSettingsDialog::ParameterContext ctx = crcSettingsDialog->parametersContext();
+        inputParameters.bigEndian = ctx.bigEndianCRC;
+        inputParameters.startByte = ctx.startByte;
+        inputParameters.endByte = ctx.endByte;
+    });
 
     sendPushButton->setEnabled(false);
     sendPresetPushButton->setEnabled(false);
@@ -60,7 +73,6 @@ SAKDebugPageInputManager::SAKDebugPageInputManager(SAKDebugPage *debugPage, QObj
     connect(saveInputDataPushButton,    &QPushButton::clicked,          this, &SAKDebugPageInputManager::saveInputDataToFile);
     connect(readinFilePushButton,       &QPushButton::clicked,          this, &SAKDebugPageInputManager::readinFile);
     connect(addCRCCheckBox,             &QCheckBox::clicked,            this, &SAKDebugPageInputManager::changeAddCRCFlag);
-    connect(bigeEndianCheckBox,         &QCheckBox::clicked,            this, &SAKDebugPageInputManager::changeEndianFlag);
     connect(clearInputPushButton,       &QPushButton::clicked,          this, &SAKDebugPageInputManager::clearInputArea);
     connect(sendPushButton,             &QPushButton::clicked,          this, &SAKDebugPageInputManager::sendRawData);
     connect(inputTextEdit,              &QTextEdit::textChanged,        this, &SAKDebugPageInputManager::inputTextEditTextChanged);
@@ -82,6 +94,12 @@ SAKDebugPageInputManager::~SAKDebugPageInputManager()
     delete inputDataFactory;
     delete crcInterface;
     delete inputDataItemManager;
+    delete crcSettingsDialog;
+}
+
+void SAKDebugPageInputManager::showCrcSettingsDialog()
+{
+    crcSettingsDialog->show();
 }
 
 void SAKDebugPageInputManager::changeInputModel(const QString &text)
@@ -160,11 +178,6 @@ void SAKDebugPageInputManager::changeAddCRCFlag()
     inputParameters.addCRC = addCRCCheckBox->isChecked();
 }
 
-void SAKDebugPageInputManager::changeEndianFlag()
-{
-    inputParameters.bigEndian = bigeEndianCheckBox->isChecked();
-}
-
 void SAKDebugPageInputManager::clearInputArea()
 {
     inputTextEdit->clear();
@@ -221,7 +234,6 @@ void SAKDebugPageInputManager::sendPresetData()
 void SAKDebugPageInputManager::initParameters()
 {
     inputParameters.addCRC = addCRCCheckBox->isChecked();
-    inputParameters.bigEndian = bigeEndianCheckBox->isChecked();
     inputParameters.cycleTime = cycleTimeLineEdit->text().toInt();
 
     bool ok = false;
@@ -261,8 +273,8 @@ void SAKDebugPageInputManager::updateCRC()
 {
     QString rawData = inputTextEdit->toPlainText();
     QByteArray cookedData = inputDataFactory->rawDataToArray(rawData, inputParameters);
-    quint32 crc = inputDataFactory->crcCalculate(cookedData, inputParameters.crcModel);
 
+    quint32 crc = inputDataFactory->crcCalculate(cookedData, inputParameters.crcModel);
     int bits = crcInterface->getBitsWidth(static_cast<SAKCRCInterface::CRCModel>(inputParameters.crcModel));
     crcLabel->setText(QString(QString("%1").arg(QString::number(crc, 16), (bits/8)*2, '0')).toUpper().prepend("0x"));
 }

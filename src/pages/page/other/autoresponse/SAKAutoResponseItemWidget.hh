@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -10,13 +10,13 @@
 #ifndef SAKAUTORESPONSEITEMWIDGET_HH
 #define SAKAUTORESPONSEITEMWIDGET_HH
 
-#include "SAKDebugPage.hh"
-
+#include <QTimer>
 #include <QRegExp>
 #include <QWidget>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QPushButton>
 #include <QRegExpValidator>
 
 namespace Ui {
@@ -60,12 +60,21 @@ private:
     bool forbiddenAllAutoResponse;
     SAKDebugPage *debugPage;
     quint64 id;
+
+    struct DelayWritingInfo{
+        quint64 expectedTimestamp;
+        QByteArray data;
+    };
+    QTimer delayToWritingTimer;
+    QList<DelayWritingInfo*> delayWritingInfoList;
 private:
     void setLineEditFormat(QLineEdit *lineEdit, int format);
     void bytesRead(QByteArray bytes);
     QByteArray string2array(QString str, int format);
     bool response(QByteArray receiveData, QByteArray referenceData, int option);
     void initUi();
+    void initDelayWritingTimer();
+    void delayToWritBytes();
 private:
     Ui::SAKAutoResponseItemWidget *ui;
     QLineEdit *remarkLineEdit;
@@ -76,6 +85,8 @@ private:
     QComboBox *referenceDataFromatComboBox;
     QComboBox *responseDataFormatComboBox;
     QPushButton *updatePushButton;
+    QCheckBox *delayResponseCheckBox;
+    QLineEdit *delayResponseLineEdit;
 private slots:
     void on_referenceDataFromatComboBox_currentTextChanged();
     void on_responseDataFormatComboBox_currentTextChanged();

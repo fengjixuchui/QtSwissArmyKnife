@@ -8,7 +8,11 @@ QT += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = QtSwissArmyKnife
+contains(CONFIG, debug, debug|release){
+    TARGET = QtSwissArmyKnifed
+}else{
+    TARGET = QtSwissArmyKnife
+}
 
 TEMPLATE = app
 
@@ -28,10 +32,11 @@ CONFIG += c++11
 # 子项目
 #include(SAKHID.pri)
 #include(SAKUSB.pri)
+#include(SAKSCTP.pri)
 include(SAKSetup.pri)
 include(SAKTools.pri)
 include(SAKCommon.pri)
-include(SAKDataVis.pri)
+include(SAKCharts.pri)
 include(SAKModules.pri)
 include(SAKWebSocket.pri)
 include(SAKSerialPort.pri)
@@ -43,8 +48,8 @@ exists(private/SAKPrivate.pri){
 QSAK_APP_NAME        = "QtSwissArmyKnife"
 QSAK_ORG_NAME        = "Qter"
 QSAK_ORG_DOMAIN      = "IT"
-QSAK_APP_DESCRIPTION = "Qt Swiss Army Knife is a multi-functional, cross-platform debugging tool based on Qt open source framework."
-QSAK_APP_COPYRIGHT   = "Copyright (C) 2020 Qter(qsak@foxmail.com). All rights reserved."
+QSAK_APP_DESCRIPTION = "Qt Swiss Army Knife"
+QSAK_APP_COPYRIGHT   = "Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved."
 
 win32 {
     QMAKE_TARGET_COMPANY        = "$${QSAK_ORG_NAME}"
@@ -73,9 +78,9 @@ win32 {
 #--------------------------------------------------------------------------------------------
 #国际化文件
 TRANSLATIONS  += \
-    Translations/sak/SAK_en.ts \
-    Translations/sak/SAK_zh_CN.ts \
-    Translations/sak/SAK_zh_TW.ts
+    translations/sak/SAK_en.ts \
+    translations/sak/SAK_zh_CN.ts \
+    translations/sak/SAK_zh_TW.ts
 
 RESOURCES += \
     SAKResources.qrc
@@ -106,30 +111,35 @@ INCLUDEPATH += \
     src/pages/page/other/autoresponse \
     src/pages/page/other/highlight \
     src/pages/page/other/more \
+    src/pages/page/other/more/generator \
+    src/pages/page/other/more/protocol \
     src/pages/page/other/readwrite \
     src/pages/page/other/timing \
     src/pages/page/other/transmission \
     src/pages/page/output \
     src/pages/page/output/save \
     src/pages/page/statistics \
-    src/pages/tcpclient \
-    src/pages/tcpserver \
+    src/pages/tcp/client \
+    src/pages/tcp/server \
     src/pages/udp \
     src/qrcode \
     src/startui \
+    src/singleton \
     src/update
 
 FORMS += \
     src/SAKMainWindow.ui \
     src/moreinfo/SAKMoreInformation.ui \
     src/pages/page/SAKDebugPage.ui \
-    src/pages/page/input/SAKInputCrcSettingDialog.ui \
+    src/pages/page/input/SAKInputCrcSettingsDialog.ui \
     src/pages/page/input/SAKInputDataItem.ui \
     src/pages/page/input/SAKInputDataItemManager.ui \
     src/pages/page/other/autoresponse/SAKAutoResponseItemWidget.ui \
     src/pages/page/other/autoresponse/SAKAutoResponseSettingsWidget.ui \
     src/pages/page/other/highlight/SAKHighlightSettingsWidget.ui \
     src/pages/page/other/more/SAKMoreSettingsWidget.ui \
+    src/pages/page/other/more/generator/SAKWaveformGeneratorWidget.ui \
+    src/pages/page/other/more/protocol/SAKProtocolAnalyzerWidget.ui \
     src/pages/page/other/readwrite/SAKReadWriteSettingsWidget.ui \
     src/pages/page/other/timing/SAKTimingSendingItemWidget.ui \
     src/pages/page/other/timing/SAKTimingSendingSettingsWidget.ui \
@@ -139,12 +149,13 @@ FORMS += \
     src/pages/page/other/transmission/SAKTransmissionSettings.ui \
     src/pages/page/other/transmission/SAKUdpTransmissionItemWidget.ui \
     src/pages/page/output/save/SAKSaveOutputDataSettings.ui \
-    src/pages/tcpclient/SAKTcpClientDeviceController.ui \
-    src/pages/tcpserver/SAKTcpServerDeviceController.ui \
+    src/pages/tcp/client/SAKTcpClientDeviceController.ui \
+    src/pages/tcp/server/SAKTcpServerDeviceController.ui \
     src/pages/udp/SAKUdpAdvanceSettingWidget.ui \
     src/pages/udp/SAKUdpDeviceController.ui \
     src/pages/udp/SAKUdpMulticastEditingDialog.ui \
     src/qrcode/SAKQRCodeDialog.ui \
+    src/singleton/SAKSingletonErrorDialog.ui \
     src/update/SAKDownloadItemWidget.ui \
     src/update/SAKUpdateManager.ui
 
@@ -154,13 +165,14 @@ HEADERS += \
     src/SAKGlobal.hh \
     src/SAKMainWindow.hh \
     src/SAKSettings.hh \
+    src/SAKSqlDatabase.hh \
     src/common/SAKInterface.hh \
     src/moreinfo/SAKMoreInformation.hh \
     src/pages/page/SAKDebugPage.hh \
     src/pages/page/SAKDebugPageDatabaseInterface.hh \
     src/pages/page/device/SAKDevice.hh \
     src/pages/page/input/SAKDebugPageInputManager.hh \
-    src/pages/page/input/SAKInputCrcSettingDialog.hh \
+    src/pages/page/input/SAKInputCrcSettingsDialog.hh \
     src/pages/page/input/SAKInputDataFactory.hh \
     src/pages/page/input/SAKInputDataItem.hh \
     src/pages/page/input/SAKInputDataItemManager.hh \
@@ -170,6 +182,9 @@ HEADERS += \
     src/pages/page/other/highlight/SAKHighlightSettings.hh \
     src/pages/page/other/highlight/SAKHighlightSettingsWidget.hh \
     src/pages/page/other/more/SAKMoreSettingsWidget.hh \
+    src/pages/page/other/more/generator/SAKWaveformGeneratorWidget.hh \
+    src/pages/page/other/more/protocol/SAKProtocolAnalyzer.hh \
+    src/pages/page/other/more/protocol/SAKProtocolAnalyzerWidget.hh \
     src/pages/page/other/readwrite/SAKReadWriteSettingsWidget.hh \
     src/pages/page/other/timing/SAKTimingSendingItemWidget.hh \
     src/pages/page/other/timing/SAKTimingSendingSettingsWidget.hh \
@@ -187,12 +202,12 @@ HEADERS += \
     src/pages/page/statistics/SAKStatisticsManager.hh \
     src/common/SAKCRCInterface.hh \
     src/common/SAKDataStruct.hh \
-    src/pages/tcpclient/SAKTcpClientDebugPage.hh \
-    src/pages/tcpclient/SAKTcpClientDevice.hh \
-    src/pages/tcpclient/SAKTcpClientDeviceController.hh \
-    src/pages/tcpserver/SAKTcpServerDebugPage.hh \
-    src/pages/tcpserver/SAKTcpServerDevice.hh \
-    src/pages/tcpserver/SAKTcpServerDeviceController.hh \
+    src/pages/tcp/client/SAKTcpClientDebugPage.hh \
+    src/pages/tcp/client/SAKTcpClientDevice.hh \
+    src/pages/tcp/client/SAKTcpClientDeviceController.hh \
+    src/pages/tcp/server/SAKTcpServerDebugPage.hh \
+    src/pages/tcp/server/SAKTcpServerDevice.hh \
+    src/pages/tcp/server/SAKTcpServerDeviceController.hh \
     src/pages/udp/SAKUdpAdvanceSettingWidget.hh \
     src/pages/udp/SAKUdpDebugPage.hh \
     src/pages/udp/SAKUdpDevice.hh \
@@ -200,6 +215,8 @@ HEADERS += \
     src/pages/udp/SAKUdpMulticastEditingDialog.hh \
     src/qrcode/SAKQRCodeDialog.hh \
     src/qrcode/SAKQRCodeWidget.hh \
+    src/singleton/SAKSingletonController.hh \
+    src/singleton/SAKSingletonErrorDialog.hh \
     src/startui/SAKSplashScreen.hh \
     src/update/SAKDownloadItemWidget.hh \
     src/update/SAKUpdateManager.hh
@@ -210,13 +227,14 @@ SOURCES += \
     src/SAKGlobal.cc \
     src/SAKMainWindow.cc \
     src/SAKSettings.cc \
+    src/SAKSqlDatabase.cc \
     src/common/SAKInterface.cc \
     src/moreinfo/SAKMoreInformation.cc \
     src/pages/page/SAKDebugPage.cc \
     src/pages/page/SAKDebugPageDatabaseInterface.cc \
     src/pages/page/device/SAKDevice.cc \
     src/pages/page/input/SAKDebugPageInputManager.cc \
-    src/pages/page/input/SAKInputCrcSettingDialog.cc \
+    src/pages/page/input/SAKInputCrcSettingsDialog.cc \
     src/pages/page/input/SAKInputDataFactory.cc \
     src/pages/page/input/SAKInputDataItem.cc \
     src/pages/page/input/SAKInputDataItemManager.cc \
@@ -226,6 +244,9 @@ SOURCES += \
     src/pages/page/other/highlight/SAKHighlightSettings.cc \
     src/pages/page/other/highlight/SAKHighlightSettingsWidget.cc \
     src/pages/page/other/more/SAKMoreSettingsWidget.cc \
+    src/pages/page/other/more/generator/SAKWaveformGeneratorWidget.cc \
+    src/pages/page/other/more/protocol/SAKProtocolAnalyzer.cc \
+    src/pages/page/other/more/protocol/SAKProtocolAnalyzerWidget.cc \
     src/pages/page/other/readwrite/SAKReadWriteSettingsWidget.cc \
     src/pages/page/other/timing/SAKTimingSendingItemWidget.cc \
     src/pages/page/other/timing/SAKTimingSendingSettingsWidget.cc \
@@ -244,12 +265,12 @@ SOURCES += \
     src/common/SAKCRCInterface.cc \
     src/common/SAKDataStruct.cc \
     src/main.cc \
-    src/pages/tcpclient/SAKTcpClientDebugPage.cc \
-    src/pages/tcpclient/SAKTcpClientDevice.cc \
-    src/pages/tcpclient/SAKTcpClientDeviceController.cc \
-    src/pages/tcpserver/SAKTcpServerDebugPage.cc \
-    src/pages/tcpserver/SAKTcpServerDevice.cc \
-    src/pages/tcpserver/SAKTcpServerDeviceController.cc \
+    src/pages/tcp/client/SAKTcpClientDebugPage.cc \
+    src/pages/tcp/client/SAKTcpClientDevice.cc \
+    src/pages/tcp/client/SAKTcpClientDeviceController.cc \
+    src/pages/tcp/server/SAKTcpServerDebugPage.cc \
+    src/pages/tcp/server/SAKTcpServerDevice.cc \
+    src/pages/tcp/server/SAKTcpServerDeviceController.cc \
     src/pages/udp/SAKUdpAdvanceSettingWidget.cc \
     src/pages/udp/SAKUdpDebugPage.cc \
     src/pages/udp/SAKUdpDevice.cc \
@@ -257,6 +278,8 @@ SOURCES += \
     src/pages/udp/SAKUdpMulticastEditingDialog.cc \
     src/qrcode/SAKQRCodeDialog.cc \
     src/qrcode/SAKQRCodeWidget.cc \
+    src/singleton/SAKSingletonController.cc \
+    src/singleton/SAKSingletonErrorDialog.cc \
     src/startui/SAKSplashScreen.cc \
     src/update/SAKDownloadItemWidget.cc \
     src/update/SAKUpdateManager.cc

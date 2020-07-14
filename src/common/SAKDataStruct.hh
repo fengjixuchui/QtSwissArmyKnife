@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -18,6 +18,18 @@ class SAKDataStruct:public QObject
 public:
     SAKDataStruct(QObject* parent = Q_NULLPTR);
 
+    /// @brief 支持的调试工具类型
+    enum SAKEnumToolType {
+#ifdef SAK_IMPORT_FILECHECKER_MODULE
+        ToolTypeFileChecker,
+#endif
+#ifdef SAK_IMPORT_QRCODE_MODULE
+        ToolTypeQRCodeCreator,
+#endif
+        ToolTypeCRCCalculator
+    };
+    Q_ENUM(SAKEnumToolType);
+
     /// @brief 支持调试的设备类型
     enum SAKEnumDebugPageType {
 #ifdef SAK_IMPORT_COM_MODULE
@@ -32,10 +44,16 @@ public:
 #endif
         DebugPageTypeTCPClient,
         DebugPageTypeTCPServer,
+#ifdef SAK_IMPORT_SCTP_MODULE
+        DebugPageTypeSCTPClient,
+        DebugPageTypeSCTPServer,
+#endif
+#ifdef SAK_IMPORT_WEBSOCKET_MODULE
         DebugPageTypeWebSocketClient,
         DebugPageTypeWebSocketServer
+#endif
     };
-    Q_ENUM(SAKEnumDebugPageType)
+    Q_ENUM(SAKEnumDebugPageType);
 
     /// @brief 文本输出格式
     enum SAKEnumTextInputFormat {
@@ -47,7 +65,7 @@ public:
         InputFormatUtf8,
         InputFormatLocal
     };
-    Q_ENUM(SAKEnumTextInputFormat)
+    Q_ENUM(SAKEnumTextInputFormat);
 
     /// @brief 文本输出格式
     enum SAKEnumTextOutputFormat {
@@ -62,7 +80,7 @@ public:
         OutputFormatUcs4,
         OutputFormatStdwstring
     };
-    Q_ENUM(SAKEnumTextOutputFormat)
+    Q_ENUM(SAKEnumTextOutputFormat);
 
     /// @brief 调试页面，自动回复选项
     enum SAKEnumAutoResponseOption {
@@ -70,13 +88,14 @@ public:
         AutoResponseOptionContain,      // 接收数据包含参考数据时回复
         AutoResponseOptionDoNotContain  // 接收数据不包含参考数据时回复
     };
-    Q_ENUM(SAKEnumAutoResponseOption)
+    Q_ENUM(SAKEnumAutoResponseOption);
 
     /// @brief web socket 发送接口类型
     enum SAKEnumWebSocketSendingType {
         WebSocketSendingTypeText,
         WebSocketSendingTypeBin,
     };
+    Q_ENUM(SAKEnumWebSocketSendingType);
 
     /// @brief 调试页面自动回复数据的数据结构
     struct SAKStructAutoResponseItem {

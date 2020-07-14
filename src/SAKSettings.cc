@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -12,21 +12,22 @@
 #include "SAKGlobal.hh"
 #include "SAKSettings.hh"
 
-SAKSettings* SAKSettings::_instance = Q_NULLPTR;
+SAKSettings* SAKSettings::instancePtr = Q_NULLPTR;
 SAKSettings* SAKSettings::instance()
 {
-    if (!_instance){
+    if (!instancePtr){
         const QString fileName = QString("%1/%2.ini").arg(SAKGlobal::dataPath()).arg(qApp->applicationName());
         new SAKSettings(fileName, QSettings::IniFormat, qApp);
     }
+    Q_ASSERT_X(instancePtr, __FUNCTION__, "Initialzing failed!");
 
-    return _instance;
+    return instancePtr;
 }
 
 SAKSettings::SAKSettings(const QString &fileName, Format format, QObject *parent)
     :QSettings(fileName, format, parent)
 {
-    _instance = this;
+    instancePtr = this;
 
     enableAutoCheckForUpdateKey = QString("Universal/enableAutoCheckForUpdate");
     appStyleKey = QString("Universal/appStyle");
@@ -36,7 +37,7 @@ SAKSettings::SAKSettings(const QString &fileName, Format format, QObject *parent
 
 SAKSettings::~SAKSettings()
 {
-    _instance = Q_NULLPTR;
+    instancePtr = Q_NULLPTR;
 }
 
 bool SAKSettings::enableAutoCheckForUpdate()

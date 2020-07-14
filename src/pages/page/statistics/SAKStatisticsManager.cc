@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -14,15 +14,15 @@ SAKStatisticsManager::SAKStatisticsManager(SAKDebugPage *debugPage, QObject *par
     :QObject (parent)
     ,debugPage (debugPage)
 {
-    rxSpeedLabel    = debugPage->rxSpeedLabel;
-    txSpeedLabel    = debugPage->txSpeedLabel;
-    txFramesLabel   = debugPage->txFramesLabel;
-    rxFramesLabel   = debugPage->rxFramesLabel;
-    txBytesLabel    = debugPage->txBytesLabel;
-    rxBytesLabel    = debugPage->rxBytesLabel;
+    rxSpeedLabel    = debugPage->mRxSpeedLabel;
+    txSpeedLabel    = debugPage->mTxSpeedLabel;
+    txFramesLabel   = debugPage->mTxFramesLabel;
+    rxFramesLabel   = debugPage->mRxFramesLabel;
+    txBytesLabel    = debugPage->mTxBytesLabel;
+    rxBytesLabel    = debugPage->mRxBytesLabel;
 
-    resetTxCountPushButton  = debugPage->resetTxCountPushButton;
-    resetRxCountPushButton  = debugPage->resetRxCountPushButton;
+    resetTxCountPushButton  = debugPage->mResetTxCountPushButton;
+    resetRxCountPushButton  = debugPage->mResetRxCountPushButton;
 
     dataContext.rxBytes  = 0;
     dataContext.txBytes  = 0;

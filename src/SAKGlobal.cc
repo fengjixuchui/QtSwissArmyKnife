@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -81,7 +81,7 @@ QString SAKGlobal::mkMutiDir(const QString path){
     return parentDir + "/" + dirname;
 }
 
-QString SAKGlobal::getNameOfDebugPage(int type)
+QString SAKGlobal::debugPageNameFromType(int type)
 {
     QString name;
     switch (type) {
@@ -94,6 +94,14 @@ QString SAKGlobal::getNameOfDebugPage(int type)
     case SAKDataStruct::DebugPageTypeTCPServer:
         name = tr("TCP服务器");
         break;
+#ifdef SAK_IMPORT_SCTP_MODULE
+    case SAKDataStruct::DebugPageTypeSCTPClient:
+        name = tr("SCTP客户端");
+        break;
+    case SAKDataStruct::DebugPageTypeSCTPServer:
+        name = tr("SCTP服务器");
+        break;
+#endif
 #ifdef SAK_IMPORT_WEBSOCKET_MODULE
     case SAKDataStruct::DebugPageTypeWebSocketClient:
         name = tr("WebSocket客户端");
@@ -126,6 +134,27 @@ QString SAKGlobal::getNameOfDebugPage(int type)
     return name;
 }
 
+QString SAKGlobal::toolNameFromType(int type)
+{
+    QString name("Unknow name of tool");
+    switch (type) {
+#ifdef SAK_IMPORT_FILECHECKER_MODULE
+    case SAKDataStruct::ToolTypeFileChecker:
+        name = QString("文件校验器");
+        break;
+#endif
+    case SAKDataStruct::ToolTypeCRCCalculator:
+        name = QString("CRC计算器");
+        break;
+#ifdef SAK_IMPORT_QRCODE_MODULE
+    case SAKDataStruct::ToolTypeQRCodeCreator:
+        name = QString("二维码生成器");
+        break;
+#endif
+    }
+
+    return name;
+}
 
 #ifdef SAK_IMPORT_COM_MODULE
 void SAKGlobal::initComComboBox(QComboBox *comboBox)

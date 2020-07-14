@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -19,13 +19,13 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 
-class SAKDebugPage;
-
 namespace Ui {
     class SAKAutoResponseSettingsWidget;
 }
 
+class SAKDebugPage;
 class SAKDebugPageDatabaseInterface;
+/// @brief 自动回复设置窗口
 class SAKAutoResponseSettingsWidget:public QWidget
 {
    Q_OBJECT

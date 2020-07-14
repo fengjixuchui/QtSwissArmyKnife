@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -12,7 +12,7 @@
 
 #include <QSettings>
 
-/// @brief 配置文件读写类，该类是一个单实例类，只能通过SAKSettings::instance()接口来穿件获取其实例
+/// @brief 配置文件类
 class SAKSettings:public QSettings
 {
     Q_OBJECT
@@ -42,7 +42,7 @@ public:
     QString language();
     void setLanguage(QString language);
 private:
-    static SAKSettings* _instance;
+    static SAKSettings* instancePtr;
 private:
     QString enableAutoCheckForUpdateKey;
     QString appStyleKey;

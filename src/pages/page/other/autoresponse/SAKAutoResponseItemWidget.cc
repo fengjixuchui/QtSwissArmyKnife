@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -7,9 +7,11 @@
  * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
  * group which number is 952218522 to have a communication.
  */
+#include <QDebug>
 #include <QDateTime>
 
 #include "SAKGlobal.hh"
+#include "SAKDebugPage.hh"
 #include "SAKDataStruct.hh"
 #include "SAKAutoResponseItemWidget.hh"
 #include "SAKDebugPageDatabaseInterface.hh"
@@ -25,6 +27,7 @@ SAKAutoResponseItemWidget::SAKAutoResponseItemWidget(SAKDebugPage *debugPage, QW
     initUi();
     id = QDateTime::currentMSecsSinceEpoch();
     remarkLineEdit->setText(QString::number(id));
+    initDelayWritingTimer();
 }
 
 SAKAutoResponseItemWidget::SAKAutoResponseItemWidget(SAKDebugPage *debugPage,
@@ -51,6 +54,7 @@ SAKAutoResponseItemWidget::SAKAutoResponseItemWidget(SAKDebugPage *debugPage,
     referenceDataFromatComboBox->setCurrentIndex(referenceFormat);
     responseDataFormatComboBox->setCurrentIndex(responseFormat);
     optionComboBox->setCurrentIndex(option);
+    initDelayWritingTimer();
 }
 
 SAKAutoResponseItemWidget::~SAKAutoResponseItemWidget()
@@ -163,7 +167,22 @@ void SAKAutoResponseItemWidget::bytesRead(QByteArray bytes)
          QByteArray responseData = string2array(responseString, responseFromat);
 
          if (!responseData.isEmpty()){
-             debugPage->write(responseData);
+             /// @brief 延时回复
+             if (delayResponseCheckBox->isChecked()){
+                quint32 delayTime = delayResponseLineEdit->text().toUInt();
+                if (delayTime < 40){
+                    delayTime = 20;
+                }
+
+                /// @brief 延时回复
+                DelayWritingInfo *info = new DelayWritingInfo;
+                /// @brief 减20是因为延时回复使用20毫秒的定时器
+                info->expectedTimestamp = QDateTime::currentMSecsSinceEpoch() + delayTime - 20;
+                info->data = responseData;
+                delayWritingInfoList.append(info);
+             }else{
+                 debugPage->write(responseData);
+             }
          }
     }
 }
@@ -243,6 +262,8 @@ void SAKAutoResponseItemWidget::initUi()
     updatePushButton = ui->updatePushButton;
     referenceDataFromatComboBox = ui->referenceDataFromatComboBox;
     responseDataFormatComboBox  = ui->responseDataFormatComboBox;
+    delayResponseCheckBox = ui->delayResponseCheckBox;
+    delayResponseLineEdit = ui->delayResponseLineEdit;
 
     optionComboBox->clear();
     optionComboBox->addItem(tr("接收数据等于参考数据时自动回复"), QVariant::fromValue<int>(SAKDataStruct::AutoResponseOptionEqual));
@@ -253,6 +274,41 @@ void SAKAutoResponseItemWidget::initUi()
     SAKGlobal::initInputTextFormatComboBox(responseDataFormatComboBox);
 
     connect(debugPage, &SAKDebugPage::bytesRead, this, &SAKAutoResponseItemWidget::bytesRead);
+}
+
+void SAKAutoResponseItemWidget::initDelayWritingTimer()
+{
+    delayToWritingTimer.setInterval(20);
+    connect(&delayToWritingTimer, &QTimer::timeout, this, &SAKAutoResponseItemWidget::delayToWritBytes);
+    delayToWritingTimer.start();
+}
+
+void SAKAutoResponseItemWidget::delayToWritBytes()
+{
+    delayToWritingTimer.stop();
+    QList<DelayWritingInfo> temp;
+    QList<DelayWritingInfo*> need2removeList;
+    for (int i = 0; i < delayWritingInfoList.length(); i++){
+        DelayWritingInfo *infoPtr = delayWritingInfoList.at(i);
+        if (quint64(QDateTime::currentMSecsSinceEpoch()) > infoPtr->expectedTimestamp){
+            DelayWritingInfo info;
+            info.data = infoPtr->data;
+            info.expectedTimestamp = infoPtr->expectedTimestamp;
+            temp.append(info);
+            need2removeList.append(infoPtr);
+        }
+    }
+
+    /// @brief 发送数据
+    for (auto var : temp){
+        debugPage->write(var.data);
+    }
+
+    /// @brief 删除已发送的数据
+    for (auto var : need2removeList){
+        delayWritingInfoList.removeOne(var);
+    }
+    delayToWritingTimer.start();
 }
 
 void SAKAutoResponseItemWidget::on_referenceDataFromatComboBox_currentTextChanged()

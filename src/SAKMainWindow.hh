@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -34,17 +34,14 @@ class SAKMainWindow : public QMainWindow
 public:
     explicit SAKMainWindow(QWidget *parent = Q_NULLPTR);
     ~SAKMainWindow();
-protected:
-      bool eventFilter(QObject *obj, QEvent *event);
 private:
-    void addTab();    
-    void addTool();
-
-    void addTool(QString toolName, QWidget *toolWidget);
-    void changeStylesheet(QString styleSheetName);
-    void changeAppStyle(QString appStyle);
-
-    void initMenu();
+    QMenu *mToolsMenu;
+    QAction *mDefaultStyleSheetAction;
+    SAKUpdateManager *mUpdateManager;
+    SAKMoreInformation *mMoreInformation;
+    SAKQRCodeDialog *mQrCodeDialog;
+private: 
+    void initMenuBar();
     void initFileMenu();
     void initToolMenu();
     void initOptionMenu();
@@ -52,27 +49,27 @@ private:
     void initHelpMenu();
     void initLinksMenu();
 
-    void installLanguage();
-    void addRemovablePage();
-    void openIODeviceWindow();
-    QWidget *getDebugPage(int type);
-    void closeDebugPage(int index);
+    void changeStylesheet(QString styleSheetName);
+    void changeAppStyle(QString appStyle);
+
+    /// @brief 显示关于软件弹窗
     void about();
-
-    void createCRCCalculator();
+    /// @brief 切换软件显示语言，重启软件生效，该函数只能通过“选项”>>“语言”菜单下的菜单选项来调用
+    void installLanguage();
+    /// @brief 追加页面
+    void appendRemovablePage();
+    /// @brief 移除页面
+    void removeRemovableDebugPage(int index);
+    /// @brief 打开调试页面窗口
+    void openDebugPageWidget();
+    /// @brief 生成调试页面
+    QWidget *debugPageFromType(int type);
+private slots:
+    /// @brief 显示工具窗口，该函数只能通过“工具”菜单的菜单项来调用
+    void showToolWidget();
 private:
-    QTabWidget *tabWidget;
-    QMenu *toolsMenu;
-    QAction *defaultStyleSheetAction;
-    SAKUpdateManager *updateManager;
-    SAKMoreInformation *moreInformation;
-    SAKQRCodeDialog *qrCodeDialog;
-
-    QTranslator qtTranslator;
-    QTranslator qtBaeTranslator;
-    QTranslator sakTranslator;
-private:
-    Ui::SAKMainWindow *ui;
+    Ui::SAKMainWindow *mUi;
+    QTabWidget *mTabWidget;
 };
 
 #endif // MAINWINDOW_H

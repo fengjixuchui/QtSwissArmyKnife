@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsak@foxmail.com). All rights reserved.
+ * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
  * project(https://www.qsak.pro). The project is an open source project. You can
@@ -18,33 +18,49 @@
 
 #include "SAK.hh"
 #include "SAKSettings.hh"
+#include "SAKSettings.hh"
 #include "SAKMainWindow.hh"
+#include "SAKSqlDatabase.hh"
 #include "SAKApplication.hh"
 #include "SAKSplashScreen.hh"
 
 SAKApplication::SAKApplication(int argc, char **argv)
     : QApplication (argc, argv)
 {
+    /// @brief 率先显示启动页面
     SAKSplashScreen *splashScreen = SAKSplashScreen::instance();
     splashScreen->show();
     processEvents();
 
-    setApplicationVersion(SAK_VERSION);
+    /// @brief 初始化全部变量
     SAKSettings::instance();
+#if 0
+    SAKSqlDatabase::instance();
+#endif
+
+    /// @brief 设置软件版本，SAK_VERSION在SAKCommon中定义
+#ifndef SAK_VERSION
+    setApplicationVersion(QString("0.0.0"));
+#else
+    setApplicationVersion(SAK_VERSION);
+#endif
+
+    /// @brief 安装语言包，必须在构造界面控件之前调用，否则短语翻译不生效
     installLanguage();
-    setApplicationVersion(SAK::instance()->version());
 
     /// @brief 注册表选项
     setOrganizationName(QString("Qter"));
     setOrganizationDomain(QString("IT"));
     setApplicationName(QString("QtSwissArmyKnife"));
 
+    /// @brief 5秒后发射检查更新信号
     QTimer::singleShot(5*1000, [=](){
         if (SAKSettings::instance()->enableAutoCheckForUpdate()){
-            emit this->checkForUpdate();
+            emit this->checkForUpdateRequest();
         }
     });
 
+    /// @brief 实例化主窗口
     QMainWindow *mainWindow = new SAKMainWindow;
     mainWindow->show();
     splashScreen->finish(mainWindow);
@@ -76,18 +92,12 @@ void SAKApplication::installLanguage()
         qmName = language.split('-').first();
     }
 
-    qtBaeTranslator.load(QString(":/translations/qt/qtbase_%1.qm").arg(qmName));
-    qApp->installTranslator(&qtBaeTranslator);
+    mQtBaseTranslator.load(QString(":/translations/qt/qtbase_%1.qm").arg(qmName));
+    qApp->installTranslator(&mQtBaseTranslator);
 
-    qtTranslator.load(QString(":/translations/qt/qt_%1.qm").arg(qmName));
-    qApp->installTranslator(&qtTranslator);
+    mQtTranslator.load(QString(":/translations/qt/qt_%1.qm").arg(qmName));
+    qApp->installTranslator(&mQtTranslator);
 
-    sakTranslator.load(QString(":/translations/sak/SAK_%1.qm").arg(qmName));
-    qApp->installTranslator(&sakTranslator);
-
-    if (sender() && inherits("QAction")){
-        QAction *action = reinterpret_cast<QAction*>(sender());
-        action->setChecked(true);
-        QString title = action->data().toString();
-    }
+    mSakTranslator.load(QString(":/translations/sak/SAK_%1.qm").arg(qmName));
+    qApp->installTranslator(&mSakTranslator);
 }
