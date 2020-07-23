@@ -30,17 +30,17 @@
 #include "SAKReadWriteSettingsWidget.hh"
 #include "SAKAutoResponseSettingsWidget.hh"
 
-class SAKDevice;
+class SAKDebugPageDevice;
 class SAKDataFactory;
 class SAKCRCInterface;
-class SAKStatisticsManager;
-class SAKOtherSettingsManager;
+class SAKDebugPageStatisticsController;
+class SAKDebugPageOtherController;
 class SAKTransmissionSettings;
-class SAKDebugPageInputManager;
-class SAKDebugPageOutputManager;
+class SAKDebugPageInputController;
+class SAKDebugPageOutputController;
 class SAKHighlightSettingsWidget;
 #ifdef SAK_IMPORT_CHARTS_MODULE
-class SAKChartsManager;
+class SAKChartsController;
 #endif
 class SAKDebugPageDatabaseInterface;
 
@@ -68,11 +68,11 @@ public:
         int runIntervalTime;        // while循环执行时间间隔
     };
 
-    friend class SAKChartsManager;
-    friend class SAKOtherSettingsManager;
-    friend class SAKStatisticsManager;
-    friend class SAKDebugPageInputManager;
-    friend class SAKDebugPageOutputManager;
+    friend class SAKChartsController;
+    friend class SAKDebugPageOtherController;
+    friend class SAKDebugPageStatisticsController;
+    friend class SAKDebugPageInputController;
+    friend class SAKDebugPageOutputController;
 
     /**
      * @brief write             -- 写数据
@@ -123,13 +123,13 @@ protected:
     /// @brief 返回控制面板
     virtual QWidget *controllerWidget();
     /// @brief 创建设备,创建的设备由基类管理，不能在子类中对设备进行销毁操作
-    virtual SAKDevice* createDevice();
+    virtual SAKDebugPageDevice* createDevice();
     /// @brief 使能ui
     virtual void setUiEnable(bool ebable);
     /// @brief 初始化页面，子类在重新实现所有虚函数后，条用该函数即可
     void initPage();
 private:
-    SAKDevice *mDevice;
+    SAKDebugPageDevice *mDevice;
     bool mIsInitializing;
     int mDebugPageType = -1;
     QString mSettingKey;
@@ -245,7 +245,7 @@ protected:
     QCheckBox *mShowMsCheckBox;
     QCheckBox *mShowRxDataCheckBox;
     QCheckBox *mShowTxDataCheckBox;
-    QCheckBox *mSaveOutputFileToFilecheckBox;
+    QCheckBox *mSaveOutputToFileCheckBox;
     QPushButton *mOutputFilePathPushButton;
     QPushButton *mClearOutputPushButton;
     QPushButton *mSaveOutputPushButton;
@@ -300,12 +300,12 @@ private slots:
     void on_dataVisualizationPushButton_clicked();
 private:
 #ifdef SAK_IMPORT_CHARTS_MODULE
-    SAKChartsManager *mDataVisualizationManager;
+    SAKChartsController *mDataVisualizationManager;
 #endif
-    SAKOtherSettingsManager *mOtherSettings;
-    SAKStatisticsManager *mStatisticsManager;
-    SAKDebugPageOutputManager *mOutputManager;
-    SAKDebugPageInputManager *mDebugPageInputManager;
+    SAKDebugPageOtherController *mOtherSettings;
+    SAKDebugPageStatisticsController *mStatisticsManager;
+    SAKDebugPageOutputController *mOutputManager;
+    SAKDebugPageInputController *mDebugPageInputManager;
 };
 
 #endif  // SAKTabPage_H

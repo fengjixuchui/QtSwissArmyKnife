@@ -38,6 +38,7 @@ include(SAKTools.pri)
 include(SAKCommon.pri)
 include(SAKCharts.pri)
 include(SAKModules.pri)
+#include(SAKBluetooth.pri)
 include(SAKWebSocket.pri)
 include(SAKSerialPort.pri)
 
@@ -117,7 +118,7 @@ INCLUDEPATH += \
     src/pages/page/other/timing \
     src/pages/page/other/transmission \
     src/pages/page/output \
-    src/pages/page/output/save \
+    src/pages/page/output/save2file \
     src/pages/page/statistics \
     src/pages/tcp/client \
     src/pages/tcp/server \
@@ -148,7 +149,7 @@ FORMS += \
     src/pages/page/other/transmission/SAKTransmissionPage.ui \
     src/pages/page/other/transmission/SAKTransmissionSettings.ui \
     src/pages/page/other/transmission/SAKUdpTransmissionItemWidget.ui \
-    src/pages/page/output/save/SAKSaveOutputDataSettings.ui \
+    src/pages/page/output/save2file/SAKOutputSave2FileDialog.ui \
     src/pages/tcp/client/SAKTcpClientDeviceController.ui \
     src/pages/tcp/server/SAKTcpServerDeviceController.ui \
     src/pages/udp/SAKUdpAdvanceSettingWidget.ui \
@@ -170,13 +171,13 @@ HEADERS += \
     src/moreinfo/SAKMoreInformation.hh \
     src/pages/page/SAKDebugPage.hh \
     src/pages/page/SAKDebugPageDatabaseInterface.hh \
-    src/pages/page/device/SAKDevice.hh \
-    src/pages/page/input/SAKDebugPageInputManager.hh \
+    src/pages/page/device/SAKDebugPageDevice.hh \
+    src/pages/page/input/SAKDebugPageInputController.hh \
     src/pages/page/input/SAKInputCrcSettingsDialog.hh \
     src/pages/page/input/SAKInputDataFactory.hh \
     src/pages/page/input/SAKInputDataItem.hh \
     src/pages/page/input/SAKInputDataItemManager.hh \
-    src/pages/page/other/SAKOtherSettingsManager.hh \
+    src/pages/page/other/SAKDebugPageOtherController.hh \
     src/pages/page/other/autoresponse/SAKAutoResponseItemWidget.hh \
     src/pages/page/other/autoresponse/SAKAutoResponseSettingsWidget.hh \
     src/pages/page/other/highlight/SAKHighlightSettings.hh \
@@ -195,13 +196,12 @@ HEADERS += \
     src/pages/page/other/transmission/SAKTransmissionPage.hh \
     src/pages/page/other/transmission/SAKTransmissionSettings.hh \
     src/pages/page/other/transmission/SAKUdpTransmissionItemWidget.hh \
-    src/pages/page/output/SAKDebugPageOutputManager.hh \
-    src/pages/page/output/SAKOutputDataFactory.hh \
-    src/pages/page/output/save/SAKSaveOutputDataSettings.hh \
-    src/pages/page/output/save/SAKSaveOutputDataThread.hh \
-    src/pages/page/statistics/SAKStatisticsManager.hh \
+    src/pages/page/output/SAKDebugPageOutputController.hh \
+    src/pages/page/output/save2file/SAKOutputSave2FileDialog.hh \
     src/common/SAKCRCInterface.hh \
     src/common/SAKDataStruct.hh \
+    src/pages/page/output/save2file/SAKOutputSave2FileThread.hh \
+    src/pages/page/statistics/SAKDebugPageStatisticsController.hh \
     src/pages/tcp/client/SAKTcpClientDebugPage.hh \
     src/pages/tcp/client/SAKTcpClientDevice.hh \
     src/pages/tcp/client/SAKTcpClientDeviceController.hh \
@@ -232,13 +232,13 @@ SOURCES += \
     src/moreinfo/SAKMoreInformation.cc \
     src/pages/page/SAKDebugPage.cc \
     src/pages/page/SAKDebugPageDatabaseInterface.cc \
-    src/pages/page/device/SAKDevice.cc \
-    src/pages/page/input/SAKDebugPageInputManager.cc \
+    src/pages/page/device/SAKDebugPageDevice.cc \
+    src/pages/page/input/SAKDebugPageInputController.cc \
     src/pages/page/input/SAKInputCrcSettingsDialog.cc \
     src/pages/page/input/SAKInputDataFactory.cc \
     src/pages/page/input/SAKInputDataItem.cc \
     src/pages/page/input/SAKInputDataItemManager.cc \
-    src/pages/page/other/SAKOtherSettingsManager.cc \
+    src/pages/page/other/SAKDebugPageOtherController.cc \
     src/pages/page/other/autoresponse/SAKAutoResponseItemWidget.cc \
     src/pages/page/other/autoresponse/SAKAutoResponseSettingsWidget.cc \
     src/pages/page/other/highlight/SAKHighlightSettings.cc \
@@ -257,14 +257,13 @@ SOURCES += \
     src/pages/page/other/transmission/SAKTransmissionPage.cc \
     src/pages/page/other/transmission/SAKTransmissionSettings.cc \
     src/pages/page/other/transmission/SAKUdpTransmissionItemWidget.cc \
-    src/pages/page/output/SAKDebugPageOutputManager.cc \
-    src/pages/page/output/SAKOutputDataFactory.cc \
-    src/pages/page/output/save/SAKSaveOutputDataSettings.cc \
-    src/pages/page/output/save/SAKSaveOutputDataThread.cc \
-    src/pages/page/statistics/SAKStatisticsManager.cc \
+    src/pages/page/output/SAKDebugPageOutputController.cc \
+    src/pages/page/output/save2file/SAKOutputSave2FileDialog.cc \
     src/common/SAKCRCInterface.cc \
     src/common/SAKDataStruct.cc \
     src/main.cc \
+    src/pages/page/output/save2file/SAKOutputSave2FileThread.cc \
+    src/pages/page/statistics/SAKDebugPageStatisticsController.cc \
     src/pages/tcp/client/SAKTcpClientDebugPage.cc \
     src/pages/tcp/client/SAKTcpClientDevice.cc \
     src/pages/tcp/client/SAKTcpClientDeviceController.cc \

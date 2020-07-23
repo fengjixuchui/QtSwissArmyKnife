@@ -19,9 +19,9 @@
 #include "SAKWebSocketServerDeviceController.hh"
 
 SAKWebSocketServerDevice::SAKWebSocketServerDevice(SAKWebSocketServerDebugPage *debugPage, QObject *parent)
-    :SAKDevice(parent)
-    ,debugPage(debugPage)
-    ,webSocketServer(Q_NULLPTR)
+    :SAKDebugPageDevice(parent)
+    ,mDebugPage(debugPage)
+    ,mWebSocketServer(Q_NULLPTR)
 {
 
 }
@@ -29,16 +29,16 @@ SAKWebSocketServerDevice::SAKWebSocketServerDevice(SAKWebSocketServerDebugPage *
 void SAKWebSocketServerDevice::run()
 {
     QEventLoop eventLoop;
-    SAKWebSocketServerDeviceController *deviceController = debugPage->controllerInstance();
-    serverHost = deviceController->serverHost();
-    serverPort = deviceController->serverPort();
-    QString serverName = QString("%1:%2").arg(serverHost).arg(serverPort);
+    SAKWebSocketServerDeviceController *deviceController = mDebugPage->controllerInstance();
+    mServerHost = deviceController->serverHost();
+    mServerPort = deviceController->serverPort();
+    QString serverName = QString("%1:%2").arg(mServerHost).arg(mServerPort);
 
     QList<QWebSocket*> clientList;
-    webSocketServer = new QWebSocketServer(serverName, QWebSocketServer::NonSecureMode);
-    if (!webSocketServer->listen(QHostAddress(serverHost), serverPort)){
+    mWebSocketServer = new QWebSocketServer(serverName, QWebSocketServer::NonSecureMode);
+    if (!mWebSocketServer->listen(QHostAddress(mServerHost), mServerPort)){
         emit deviceStateChanged(false);
-        emit messageChanged(tr("服务器监听地址、端口失败：")+webSocketServer->errorString(), false);
+        emit messageChanged(tr("服务器监听地址、端口失败：")+mWebSocketServer->errorString(), false);
         return;
     }else{
         emit deviceStateChanged(true);
@@ -51,8 +51,8 @@ void SAKWebSocketServerDevice::run()
         }
 
         /// @brief 处理接入
-        while (webSocketServer->hasPendingConnections()){
-            QWebSocket *socket = webSocketServer->nextPendingConnection();
+        while (mWebSocketServer->hasPendingConnections()){
+            QWebSocket *socket = mWebSocketServer->nextPendingConnection();
             if (socket){
                 clientList.append(socket);
                 deviceController->addClient(socket->peerAddress().toString(), socket->peerPort(), socket);
@@ -88,13 +88,13 @@ void SAKWebSocketServerDevice::run()
         eventLoop.processEvents();
 
         /// @brief 线程睡眠
-        threadMutex.lock();
-        threadWaitCondition.wait(&threadMutex, debugPage->readWriteParameters().runIntervalTime);
-        threadMutex.unlock();
+        mThreadMutex.lock();
+        mThreadWaitCondition.wait(&mThreadMutex, mDebugPage->readWriteParameters().runIntervalTime);
+        mThreadMutex.unlock();
     }
 
-    webSocketServer->close();
-    delete webSocketServer;
+    mWebSocketServer->close();
+    delete mWebSocketServer;
     deviceController->clearClient();
     emit deviceStateChanged(false);
 }

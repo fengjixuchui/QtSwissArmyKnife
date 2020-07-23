@@ -1,11 +1,11 @@
 ﻿/*
  * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
- * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project(https://www.qsak.pro). The project is an open source project. You can
- * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
- * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
- * group which number is 952218522 to have a communication.
+ * The file is encoded using "utf8 with bom", it is a part
+ * of QtSwissArmyKnife project.
+ *
+ * QtSwissArmyKnife is licensed according to the terms in
+ * the file LICENCE in the root of the source code directory.
  */
 #ifndef SAKOUTPUTDATAFACTORY_HH
 #define SAKOUTPUTDATAFACTORY_HH
@@ -14,7 +14,7 @@
 #include <QThread>
 #include <QWaitCondition>
 
-#include "SAKDebugPageOutputManager.hh"
+#include "SAKDebugPageOutputController.hh"
 
 class SAKOutputDataFactory:public QThread
 {
@@ -28,13 +28,13 @@ public:
      * @param rawData 原始数据（已接受数据或者已发送数据）
      * @param parameters 输出参数
      */
-    void cookData(QByteArray rawData, SAKDebugPageOutputManager::OutputParameters parameters);
+    void cookData(QByteArray rawData, SAKDebugPageOutputController::OutputParameters parameters);
 protected:
     void run() final;
 private:
     struct RawDataStruct {
         QByteArray rawData;
-        SAKDebugPageOutputManager::OutputParameters parameters;
+        SAKDebugPageOutputController::OutputParameters parameters;
     };
 
     QList<RawDataStruct> rawDataList;
@@ -42,7 +42,7 @@ private:
     QMutex threadMutex;
     QWaitCondition threadWaitCondition;
 private:
-    void innerCookData(QByteArray rawData, SAKDebugPageOutputManager::OutputParameters parameters);
+    void innerCookData(QByteArray rawData, SAKDebugPageOutputController::OutputParameters parameters);
     RawDataStruct takeRawData();
 signals:
     void dataCooked(QString data);

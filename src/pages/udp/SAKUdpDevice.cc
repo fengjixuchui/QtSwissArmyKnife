@@ -16,7 +16,7 @@
 #include "SAKUdpDeviceController.hh"
 
 SAKUdpDevice::SAKUdpDevice(SAKUdpDebugPage *debugPage, QObject *parent)
-    :SAKDevice(parent)
+    :SAKDebugPageDevice(parent)
     ,enableCustomLocalSetting(false)
     ,debugPage (debugPage)
 {
@@ -169,9 +169,9 @@ void SAKUdpDevice::run()
             eventLoop.processEvents();
 
             /// @brief 线程睡眠
-            threadMutex.lock();
-            threadWaitCondition.wait(&threadMutex, debugPage->readWriteParameters().runIntervalTime);
-            threadMutex.unlock();
+            mThreadMutex.lock();
+            mThreadWaitCondition.wait(&mThreadMutex, debugPage->readWriteParameters().runIntervalTime);
+            mThreadMutex.unlock();
         }
 
         udpSocket->close();

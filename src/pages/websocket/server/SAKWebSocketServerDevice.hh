@@ -14,12 +14,12 @@
 #include <QWebSocket>
 #include <QWebSocketServer>
 
-#include "SAKDevice.hh"
+#include "SAKDebugPageDevice.hh"
 
 class SAKWebSocketServerDebugPage;
 class SAKWebSocketServerDeviceController;
 /// @brief web socket服务器设备
-class SAKWebSocketServerDevice:public SAKDevice
+class SAKWebSocketServerDevice:public SAKDebugPageDevice
 {
     Q_OBJECT
 public:
@@ -27,13 +27,13 @@ public:
 private:
     void run();    
 private:
-    QString localHost;
-    quint16 localPort;
-    bool enableCustomLocalSetting;
-    QString serverHost;
-    quint16 serverPort;
-    SAKWebSocketServerDebugPage *debugPage;
-    QWebSocketServer *webSocketServer;
+    QString mLocalHost;
+    quint16 mLocalPort;
+    bool mEnableCustomLocalSetting;
+    QString mServerHost;
+    quint16 mServerPort;
+    SAKWebSocketServerDebugPage *mDebugPage;
+    QWebSocketServer *mWebSocketServer;
 private:
     void innerReadBytes(QWebSocket *socket, QByteArray bytes, SAKWebSocketServerDeviceController *deviceController);
     void innerWriteBytes(QWebSocket *socket, QByteArray bytes, SAKWebSocketServerDeviceController *deviceController);

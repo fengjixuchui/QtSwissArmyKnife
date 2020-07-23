@@ -18,7 +18,7 @@
 #include "SAKTcpServerDeviceController.hh"
 
 SAKTcpServerDevice::SAKTcpServerDevice(SAKTcpServerDebugPage *debugPage, QObject *parent)
-    :SAKDevice(parent)
+    :SAKDebugPageDevice(parent)
     ,debugPage(debugPage)
     ,tcpServer(Q_NULLPTR)
 {
@@ -92,9 +92,9 @@ void SAKTcpServerDevice::run()
         eventLoop.processEvents();
 
         /// @brief 线程睡眠
-        threadMutex.lock();
-        threadWaitCondition.wait(&threadMutex, debugPage->readWriteParameters().runIntervalTime);
-        threadMutex.unlock();
+        mThreadMutex.lock();
+        mThreadWaitCondition.wait(&mThreadMutex, debugPage->readWriteParameters().runIntervalTime);
+        mThreadMutex.unlock();
     }
 
     tcpServer->close();

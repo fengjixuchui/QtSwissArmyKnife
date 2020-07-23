@@ -16,7 +16,7 @@
 #include "SAKSerialPortDeviceController.hh"
 
 SAKSerialPortDevice::SAKSerialPortDevice(SAKSerialPortDebugPage *debugPage, QObject *parent)
-    :SAKDevice(parent)
+    :SAKDebugPageDevice(parent)
     ,serialPort(Q_NULLPTR)
     ,debugPage(debugPage)
 {
@@ -82,9 +82,9 @@ void SAKSerialPortDevice::run()
             eventLoop.processEvents();
 
             /// @brief 线程睡眠
-            threadMutex.lock();
-            threadWaitCondition.wait(&threadMutex, 25);
-            threadMutex.unlock();
+            mThreadMutex.lock();
+            mThreadWaitCondition.wait(&mThreadMutex, 25);
+            mThreadMutex.unlock();
         }
 
         /// @brief 关闭清理串口

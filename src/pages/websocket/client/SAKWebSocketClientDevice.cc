@@ -19,7 +19,7 @@
 #include "SAKWebSocketClientDeviceController.hh"
 
 SAKWebSocketClientDevice::SAKWebSocketClientDevice(SAKWebSocketClientDebugPage *debugPage, QObject *parent)
-    :SAKDevice(parent)
+    :SAKDebugPageDevice(parent)
     ,debugPage (debugPage)
 {
     qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
@@ -81,9 +81,9 @@ void SAKWebSocketClientDevice::run()
 
         /// @brief 线程睡眠
         if (isInterruptionRequested()){
-            threadMutex.lock();
-            threadWaitCondition.wait(&threadMutex, 50);
-            threadMutex.unlock();
+            mThreadMutex.lock();
+            mThreadWaitCondition.wait(&mThreadMutex, 50);
+            mThreadMutex.unlock();
         }
     }
 
