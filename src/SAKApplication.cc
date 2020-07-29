@@ -20,7 +20,6 @@
 #include "SAKSettings.hh"
 #include "SAKSettings.hh"
 #include "SAKMainWindow.hh"
-#include "SAKSqlDatabase.hh"
 #include "SAKApplication.hh"
 #include "SAKSplashScreen.hh"
 
@@ -28,6 +27,7 @@ SAKApplication::SAKApplication(int argc, char **argv)
     :QApplication (argc, argv)
     ,mMainWindow(Q_NULLPTR)
 {
+    setApplicationName(QString("QtSwissArmyKnife"));
     /// @brief 率先显示启动页面
     SAKSplashScreen *splashScreen = SAKSplashScreen::instance();
     splashScreen->show();

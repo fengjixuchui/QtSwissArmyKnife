@@ -111,10 +111,12 @@ public:
         quint32 referenceFormat;    /// 参考数据格式，详情查看SAKEnumTextInputFormat
         quint32 responseFormat;     /// 回复数据格式，详情查看SAKEnumTextInputFormat
         quint32 option;             /// 回复选项
+        bool delay; // true-response delayly
+        quint32 interval; // delay interval
     };
 
     /// @brief 调试页面定时发送数的据结构
-    struct SAKStructTimingSendingItem {
+    struct SAKStructTimingSentItem {
         quint64 id;
         quint32 interval;   /// 定时间隔
         quint32 format;     /// 文本格式
@@ -126,9 +128,9 @@ public:
     struct SAKStructPresettingDataItem{
         quint64 id;
         quint32 format;     /// 预设数据格式
-        QString comment;    /// 预设数据备注
+        QString description;    /// 预设数据备注
         quint32 classify;   /// 预设数据分类
-        QString data;       /// 预设数据
+        QString text;       /// 预设数据
     };
 public:
     /**
@@ -150,7 +152,7 @@ public:
      * @param type 调试类型，详情查看SAKEnumDebugPageType
      * @return 数据表名称
      */
-    static QString presettingDataTableName(int type);
+    static QString dataPresetTableName(int type);
 };
 
 #endif

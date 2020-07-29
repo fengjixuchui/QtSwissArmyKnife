@@ -14,12 +14,11 @@
 #include <QPushButton>
 
 class SAKDebugPage;
-class SAKMoreSettingsWidget;
-class SAKTransmissionSettings;
-class SAKHighlightSettingsWidget;
-class SAKReadWriteSettingsWidget;
-class SAKAutoResponseSettingsWidget;
-class SAKTimingSendingSettingsWidget;
+class SAKOtherTransmissionPageViewer;
+class SAKOtherHighlighterManager;
+class SAKOtherTimingSentItemManager;
+class SAKOtherAnalyzerThreadManager;
+class SAKOtherAutoResponseItemManager;
 
 /// @brief other setting module
 class SAKDebugPageOtherController:public QObject
@@ -30,31 +29,29 @@ public:
     ~SAKDebugPageOtherController();
 
     /**
-     * @brief moreSettingsWidget: get the more settings widget
-     * @return widget: setting widget
+     * @brief analyzerThreadManager: Get the SAKOtherAnalyzerThreadManager instance
+     * @return instance
      */
-    SAKMoreSettingsWidget *moreSettingsWidget();
+    SAKOtherAnalyzerThreadManager *analyzerThreadManager();
 private:
     SAKDebugPage *mDebugPage;
 
     QPushButton *moreSettingsPushButton;
     QPushButton *timingSendingPushButton;
     QPushButton *highlightSettingPushButton;
-    QPushButton *readWriteSettingPushButton;
+    QPushButton *mAnalyzerPushButton;
     QPushButton *autoResponseSettingPushButton;
     QPushButton *transmissionSettingPushButton;
 
-    SAKMoreSettingsWidget *mMoreSettingsWidget;
-    SAKTransmissionSettings *mTransmissionSettings;
-    SAKHighlightSettingsWidget *mHighlightSettingsWidget;
-    SAKReadWriteSettingsWidget *mReadWriteSettingsWidget;
-    SAKAutoResponseSettingsWidget *mAutoResponseSettingWidget;
-    SAKTimingSendingSettingsWidget *mTimingSendingSettingsWidget;
+    SAKOtherTransmissionPageViewer *mTransmissionSettings;
+    SAKOtherHighlighterManager *mHighlightSettingsWidget;
+    SAKOtherAutoResponseItemManager *mAutoResponseSettingWidget;
+    SAKOtherTimingSentItemManager *mTimingSendingSettingsWidget;
+    SAKOtherAnalyzerThreadManager *mAnalyzerThreadManager;
 private slots:
-    void onMoreSettingsPushButtonClicked();
     void onTimingSendingPushButtonClicked();
-    void onReadWriteSettingPushButtonClicked();
     void onHighlightSettingPushButtonClicked();
+    void onAnalyzerPushButtonClicked();
     void onAutoresponseSettingPushbuttonClicked();
     void onTransmissionSettingPushButtonClicked();
 };

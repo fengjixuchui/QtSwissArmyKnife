@@ -1,11 +1,11 @@
 ﻿/*
  * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
- * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project(https://www.qsak.pro). The project is an open source project. You can
- * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
- * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
- * group which number is 952218522 to have a communication.
+ * The file is encoded using "utf8 with bom", it is a part
+ * of QtSwissArmyKnife project.
+ *
+ * QtSwissArmyKnife is licensed according to the terms in
+ * the file LICENCE in the root of the source code directory.
  */
 #include <QPixmap>
 #include <QDateTime>
@@ -20,24 +20,23 @@
 #include <QIntValidator>
 #include <QLoggingCategory>
 
-#include "SAKDebugPageDevice.hh"
 #include "SAKGlobal.hh"
 #include "SAKSettings.hh"
 #include "SAKDebugPage.hh"
 #include "SAKDataStruct.hh"
 #include "SAKCRCInterface.hh"
-#include "SAKProtocolAnalyzer.hh"
-#include "SAKDebugPageStatisticsController.hh"
-#include "SAKMoreSettingsWidget.hh"
+#include "SAKDebugPageDevice.hh"
+#include "SAKOtherAnalyzerThread.hh"
+#include "SAKOtherAnalyzerThreadManager.hh"
+#include "SAKOtherHighlighterManager.hh"
 #include "SAKDebugPageOtherController.hh"
 #include "SAKDebugPageInputController.hh"
 #include "SAKDebugPageOutputController.hh"
-#include "SAKProtocolAnalyzerWidget.hh"
-#include "SAKHighlightSettingsWidget.hh"
 #ifdef SAK_IMPORT_CHARTS_MODULE
-#include "SAKChartsController.hh"
+#include "SAKDebugPageChartsController.hh"
 #endif
-#include "SAKDebugPageDatabaseInterface.hh"
+#include "SAKOtherAutoResponseItemManager.hh"
+#include "SAKDebugPageStatisticsController.hh"
 
 #include "ui_SAKDebugPage.h"
 
@@ -49,25 +48,20 @@ SAKDebugPage::SAKDebugPage(int type, QWidget *parent)
     ,mDebugPageType(type)
     ,mUi(new Ui::SAKDebugPage)
 {
-    mDatabaseInterface = SAKDebugPageDatabaseInterface::instance();
-
     mIsInitializing = true;
     initSettingString();
 
     mUi->setupUi(this);
     initUiPointer();
 
-    mOutputManager           = new SAKDebugPageOutputController(this, this);
-    mOtherSettings           = new SAKDebugPageOtherController(this, this);
-    mStatisticsManager       = new SAKDebugPageStatisticsController(this, this);
-    mDebugPageInputManager   = new SAKDebugPageInputController(this, this);
+    mOutputController           = new SAKDebugPageOutputController(this, this);
+    mOtherController           = new SAKDebugPageOtherController(this, this);
+    mStatisticsController       = new SAKDebugPageStatisticsController(this, this);
+    mInputController   = new SAKDebugPageInputController(this, this);
 #ifdef SAK_IMPORT_CHARTS_MODULE
-    mDataVisualizationManager= Q_NULLPTR;
+    mChartsController= new SAKDebugPageChartsController(this);
 #endif
 
-    mRreadWriteParameters.waitForReadyReadTime = MINI_READ_WRITE_WATINGT_TIME;
-    mRreadWriteParameters.waitForBytesWrittenTime = MINI_READ_WRITE_WATINGT_TIME;
-    mRreadWriteParameters.runIntervalTime = 25;
 #if 0
     resize(800, 600);
 #endif
@@ -95,9 +89,9 @@ SAKDebugPage::~SAKDebugPage()
     }
 
 #ifdef SAK_IMPORT_CHARTS_MODULE
-    if (mDataVisualizationManager){
-        delete mDataVisualizationManager;
-        mDataVisualizationManager = Q_NULLPTR;
+    if (mChartsController){
+        delete mChartsController;
+        mChartsController = Q_NULLPTR;
     }
 #endif
 }
@@ -132,42 +126,36 @@ void SAKDebugPage::outputMessage(QString msg, bool isInfo)
     mClearInfoTimer.start();
 }
 
-struct SAKDebugPage::ReadWriteParameters SAKDebugPage::readWriteParameters()
-{
-    ReadWriteParameters parameters;
-    mReadWriteParametersMutex.lock();
-    parameters.waitForReadyReadTime = mRreadWriteParameters.waitForReadyReadTime;
-    parameters.waitForBytesWrittenTime = mRreadWriteParameters.waitForBytesWrittenTime;
-    parameters.runIntervalTime = mRreadWriteParameters.runIntervalTime;
-    mReadWriteParametersMutex.unlock();
-
-    return  parameters;
-}
-
-void SAKDebugPage::setReadWriteParameters(struct ReadWriteParameters parameters)
-{
-    if (parameters.waitForReadyReadTime < MINI_READ_WRITE_WATINGT_TIME){
-        parameters.waitForReadyReadTime = MINI_READ_WRITE_WATINGT_TIME;
-    }
-
-    if (parameters.waitForBytesWrittenTime < MINI_READ_WRITE_WATINGT_TIME){
-        parameters.waitForBytesWrittenTime = MINI_READ_WRITE_WATINGT_TIME;
-    }
-
-    mReadWriteParametersMutex.lock();
-    mRreadWriteParameters.waitForReadyReadTime = parameters.waitForReadyReadTime;
-    mRreadWriteParameters.waitForBytesWrittenTime = parameters.waitForBytesWrittenTime;
-    mReadWriteParametersMutex.unlock();
-}
-
-SAKDebugPageDatabaseInterface *SAKDebugPage::databaseInterfaceInstance()
-{
-   return mDatabaseInterface;
-}
-
 quint32 SAKDebugPage::pageType()
 {
     return mDebugPageType;
+}
+
+SAKDebugPageOtherController *SAKDebugPage::otherController()
+{
+    return mOtherController;
+}
+
+SAKDebugPageInputController *SAKDebugPage::inputController()
+{
+    return mInputController;
+}
+
+#ifdef SAK_IMPORT_CHARTS_MODULE
+SAKDebugPageChartsController *SAKDebugPage::chartsController()
+{
+   return mChartsController;
+}
+#endif
+
+SAKDebugPageOutputController *SAKDebugPage::outputController()
+{
+    return mOutputController;
+}
+
+SAKDebugPageStatisticsController *SAKDebugPage::statisticsController()
+{
+    return mStatisticsController;
 }
 
 void SAKDebugPage::refreshDevice()
@@ -401,11 +389,10 @@ void SAKDebugPage::setupDevice()
 #if 0
         connect(device, &SAKDevice::bytesRead, this, &SAKDebugPage::bytesRead);
 #else
-        /// @brief 设备读取到的数据传输至协议分析器中，分析完成的数据回传至调试页面中
-        SAKMoreSettingsWidget *moreSettingsWidget = mOtherSettings->moreSettingsWidget();
-        SAKProtocolAnalyzerWidget *protocolAnalyzerWidget = moreSettingsWidget->protocolAnalyzerWidget();
-        connect(mDevice, &SAKDebugPageDevice::bytesRead, protocolAnalyzerWidget, &SAKProtocolAnalyzerWidget::inputBytes);
-        connect(protocolAnalyzerWidget, &SAKProtocolAnalyzerWidget::bytesAnalysed, this, &SAKDebugPage::bytesRead);
+        // The bytes read will be input to analyzer, after analuzing, the bytes will be input to debug page
+        SAKOtherAnalyzerThreadManager *analyzerManager = mOtherController->analyzerThreadManager();
+        connect(mDevice, &SAKDebugPageDevice::bytesRead, analyzerManager, &SAKOtherAnalyzerThreadManager::inputBytes);
+        connect(analyzerManager, &SAKOtherAnalyzerThreadManager::bytesAnalysed, this, &SAKDebugPage::bytesRead);
 #endif
         connect(mDevice, &SAKDebugPageDevice::messageChanged, this, &SAKDebugPage::outputMessage);
         connect(mDevice, &SAKDebugPageDevice::deviceStateChanged, this, &SAKDebugPage::changedDeviceState);
@@ -463,7 +450,7 @@ void SAKDebugPage::on_addCRCCheckBox_clicked()
 
 void SAKDebugPage::on_crcSettingsPushButton_clicked()
 {
-    mDebugPageInputManager->showCrcSettingsDialog();
+    mInputController->showCrcSettingsDialog();
 }
 
 void SAKDebugPage::on_crcParameterModelsComboBox_currentIndexChanged(int index)
@@ -576,7 +563,7 @@ void SAKDebugPage::initUiPointer()
 
     /// @brief 其他设置
     mTransmissionSettingPushButton = mUi->transmissionSettingPushButton;
-    mReadWriteSettingPushButton    = mUi->readWriteSettingPushButton;
+    mAnalyzerPushButton = mUi->analyzerPushButton;
     mAutoResponseSettingPushButton = mUi->autoResponseSettingPushButton;
     mTimingSendingPushButton       = mUi->timingSendingPushButton;
     mHighlightSettingPushButton    = mUi->highlightSettingPushButton;
@@ -589,17 +576,17 @@ void SAKDebugPage::initUiPointer()
 void SAKDebugPage::on_dataVisualizationPushButton_clicked()
 {
 #ifdef SAK_IMPORT_CHARTS_MODULE
-    if (mDataVisualizationManager){
-        if (mDataVisualizationManager->isHidden()){
-            mDataVisualizationManager->show();
+    if (mChartsController){
+        if (mChartsController->isHidden()){
+            mChartsController->show();
         }else{
-            mDataVisualizationManager->activateWindow();
+            mChartsController->activateWindow();
         }
     }else{
-        mDataVisualizationManager = new SAKChartsController(this);
-        mDataVisualizationManager->show();
-        connect(mDataVisualizationManager, &SAKChartsController::destroyed, [&](){
-            mDataVisualizationManager = Q_NULLPTR;
+        mChartsController = new SAKDebugPageChartsController(this);
+        mChartsController->show();
+        connect(mChartsController, &SAKDebugPageChartsController::destroyed, [&](){
+            mChartsController = Q_NULLPTR;
         });
     }
 #else
