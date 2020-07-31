@@ -1,11 +1,11 @@
 ﻿/*
  * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
  *
- * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project(https://www.qsak.pro). The project is an open source project. You can
- * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
- * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
- * group which number is 952218522 to have a communication.
+ * The file is encoded using "utf8 with bom", it is a part
+ * of QtSwissArmyKnife project.
+ *
+ * QtSwissArmyKnife is licensed according to the terms in
+ * the file LICENCE in the root of the source code directory.
  */
 #include <QValueAxis>
 #include <QHBoxLayout>
@@ -28,10 +28,10 @@ SAKChartsThroughputWidget::SAKChartsThroughputWidget(SAKDebugPage *debugPage, QW
     dataContext.txMax = 10;
 
     resize(800, 400);
-    setWindowTitle(tr("吞吐量"));
+    setWindowTitle(tr("Throughput"));
 
-    rxLineSeries->setName(tr("接收数据"));
-    txLineSeries->setName(tr("发送数据"));
+    rxLineSeries->setName(tr("Rx data"));
+    txLineSeries->setName(tr("Tx data"));
 
     chart->addSeries(rxLineSeries);
     chart->addSeries(txLineSeries);
@@ -39,7 +39,7 @@ SAKChartsThroughputWidget::SAKChartsThroughputWidget(SAKDebugPage *debugPage, QW
     chart->axes(Qt::Horizontal).first()->setRange(QVariant::fromValue(0), QVariant::fromValue(60));
     chart->axes(Qt::Horizontal).first()->setReverse(true);
     reinterpret_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first())->setTickCount(30);
-    reinterpret_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first())->setLabelFormat("%d");   // 坐标显示格式（整数）
+    reinterpret_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first())->setLabelFormat("%d");
 
     chart->axes(Qt::Vertical).first()->setMin(QVariant::fromValue(-1));
     reinterpret_cast<QValueAxis*>(chart->axes(Qt::Vertical).first())->setLabelFormat("%d");

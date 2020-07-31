@@ -14,6 +14,7 @@
 
 SAKInputCrcSettingsDialog::SAKInputCrcSettingsDialog(QWidget *parent)
     :QDialog(parent)
+    ,mIsInitializing(true)
     ,mUi(new Ui::SAKInputCrcSettingsDialog)
 {
     mUi->setupUi(this);
@@ -25,7 +26,9 @@ SAKInputCrcSettingsDialog::SAKInputCrcSettingsDialog(QWidget *parent)
 
     mParametersContext.bigEndianCRC = mBigEndianCheckBox->isChecked();
     mParametersContext.startByte = mStartSpinBox->value();
-    mParametersContext.endByte = mStartSpinBox->value();
+    mParametersContext.endByte = mEndSpinBox->value();
+
+    mIsInitializing = false;
 }
 
 SAKInputCrcSettingsDialog::~SAKInputCrcSettingsDialog()
@@ -44,12 +47,30 @@ SAKInputCrcSettingsDialog::ParameterContext SAKInputCrcSettingsDialog::parameter
     return ctx;
 }
 
+void SAKInputCrcSettingsDialog::setBigEndian(bool bigEndian)
+{
+    mBigEndianCheckBox->setChecked(bigEndian);
+    mParametersContext.bigEndianCRC = bigEndian;
+}
+
+void SAKInputCrcSettingsDialog::setStartByte(int startByte)
+{
+    mStartSpinBox->setValue(startByte > 0 ? startByte : 1);
+}
+
+void SAKInputCrcSettingsDialog::setEndByte(int endByte)
+{
+    mEndSpinBox->setValue(endByte > 0 ? endByte : 1);
+}
+
 void SAKInputCrcSettingsDialog::on_bigEndianCheckBox_clicked()
 {
     mParametersContextMutex.lock();
     mParametersContext.bigEndianCRC = mBigEndianCheckBox->isChecked();
     mParametersContextMutex.unlock();
-    emit parametersChanged();
+    if (!mIsInitializing){
+        emit parametersChanged();
+    }
 }
 
 void SAKInputCrcSettingsDialog::on_startSpinBox_valueChanged(int value)
@@ -57,7 +78,9 @@ void SAKInputCrcSettingsDialog::on_startSpinBox_valueChanged(int value)
     mParametersContextMutex.lock();
     mParametersContext.startByte = value;
     mParametersContextMutex.unlock();
-    emit parametersChanged();
+    if (!mIsInitializing){
+        emit parametersChanged();
+    }
 }
 
 void SAKInputCrcSettingsDialog::on_endSpinBox_valueChanged(int value)
@@ -65,5 +88,7 @@ void SAKInputCrcSettingsDialog::on_endSpinBox_valueChanged(int value)
     mParametersContextMutex.lock();
     mParametersContext.endByte = value;
     mParametersContextMutex.unlock();
-    emit parametersChanged();
+    if (!mIsInitializing){
+        emit parametersChanged();
+    }
 }

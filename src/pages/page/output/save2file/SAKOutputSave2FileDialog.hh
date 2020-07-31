@@ -21,6 +21,7 @@ namespace Ui {
     class SAKOutputSave2FileDialog;
 }
 
+class SAKDebugPage;
 class SAKOutputSave2FileThread;
 /// @brief saving parameters editing dialog
 class SAKOutputSave2FileDialog : public QDialog
@@ -34,7 +35,7 @@ public:
         bool saveTimestamp;
     };
 
-    SAKOutputSave2FileDialog(QSettings *settings = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
+    SAKOutputSave2FileDialog(SAKDebugPage *debugPage, QWidget *parent = Q_NULLPTR);
     ~SAKOutputSave2FileDialog();
 
     /**
@@ -52,11 +53,12 @@ private:
     QString mDefaultPath;
     SAKOutputSave2FileThread *mSaveOutputDataThread;
     QSettings *mSettings;
-    const QString mSettingsOutputPath;
-    const QString mSettingKeyReadData;
-    const QString mSettingKeyWrittenData;
-    const QString mSettingKeyTimestamp;
-    const QString mSettingKeyDataType;
+    SAKDebugPage *mDebugPage;
+    QString mSettingsOutputPath;
+    QString mSettingKeyReadData;
+    QString mSettingKeyWrittenData;
+    QString mSettingKeyTimestamp;
+    QString mSettingKeyDataType;
 private:
     ParametersContext parameters(ParametersContext::DataType type);
 signals:

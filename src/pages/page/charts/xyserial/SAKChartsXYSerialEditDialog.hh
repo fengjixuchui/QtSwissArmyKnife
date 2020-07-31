@@ -1,11 +1,11 @@
 ﻿/*
  * Copyright 2020 Qter(qsaker@qq.com). All rights reserved.
  *
- * The file is encoding with utf-8 (with BOM). It is a part of QtSwissArmyKnife
- * project(https://www.qsak.pro). The project is an open source project. You can
- * get the source of the project from: "https://github.com/qsak/QtSwissArmyKnife"
- * or "https://gitee.com/qsak/QtSwissArmyKnife". Also, you can join in the QQ
- * group which number is 952218522 to have a communication.
+ * The file is encoded using "utf8 with bom", it is a part
+ * of QtSwissArmyKnife project.
+ *
+ * QtSwissArmyKnife is licensed according to the terms in
+ * the file LICENCE in the root of the source code directory.
  */
 #ifndef SAKCHARTSXYSERIALEDITDIALOG_HH
 #define SAKCHARTSXYSERIALEDITDIALOG_HH
@@ -23,12 +23,11 @@ namespace Ui {
     class SAKChartsXYSerialEditDialog;
 };
 
-/// @brief 散点图及曲线图显示类
+/// @brief scatter and line serial
 class SAKChartsXYSerialEditDialog:public QDialog
 {
     Q_OBJECT
 public:
-    /// @brief 从数据帧中提取图表数据的参数上下文
     struct ParametersContext {
         struct ExtractParametersContext {
             enum DataType {
@@ -61,21 +60,21 @@ public:
     ~SAKChartsXYSerialEditDialog();
 
     /**
-     * @brief parameters 获取参数
-     * @return 参数
+     * @brief parameters: Get parameters
+     * @return parameters
      */
     ParametersContext parameters();
 
     /**
-     * @brief setParameters 设置参数上下文，调用该函数会更新ui显示
-     * @param ctx 参数上下文
+     * @brief setParameters: Set parameters
+     * @param ctx: Parameters
      */
     void setParameters(ParametersContext ctx);
 
     /**
-     * @brief lengthOfDataType 获取数据类型的字节长度
-     * @param type 数据类型：ParametersContext::ExtractParametersContext::DataType
-     * @return 数据类型字节长度
+     * @brief lengthOfDataType: Get the length of data type
+     * @param type: Data type
+     * @return The length of data type
      */
     int lengthOfDataType(int type);
 private:

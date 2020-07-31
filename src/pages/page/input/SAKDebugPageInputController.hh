@@ -17,6 +17,7 @@
 #include <QTextEdit>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QSettings>
 #include <QPushButton>
 #include <QListWidget>
 #include <QWaitCondition>
@@ -71,6 +72,7 @@ private:
     QLabel *mCrcLabel;
     QPushButton *mPresetPushButton;
     QPushButton *mSendPresetPushButton;
+    QPushButton *mCrcSettingsPushButton;
 
     QTimer mTimingTimer;
     SAKInputDataFactory *mInputDataFactory;
@@ -78,6 +80,16 @@ private:
     SAKCRCInterface *mCrcInterface;
     SAKInputDataPresetItemManager *mInputDataItemManager;
     SAKInputCrcSettingsDialog *mCrcSettingsDialog;
+
+    // variables about settings
+    QSettings *mSettings;
+    QString mSettingStringInputTextFromat;
+    QString mSettingStringCycleTime;
+    QString mSettingStringAddCRC;
+    QString mSettingStringBigEndian;
+    QString mSettingStringCrcParameterModel;
+    QString mSettingStringCrcStartByte;
+    QString mSettingStringCrcEndByte;
 private:
     void changeInputModel(const QString &text);
     void changeCycleEnableFlag();
@@ -99,6 +111,7 @@ private:
     void removeAction(SAKInputDataPresetItem *item);
     void changeDescription(SAKInputDataPresetItem *item);
     void actionTriggered();
+    void readinSettings();
 signals:
     void rawDataChanged(QString rawData, InputParametersContext parameters);
 };

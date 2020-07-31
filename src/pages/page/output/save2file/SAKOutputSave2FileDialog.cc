@@ -14,24 +14,20 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
+#include "SAKDebugPage.hh"
 #include "SAKOutputSave2FileThread.hh"
 #include "SAKOutputSave2FileDialog.hh"
 #include "ui_SAKOutputSave2FileDialog.h"
 
-SAKOutputSave2FileDialog::SAKOutputSave2FileDialog(QSettings *settings, QWidget *parent)
+SAKOutputSave2FileDialog::SAKOutputSave2FileDialog(SAKDebugPage *debugPage, QWidget *parent)
     :QDialog(parent)
-    ,mSettings(settings)
-    ,mSettingsOutputPath(QString("DebugPage/outputPath"))
-    ,mSettingKeyReadData(QString("DebugPage/readData"))
-    ,mSettingKeyWrittenData(QString("DebugPage/writtenData"))
-    ,mSettingKeyTimestamp(QString("DebugPage/saveTimestamp"))
-    ,mSettingKeyDataType(QString("DebugPage/dataType"))
+    ,mSettings(Q_NULLPTR)
+    ,mDebugPage(debugPage)
     ,mUi(new Ui::SAKOutputSave2FileDialog)
 {
+    // Initializing ui components
     mUi->setupUi(this);
     setModal(true);
-    // ParametersContext will be signal parameter, the step must be done, or will be error.
-    qRegisterMetaType<ParametersContext>("SaveOutputDataParamters");
 
     // Initailizing ui component pointer
     mPathLineEdit = mUi->pathLineEdit;
@@ -44,6 +40,18 @@ SAKOutputSave2FileDialog::SAKOutputSave2FileDialog(QSettings *settings, QWidget 
     mHexRadioButton = mUi->hexRadioButton;
     mOkPushButton = mUi->okPushButton;
     mTruncatePushButton = mUi->truncatePushButton;
+
+    // Initializing variables about settings
+    QString groupString = mDebugPage->settingsGroup();
+    mSettingsOutputPath = QString("%1/outputPath").arg(groupString);
+    mSettingKeyReadData = QString("%1/readData").arg(groupString);
+    mSettingKeyWrittenData = QString("%1/writtenData").arg(groupString);
+    mSettingKeyTimestamp = QString("%1/saveTimestamp").arg(groupString);
+    mSettingKeyDataType = QString("%1/dataType").arg(groupString);
+    mSettings = mDebugPage->settings();
+
+    // ParametersContext will be signal parameter, the step must be done, or will be error.
+    qRegisterMetaType<ParametersContext>("SaveOutputDataParamters");
 
     // The task of thread is that writting data to file.
     mSaveOutputDataThread = new SAKOutputSave2FileThread(this);

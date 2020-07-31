@@ -7,8 +7,8 @@
  * QtSwissArmyKnife is licensed according to the terms in
  * the file LICENCE in the root of the source code directory.
  */
-#ifndef SAKTABPAGE_HH
-#define SAKTABPAGE_HH
+#ifndef SAKDEBUGPAGE_HH
+#define SAKDEBUGPAGE_HH
 
 #include <QSize>
 #include <QTimer>
@@ -21,6 +21,7 @@
 #include <QDateTime>
 #include <QMetaEnum>
 #include <QTextEdit>
+#include <QSettings>
 #include <QListWidget>
 #include <QGridLayout>
 #include <QPushButton>
@@ -31,7 +32,6 @@
 class SAKDataFactory;
 class SAKCRCInterface;
 class SAKDebugPageDevice;
-class SAKOtherTransmissionPageViewer;
 class SAKOtherHighlighterManager;
 class SAKDebugPageOtherController;
 class SAKDebugPageInputController;
@@ -39,6 +39,7 @@ class SAKDebugPageOutputController;
 #ifdef SAK_IMPORT_CHARTS_MODULE
 class SAKDebugPageChartsController;
 #endif
+class SAKOtherTransmissionPageViewer;
 class SAKDebugPageStatisticsController;
 
 namespace Ui {
@@ -86,6 +87,19 @@ public:
     quint32 pageType();
 
     /**
+     * @brief settingsInstance: Get the settings instance
+     * @return Settings instance
+     */
+    QSettings *settings();
+
+    /**
+     * @brief settingsGroup: Get the settings group
+     * @param pageType: The type of debug page
+     * @return Settings group
+     */
+    QString settingsGroup();
+
+    /**
      * @brief otherController: Get SAKDebugPageOtherController instance pointer
      * @return SAKDebugPageOtherController instance pointer
      */
@@ -120,35 +134,35 @@ protected:
     /**
      * @brief refreshDevice: Refresh system device
      */
-    virtual void refreshDevice();
+    virtual void refreshDevice() = 0;
 
     /**
      * @brief controllerWidget: Get device control widget
      * @return Device control widget
      */
-    virtual QWidget *controllerWidget();
+    virtual QWidget *controllerWidget() = 0;
 
     /**
      * @brief createDevice: Create the device instance
      * @return Device instance pointer
      */
-    virtual SAKDebugPageDevice* createDevice();
+    virtual SAKDebugPageDevice* createDevice() = 0;
 
     /**
      * @brief setUiEnable: Set some components enable or disable
      * @param ebable: true-enable ui components, false-disable ui components
      */
-    virtual void setUiEnable(bool ebable);
+    virtual void setUiEnable(bool ebable) = 0;
 
     /**
-     * @brief initPage: Initializing,
+     * @brief initializingPage: Initializing,
      * the function must be called in the constructor of child class
      */
-    void initPage();
+    void initializingPage();
 private:
     SAKDebugPageDevice *mDevice;
     bool mIsInitializing;
-    int mDebugPageType = -1;
+    int mDebugPageType;
     QString mSettingKey;
     QTimer mClearInfoTimer;
     QMutex mReadWriteParametersMutex;
@@ -162,39 +176,21 @@ private:
     SAKDebugPageOutputController *mOutputController;
     SAKDebugPageStatisticsController *mStatisticsController;
 private:
-    void initSettingKey();
-    /// @brief 初始化配置选项名称
-    void initSettingString();
-    void initInputSettingString();
-    void initOutputSettingString();
-
-    /// @brief 从配置文件中读入配置选项
-    void readinSettings();
-    void readinInputSettings();
-    void readinOutputSettings();
-
-    /// @brief 清空ui消息显示
     void cleanInfo();
 
-    /// @brief 打开或者关闭设备
     void openOrColoseDevice();
     void closeDevice();
     void openDevice();
 
-    /// 初始化与设备有关的信号关联
     void setupDevice();
-    /// @brief 安装设备控制面板
     void setupController();
-    /// @brief 更改设备状态
     void changedDeviceState(bool opened);
 signals:
     // Emit the read data
     void bytesRead(QByteArray data);
     // Emit the written data
     void bytesWritten(QByteArray data);
-    /// 子类关联该信号来发送数据即可
     void requestWriteData(QByteArray data);
-    /// 请求处理输出
     void requestWriteRawData(QString data, int textFormat);
 
     // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
@@ -203,7 +199,7 @@ private:
     Ui::SAKDebugPage *mUi;
 private:
     // All variable about ui will be initialize in the function
-    void initUiPointer();
+    void initializingVariables();
 
     /*************************************************************************/
     // Device control module
@@ -236,18 +232,6 @@ protected:
     QPushButton *mPresetPushButton;
     QPushButton *mSendPresetPushButton;
 
-    QString mSettingStringInputModel;
-    QString mSettingStringCycleTime;
-    QString mSettingStringAddCRC;
-    QString mSettingStringBigeEndian;
-    QString mSettingStringcrcParameterModel;
-private slots:
-    void on_inputModelComboBox_currentIndexChanged(int index);
-    void on_cycleTimeLineEdit_textChanged(const QString &text);
-    void on_addCRCCheckBox_clicked();
-    void on_crcSettingsPushButton_clicked();
-    void on_crcParameterModelsComboBox_currentIndexChanged(int index);
-
     /*************************************************************************/
     // Message output module
 protected:
@@ -270,22 +254,6 @@ protected:
     QPushButton *mClearOutputPushButton;
     QPushButton *mSaveOutputPushButton;
     QTextBrowser *mOutputTextBroswer;
-
-    QString mSettingStringOutputTextFormat;
-    QString mSettingStringShowDate;
-    QString mSettingStringAutoWrap;
-    QString mSettingStringShowTime;
-    QString mSettingStringShowMs;
-    QString mSettingStringShowRx;
-    QString mSettingStringShowTx;
-private slots:
-    void on_outputTextFormatComboBox_currentIndexChanged(int index);
-    void on_showDateCheckBox_clicked();
-    void on_autoWrapCheckBox_clicked();
-    void on_showTimeCheckBox_clicked();
-    void on_showMsCheckBox_clicked();
-    void on_showRxDataCheckBox_clicked();
-    void on_showTxDataCheckBox_clicked();
 
     /*************************************************************************/
     // Data statistics module
