@@ -56,7 +56,6 @@ void SAKSerialPortDevice::run()
             }
 
             /// @brief 读取数据
-//            serialPort->waitForReadyRead(debugPage->readWriteParameters().waitForReadyReadTime);
             QByteArray bytes = serialPort->readAll();
             if (bytes.length()){
                 emit bytesRead(bytes);
@@ -67,9 +66,8 @@ void SAKSerialPortDevice::run()
                 QByteArray var = takeWaitingForWrittingBytes();
                 if (var.length()){
                     qint64 ret = serialPort->write(var);
-//                    serialPort->waitForBytesWritten(debugPage->readWriteParameters().waitForBytesWrittenTime);
                     if (ret == -1){
-                        emit messageChanged(tr("串口发送数据失败：") + serialPort->errorString(), false);
+                        emit messageChanged(tr("Send data error: ") + serialPort->errorString(), false);
                     }else{
                         emit bytesWritten(var);
                     }
@@ -95,7 +93,7 @@ void SAKSerialPortDevice::run()
         emit deviceStateChanged(false);
     }else{        
         emit deviceStateChanged(false);
-        emit messageChanged(tr("串口打开失败：") + serialPort->errorString(), false);
+        emit messageChanged(tr("Open com error") + serialPort->errorString(), false);
         return;
     }
 }

@@ -8,6 +8,7 @@
  * the file LICENCE in the root of the source code directory.
  */
 #include <QDir>
+#include <QMap>
 #include <QFile>
 #include <QDebug>
 #include <QMetaEnum>
@@ -16,11 +17,14 @@
 #endif
 #include <QHostAddress>
 #include <QApplication>
+#include <QMapIterator>
+#include <QStandardItem>
 #include <QStandardPaths>
 #ifdef SAK_IMPORT_COM_MODULE
 #include <QSerialPortInfo>
 #endif
 #include <QNetworkInterface>
+#include <QStandardItemModel>
 
 #include "SAKGlobal.hh"
 #include "SAKDataStruct.hh"
@@ -85,52 +89,52 @@ QString SAKGlobal::debugPageNameFromType(int type)
 {
     QString name;
     switch (type) {
-    case SAKDataStruct::DebugPageTypeUDP:
-        name = tr("UDP调试");
+    case SAKDataStruct::DebugPageTypeUdpClient:
+        name = tr("UDP client");
         break;
     case SAKDataStruct::DebugPageTypeTCPClient:
-        name = tr("TCP客户端");
+        name = tr("TCP client");
         break;
     case SAKDataStruct::DebugPageTypeTCPServer:
-        name = tr("TCP服务器");
+        name = tr("TCP server");
         break;
 #ifdef SAK_IMPORT_SCTP_MODULE
     case SAKDataStruct::DebugPageTypeSCTPClient:
-        name = tr("SCTP客户端");
+        name = tr("SCTP client");
         break;
     case SAKDataStruct::DebugPageTypeSCTPServer:
-        name = tr("SCTP服务器");
+        name = tr("SCTP server");
         break;
 #endif
 #ifdef SAK_IMPORT_WEBSOCKET_MODULE
     case SAKDataStruct::DebugPageTypeWebSocketClient:
-        name = tr("WebSocket客户端");
+        name = tr("WebSocket client");
         break;
     case SAKDataStruct::DebugPageTypeWebSocketServer:
-        name = tr("WebSocket服务器");
+        name = tr("WebSocket server");
         break;
 #endif
 #ifdef SAK_IMPORT_COM_MODULE
     case SAKDataStruct::DebugPageTypeCOM:
-        name = tr("串口调试");
+        name = tr("COM debugger");
         break;
 #endif
 #ifdef SAK_IMPORT_HID_MODULE
     case SAKDataStruct::DebugPageTypeHID:
-        name = tr("HID调试");
+        name = tr("HID debugger");
         break;
 #endif
 #ifdef SAK_IMPORT_USB_MODULE
     case SAKDataStruct::DebugPageTypeUSB:
-        name = tr("USB调试");
+        name = tr("USB debugger");
         break;
 #endif
 #ifdef SAK_IMPORT_BLUETOOTH_MODULE
     case SAKDataStruct::DebugPageTypeBluetoothClient:
-        name = tr("蓝牙客户端");
+        name = tr("Bluetooth client");
         break;
     case SAKDataStruct::DebugPageTypeBluetoothServer:
-        name = tr("蓝牙服务器");
+        name = tr("Bluetooth server");
         break;
 #endif
     default:
@@ -148,15 +152,15 @@ QString SAKGlobal::toolNameFromType(int type)
     switch (type) {
 #ifdef SAK_IMPORT_FILECHECKER_MODULE
     case SAKDataStruct::ToolTypeFileChecker:
-        name = QString("文件校验器");
+        name = QString("File checker");
         break;
 #endif
     case SAKDataStruct::ToolTypeCRCCalculator:
-        name = QString("CRC计算器");
+        name = QString("CRC calculator");
         break;
 #ifdef SAK_IMPORT_QRCODE_MODULE
     case SAKDataStruct::ToolTypeQRCodeCreator:
-        name = QString("二维码生成器");
+        name = QString("QR code creator");
         break;
 #endif
     }
@@ -224,11 +228,11 @@ void SAKGlobal::initParityComboBox(QComboBox *comboBox)
 {
     if (comboBox){
         comboBox->clear();
-        comboBox->addItem(tr("无"), QVariant::fromValue(QSerialPort::NoParity));
-        comboBox->addItem(tr("偶校验"), QVariant::fromValue(QSerialPort::EvenParity));
-        comboBox->addItem(tr("奇校验"), QVariant::fromValue(QSerialPort::OddParity));
-        comboBox->addItem(tr("空格检验"), QVariant::fromValue(QSerialPort::SpaceParity));
-        comboBox->addItem(tr("标记校验"), QVariant::fromValue(QSerialPort::MarkParity));
+        comboBox->addItem(tr("No"), QVariant::fromValue(QSerialPort::NoParity));
+        comboBox->addItem(tr("Even"), QVariant::fromValue(QSerialPort::EvenParity));
+        comboBox->addItem(tr("Odd"), QVariant::fromValue(QSerialPort::OddParity));
+        comboBox->addItem(tr("Space"), QVariant::fromValue(QSerialPort::SpaceParity));
+        comboBox->addItem(tr("Mark"), QVariant::fromValue(QSerialPort::MarkParity));
     }
 }
 #endif
@@ -238,9 +242,9 @@ void SAKGlobal::initFlowControlComboBox(QComboBox *comboBox)
 {
     if (comboBox){
         comboBox->clear();
-        comboBox->addItem(tr("无"), QVariant::fromValue(QSerialPort::NoFlowControl));
-        comboBox->addItem(tr("硬件流控"), QVariant::fromValue(QSerialPort::HardwareControl));
-        comboBox->addItem(tr("软件流控"), QVariant::fromValue(QSerialPort::SoftwareControl));
+        comboBox->addItem(tr("No"), QVariant::fromValue(QSerialPort::NoFlowControl));
+        comboBox->addItem(tr("Hardware"), QVariant::fromValue(QSerialPort::HardwareControl));
+        comboBox->addItem(tr("Software"), QVariant::fromValue(QSerialPort::SoftwareControl));
     }
 }
 #endif
@@ -277,30 +281,55 @@ void SAKGlobal::initInputTextFormatComboBox(QComboBox *comboBox)
     if (comboBox){
         comboBox->clear();
 
-        comboBox->addItem(tr("二进制"), SAKDataStruct::InputFormatBin);
-        comboBox->addItem(tr("八进制"), SAKDataStruct::InputFormatOct);
-        comboBox->addItem(tr("十进制"), SAKDataStruct::InputFormatDec);
-        comboBox->addItem(tr("十六进制"), SAKDataStruct::InputFormatHex);
-        comboBox->addItem(QString("ASCII"), SAKDataStruct::InputFormatAscii);
-        comboBox->addItem(QString("UTF8"), SAKDataStruct::InputFormatUtf8);
-        comboBox->addItem(tr("系统编码"), SAKDataStruct::InputFormatLocal);
+        QMap<int, QString> formatMap;
+        formatMap.insert(SAKDataStruct::InputFormatBin, tr("BIN"));
+        formatMap.insert(SAKDataStruct::InputFormatOct, tr("DEC"));
+        formatMap.insert(SAKDataStruct::InputFormatDec, tr("HEX"));
+        formatMap.insert(SAKDataStruct::InputFormatHex, tr("ASCII"));
+        formatMap.insert(SAKDataStruct::InputFormatAscii, tr("UTF8"));
+        formatMap.insert(SAKDataStruct::InputFormatUtf8, tr("UTF16"));
+        formatMap.insert(SAKDataStruct::InputFormatLocal, tr("SYSTEM"));
 
-        comboBox->setCurrentIndex(4);
+        QMapIterator<int, QString> mapIterator(formatMap);
+        QStandardItemModel *itemModel = new QStandardItemModel(comboBox);
+        while (mapIterator.hasNext()) {
+            mapIterator.next();
+            QStandardItem *item = new QStandardItem(mapIterator.value());
+            item->setToolTip(mapIterator.value());
+            itemModel->appendRow(item);
+        }
+        comboBox->setModel(itemModel);
+        comboBox->setCurrentText(formatMap.value(SAKDataStruct::InputFormatLocal));
     }
 }
 
 void SAKGlobal::initOutputTextFormatComboBox(QComboBox *comboBox)
 {
-    comboBox->addItem(tr("二进制"), SAKDataStruct::OutputFormatBin);
-    comboBox->addItem(tr("八进制"), SAKDataStruct::OutputFormatOct);
-    comboBox->addItem(tr("十进制"), SAKDataStruct::OutputFormatDec);
-    comboBox->addItem(tr("十六进制"), SAKDataStruct::OutputFormatHex);
-    comboBox->addItem(QString("ASCII"), SAKDataStruct::OutputFormatAscii);
-    comboBox->addItem(QString("UTF8"), SAKDataStruct::OutputFormatUtf8);
-    comboBox->addItem(QString("UTF16"), SAKDataStruct::OutputFormatUtf16);
-    comboBox->addItem(QString("UCS4"), SAKDataStruct::OutputFormatUcs4);
-    comboBox->addItem(tr("宽字符"), SAKDataStruct::OutputFormatStdwstring);
-    comboBox->addItem(tr("系统编码"), SAKDataStruct::OutputFormatLocal);
+    if (comboBox){
+        comboBox->clear();
+
+        QMap<int, QString> formatMap;
+        formatMap.insert(SAKDataStruct::OutputFormatBin, tr("BIN"));
+        formatMap.insert(SAKDataStruct::OutputFormatDec, tr("DEC"));
+        formatMap.insert(SAKDataStruct::OutputFormatHex, tr("HEX"));
+        formatMap.insert(SAKDataStruct::OutputFormatAscii, tr("ASCII"));
+        formatMap.insert(SAKDataStruct::OutputFormatUtf8, tr("UTF8"));
+        formatMap.insert(SAKDataStruct::OutputFormatUtf16, tr("UTF16"));
+        formatMap.insert(SAKDataStruct::OutputFormatUcs4, tr("UCS4"));
+        formatMap.insert(SAKDataStruct::OutputFormatStdwstring, tr("WChart"));
+        formatMap.insert(SAKDataStruct::OutputFormatLocal, tr("SYSTEM"));
+
+        QMapIterator<int, QString> mapIterator(formatMap);
+        QStandardItemModel *itemModel = new QStandardItemModel(comboBox);
+        while (mapIterator.hasNext()) {
+            mapIterator.next();
+            QStandardItem *item = new QStandardItem(mapIterator.value());
+            item->setToolTip(mapIterator.value());
+            itemModel->appendRow(item);
+        }
+        comboBox->setModel(itemModel);
+        comboBox->setCurrentText(formatMap.value(SAKDataStruct::OutputFormatHex));
+    }
 }
 
 void SAKGlobal::initCRCComboBox(QComboBox *comboBox)
@@ -308,16 +337,23 @@ void SAKGlobal::initCRCComboBox(QComboBox *comboBox)
     if (comboBox){
         comboBox->clear();
         QMetaEnum enums = QMetaEnum::fromType<SAKCRCInterface::CRCModel>();
+        QStandardItemModel *itemModel = new QStandardItemModel(comboBox);
         for (int i = 0; i < enums.keyCount(); i++){
-            comboBox->addItem(QString(enums.key(i)), QVariant::fromValue(enums.value(i)));
+            const QString key = enums.key(i);
+            // There may be a bug, I do not know whether will the itemModel take ownership of the item
+            // if not, a memory leak will occur after comboBox is destroyed.
+            QStandardItem *item = new QStandardItem(key);
+            item->setToolTip(key);
+            itemModel->appendRow(item);
         }
+        comboBox->setModel(itemModel);
     }
 }
 
 void SAKGlobal::initWebSocketSendingTypeComboBox(QComboBox *comboBox)
 {
     if (comboBox){
-        comboBox->addItem(tr("文本发送方式"), SAKDataStruct::WebSocketSendingTypeText);
-        comboBox->addItem(tr("二进制发送方式"), SAKDataStruct::WebSocketSendingTypeBin);
+        comboBox->addItem(tr("BIN"), SAKDataStruct::WebSocketSendingTypeBin);
+        comboBox->addItem(tr("TEXT"), SAKDataStruct::WebSocketSendingTypeText);
     }
 }
