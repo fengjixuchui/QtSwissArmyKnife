@@ -32,16 +32,18 @@ public:
 
     /// @brief 支持调试的设备类型
     enum SAKEnumDebugPageType {
+        DebugPageTypeTest,
 #ifdef SAK_IMPORT_COM_MODULE
         DebugPageTypeCOM,
 #endif
 #ifdef SAK_IMPORT_HID_MODULE
         DebugPageTypeHID,
 #endif
-        DebugPageTypeUdpClient,
 #ifdef SAK_IMPORT_USB_MODULE
         DebugPageTypeUSB,
 #endif
+        DebugPageTypeUdpClient,
+        DebugPageTypeUdpServer,
         DebugPageTypeTCPClient,
         DebugPageTypeTCPServer,
 #ifdef SAK_IMPORT_SCTP_MODULE

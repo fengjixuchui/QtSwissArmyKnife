@@ -7,8 +7,8 @@
  * QtSwissArmyKnife is licensed according to the terms in
  * the file LICENCE in the root of the source code directory.
  */
-#ifndef SAKTABPAGESERIALPORTASSISTANT_HH
-#define SAKTABPAGESERIALPORTASSISTANT_HH
+#ifndef SAKSERIALPORTDEBUGPAGE_HH
+#define SAKSERIALPORTDEBUGPAGE_HH
 
 #include "SAKDebugPage.hh"
 
@@ -21,8 +21,8 @@ public:
     ~SAKSerialPortDebugPage();
 
     /**
-     * @brief controllerInstance 获取设备控制面板实例
-     * @return 设备控制面板实例
+     * @brief controllerInstance: Get the controller instance
+     * @return Controller instance
      */
     SAKSerialPortDeviceController *controllerInstance();
 protected:

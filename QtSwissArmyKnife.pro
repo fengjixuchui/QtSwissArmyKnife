@@ -35,7 +35,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 CONFIG += c++11
 
-# 子项目
+#Sub project
 #include(SAKHID.pri)
 #include(SAKUSB.pri)
 #include(SAKSCTP.pri)
@@ -67,14 +67,14 @@ win32 {
 }
 
 #--------------------------------------------------------------------------------------------
-#编译目录配置
+#Output directory
 UI_DIR      = $$OUT_PWD/ui
 MOC_DIR     = $$OUT_PWD/moc
 RCC_DIR     = $$OUT_PWD/res
 OBJECTS_DIR = $$OUT_PWD/obj
 
 #--------------------------------------------------------------------------------------------
-#Windows配置
+#Configuration of Windows
 win32 {
     RC_ICONS = Windows.ico
     msvc:{
@@ -83,7 +83,7 @@ win32 {
 }
 
 #--------------------------------------------------------------------------------------------
-#国际化文件
+#I18N
 TRANSLATIONS  += \
     translations/sak/SAK_en.ts \
     translations/sak/SAK_zh_CN.ts \
@@ -108,8 +108,8 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
 
 INCLUDEPATH += \
     src \
-    src/moreinfo \
     src/common \
+    src/mainwindow \
     src/pages \
     src/pages/page \
     src/pages/page/common \
@@ -130,15 +130,18 @@ INCLUDEPATH += \
     src/pages/page/statistics \
     src/pages/tcp/client \
     src/pages/tcp/server \
-    src/pages/udp \
-    src/qrcode \
-    src/startui \
+    src/pages/test \
+    src/pages/udp/client \
+    src/pages/udp/server \
+    src/splashscreen \
     src/singleton \
     src/update
 
 FORMS += \
-    src/SAKMainWindow.ui \
-    src/moreinfo/SAKMoreInformation.ui \
+    src/mainwindow/SAKMainWindow.ui \
+    src/mainwindow/SAKMainWindowMoreInformationDialog.ui \
+    src/mainwindow/SAKMainWindowQrCodeView.ui \
+    src/mainwindow/SAKMainWindowTabPageNameEditDialog.ui \
     src/pages/page/SAKDebugPage.ui \
     src/pages/page/input/crcsettings/SAKInputCrcSettingsDialog.ui \
     src/pages/page/input/datapreset/SAKInputDataPresetItem.ui \
@@ -157,10 +160,11 @@ FORMS += \
     src/pages/page/output/save2file/SAKOutputSave2FileDialog.ui \
     src/pages/tcp/client/SAKTcpClientDeviceController.ui \
     src/pages/tcp/server/SAKTcpServerDeviceController.ui \
-    src/pages/udp/SAKUdpAdvanceSettingWidget.ui \
-    src/pages/udp/SAKUdpDeviceController.ui \
-    src/pages/udp/SAKUdpMulticastEditingDialog.ui \
-    src/qrcode/SAKQRCodeDialog.ui \
+    src/pages/test/SAKTestDeviceController.ui \
+    src/pages/udp/client/SAKUdpClientAdvanceSettingWidget.ui \
+    src/pages/udp/client/SAKUdpClientDeviceController.ui \
+    src/pages/udp/client/SAKUdpClientMulticastEditingDialog.ui \
+    src/pages/udp/server/SAKUdpServerDeviceController.ui \
     src/singleton/SAKSingletonErrorDialog.ui \
     src/update/SAKDownloadItemWidget.ui \
     src/update/SAKUpdateManager.ui
@@ -169,10 +173,14 @@ HEADERS += \
     src/SAK.hh \
     src/SAKApplication.hh \
     src/SAKGlobal.hh \
-    src/SAKMainWindow.hh \
+    src/SAKSqlDatabase.hh \
+    src/mainwindow/SAKMainWindow.hh \
     src/SAKSettings.hh \
     src/common/SAKInterface.hh \
-    src/moreinfo/SAKMoreInformation.hh \
+    src/mainwindow/SAKMainWindowMoreInformationDialog.hh \
+    src/mainwindow/SAKMainWindowQrCode.hh \
+    src/mainwindow/SAKMainWindowQrCodeView.hh \
+    src/mainwindow/SAKMainWindowTabPageNameEditDialog.hh \
     src/pages/page/SAKDebugPage.hh \
     src/pages/page/common/SAKDebugPageCommonDatabaseInterface.hh \
     src/pages/page/device/SAKDebugPageDevice.hh \
@@ -208,16 +216,20 @@ HEADERS += \
     src/pages/tcp/server/SAKTcpServerDebugPage.hh \
     src/pages/tcp/server/SAKTcpServerDevice.hh \
     src/pages/tcp/server/SAKTcpServerDeviceController.hh \
-    src/pages/udp/SAKUdpAdvanceSettingWidget.hh \
-    src/pages/udp/SAKUdpDebugPage.hh \
-    src/pages/udp/SAKUdpDevice.hh \
-    src/pages/udp/SAKUdpDeviceController.hh \
-    src/pages/udp/SAKUdpMulticastEditingDialog.hh \
-    src/qrcode/SAKQRCodeDialog.hh \
-    src/qrcode/SAKQRCodeWidget.hh \
+    src/pages/test/SAKTestDebugPage.hh \
+    src/pages/test/SAKTestDevice.hh \
+    src/pages/test/SAKTestDeviceController.hh \
+    src/pages/udp/client/SAKUdpClientAdvanceSettingWidget.hh \
+    src/pages/udp/client/SAKUdpClientDebugPage.hh \
+    src/pages/udp/client/SAKUdpClientDevice.hh \
+    src/pages/udp/client/SAKUdpClientDeviceController.hh \
+    src/pages/udp/client/SAKUdpClientMulticastEditingDialog.hh \
+    src/pages/udp/server/SAKUdpServerDebugPage.hh \
+    src/pages/udp/server/SAKUdpServerDevice.hh \
+    src/pages/udp/server/SAKUdpServerDeviceController.hh \
     src/singleton/SAKSingletonController.hh \
     src/singleton/SAKSingletonErrorDialog.hh \
-    src/startui/SAKSplashScreen.hh \
+    src/splashscreen/SAKSplashScreen.hh \
     src/update/SAKDownloadItemWidget.hh \
     src/update/SAKUpdateManager.hh
 
@@ -225,10 +237,14 @@ SOURCES += \
     src/SAK.cc \
     src/SAKApplication.cc \
     src/SAKGlobal.cc \
-    src/SAKMainWindow.cc \
+    src/SAKSqlDatabase.cc \
+    src/mainwindow/SAKMainWindow.cc \
     src/SAKSettings.cc \
     src/common/SAKInterface.cc \
-    src/moreinfo/SAKMoreInformation.cc \
+    src/mainwindow/SAKMainWindowMoreInformationDialog.cc \
+    src/mainwindow/SAKMainWindowQrCode.cc \
+    src/mainwindow/SAKMainWindowQrCodeView.cc \
+    src/mainwindow/SAKMainWindowTabPageNameEditDialog.cc \
     src/pages/page/SAKDebugPage.cc \
     src/pages/page/common/SAKDebugPageCommonDatabaseInterface.cc \
     src/pages/page/device/SAKDebugPageDevice.cc \
@@ -265,15 +281,19 @@ SOURCES += \
     src/pages/tcp/server/SAKTcpServerDebugPage.cc \
     src/pages/tcp/server/SAKTcpServerDevice.cc \
     src/pages/tcp/server/SAKTcpServerDeviceController.cc \
-    src/pages/udp/SAKUdpAdvanceSettingWidget.cc \
-    src/pages/udp/SAKUdpDebugPage.cc \
-    src/pages/udp/SAKUdpDevice.cc \
-    src/pages/udp/SAKUdpDeviceController.cc \
-    src/pages/udp/SAKUdpMulticastEditingDialog.cc \
-    src/qrcode/SAKQRCodeDialog.cc \
-    src/qrcode/SAKQRCodeWidget.cc \
+    src/pages/test/SAKTestDebugPage.cc \
+    src/pages/test/SAKTestDevice.cc \
+    src/pages/test/SAKTestDeviceController.cc \
+    src/pages/udp/client/SAKUdpClientAdvanceSettingWidget.cc \
+    src/pages/udp/client/SAKUdpClientDebugPage.cc \
+    src/pages/udp/client/SAKUdpClientDevice.cc \
+    src/pages/udp/client/SAKUdpClientDeviceController.cc \
+    src/pages/udp/client/SAKUdpClientMulticastEditingDialog.cc \
+    src/pages/udp/server/SAKUdpServerDebugPage.cc \
+    src/pages/udp/server/SAKUdpServerDevice.cc \
+    src/pages/udp/server/SAKUdpServerDeviceController.cc \
     src/singleton/SAKSingletonController.cc \
     src/singleton/SAKSingletonErrorDialog.cc \
-    src/startui/SAKSplashScreen.cc \
+    src/splashscreen/SAKSplashScreen.cc \
     src/update/SAKDownloadItemWidget.cc \
     src/update/SAKUpdateManager.cc

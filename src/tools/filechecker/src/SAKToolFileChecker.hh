@@ -20,48 +20,44 @@
 #include <QProgressBar>
 #include <QCryptographicHash>
 
-#include "SAKToolBase.hh"
-
 namespace Ui {
     class SAKToolFileChecker;
 }
 
 class QtCryptographicHashCalculator;
-class SAKToolFileChecker : public SAKToolBase
+class SAKToolFileChecker : public QWidget
 {
     Q_OBJECT
 public:
     SAKToolFileChecker(QWidget *parent = Q_NULLPTR);
+    ~SAKToolFileChecker();
 
     void setUiEnable(bool enable);
-    QString fileName(){return _fileName;}
-    QCryptographicHash::Algorithm algorithm(){return _algorithm;}
+    QString fileName();
+    QCryptographicHash::Algorithm algorithm();
     void updateResult(QByteArray result);
     void outputMessage(QString msg, bool isErrMsg = false);
     void updateProgressBar(int currentValue);
     void changeRemainTime(QString remainTime);
 private:
-    Ui::SAKToolFileChecker *ui;
-    QString _fileName = QString("E:/ISO/Linux/Debian/debian-live-9.9.0-amd64-kde.iso");
-    QCryptographicHash::Algorithm _algorithm = QCryptographicHash::Md5;
-    QtCryptographicHashCalculator *calculator;
-    QTimer clearMessageTimer;
-    // ------------------------------------------------------------------------
     void finished();
     void clearMessage();
 private:
-    /*
-     * ui控件指针
-     */
-    QLineEdit       *filePathlineEdit;
-    QComboBox       *algorithmComboBox;
-    QLineEdit       *resultLineEdit;
-    QProgressBar    *calculatorProgressBar;
-    QPushButton     *openPushButton;
-    QPushButton     *startStopPushButton;
-    QCheckBox       *upperCheckBox;
-    QLabel          *messageLabel;
-    QLabel          *remainTimeLabel;
+    QString mFileName;
+    QCryptographicHash::Algorithm mAlgorithm;
+    QtCryptographicHashCalculator *mCalculator;
+    QTimer mClearMessageTimer;
+private:
+    Ui::SAKToolFileChecker *mUi;
+    QLineEdit *mFilePathlineEdit;
+    QComboBox *mAlgorithmComboBox;
+    QLineEdit *mResultLineEdit;
+    QProgressBar *mCalculatorProgressBar;
+    QPushButton *mOpenPushButton;
+    QPushButton *mStartStopPushButton;
+    QCheckBox *mUpperCheckBox;
+    QLabel *mMessageLabel;
+    QLabel *mRemainTimeLabel;
 private slots:
     void on_openPushButton_clicked();
     void on_algorithmComboBox_currentIndexChanged(int index);

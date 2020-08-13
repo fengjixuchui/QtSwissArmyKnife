@@ -57,7 +57,7 @@ QString SAKGlobal::logFile()
 QString SAKGlobal::dataPath()
 {
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    path.insert(path.lastIndexOf("/"),  QString("/Qter"));
+//    path.insert(path.lastIndexOf("/"),  QString("/Qter"));
 
     QDir dir;
     if (!dir.exists(path)){
@@ -89,52 +89,58 @@ QString SAKGlobal::debugPageNameFromType(int type)
 {
     QString name;
     switch (type) {
-    case SAKDataStruct::DebugPageTypeUdpClient:
-        name = tr("UDP client");
+    case SAKDataStruct::DebugPageTypeTest:
+        name = tr("Test");
         break;
-    case SAKDataStruct::DebugPageTypeTCPClient:
-        name = tr("TCP client");
-        break;
-    case SAKDataStruct::DebugPageTypeTCPServer:
-        name = tr("TCP server");
-        break;
-#ifdef SAK_IMPORT_SCTP_MODULE
-    case SAKDataStruct::DebugPageTypeSCTPClient:
-        name = tr("SCTP client");
-        break;
-    case SAKDataStruct::DebugPageTypeSCTPServer:
-        name = tr("SCTP server");
-        break;
-#endif
-#ifdef SAK_IMPORT_WEBSOCKET_MODULE
-    case SAKDataStruct::DebugPageTypeWebSocketClient:
-        name = tr("WebSocket client");
-        break;
-    case SAKDataStruct::DebugPageTypeWebSocketServer:
-        name = tr("WebSocket server");
-        break;
-#endif
 #ifdef SAK_IMPORT_COM_MODULE
     case SAKDataStruct::DebugPageTypeCOM:
-        name = tr("COM debugger");
+        name = tr("COM");
         break;
 #endif
 #ifdef SAK_IMPORT_HID_MODULE
     case SAKDataStruct::DebugPageTypeHID:
-        name = tr("HID debugger");
+        name = tr("HID");
         break;
 #endif
 #ifdef SAK_IMPORT_USB_MODULE
     case SAKDataStruct::DebugPageTypeUSB:
-        name = tr("USB debugger");
+        name = tr("USB");
+        break;
+#endif
+    case SAKDataStruct::DebugPageTypeUdpClient:
+        name = tr("UDP-C");
+        break;
+    case SAKDataStruct::DebugPageTypeUdpServer:
+        name = tr("UDP-S");
+        break;
+    case SAKDataStruct::DebugPageTypeTCPClient:
+        name = tr("TCP-C");
+        break;
+    case SAKDataStruct::DebugPageTypeTCPServer:
+        name = tr("TCP-S");
+        break;
+#ifdef SAK_IMPORT_SCTP_MODULE
+    case SAKDataStruct::DebugPageTypeSCTPClient:
+        name = tr("SCTP-C");
+        break;
+    case SAKDataStruct::DebugPageTypeSCTPServer:
+        name = tr("SCTP-S");
         break;
 #endif
 #ifdef SAK_IMPORT_BLUETOOTH_MODULE
     case SAKDataStruct::DebugPageTypeBluetoothClient:
-        name = tr("Bluetooth client");
+        name = tr("Bluetooth-C");
         break;
     case SAKDataStruct::DebugPageTypeBluetoothServer:
-        name = tr("Bluetooth server");
+        name = tr("Bluetooth-S");
+        break;
+#endif
+#ifdef SAK_IMPORT_WEBSOCKET_MODULE
+    case SAKDataStruct::DebugPageTypeWebSocketClient:
+        name = tr("WS-C");
+        break;
+    case SAKDataStruct::DebugPageTypeWebSocketServer:
+        name = tr("WS-S");
         break;
 #endif
     default:
@@ -300,6 +306,19 @@ void SAKGlobal::initInputTextFormatComboBox(QComboBox *comboBox)
         }
         comboBox->setModel(itemModel);
         comboBox->setCurrentText(formatMap.value(SAKDataStruct::InputFormatLocal));
+
+        // Reset the iterator...
+        while (mapIterator.hasPrevious()) {
+            mapIterator.previous();
+        }
+
+        // Set item data of combo box
+        int index = 0;
+        while (mapIterator.hasNext()) {
+            mapIterator.next();
+            comboBox->setItemData(index, QVariant::fromValue(mapIterator.key()));
+            index += 1;
+        }
     }
 }
 
@@ -329,6 +348,19 @@ void SAKGlobal::initOutputTextFormatComboBox(QComboBox *comboBox)
         }
         comboBox->setModel(itemModel);
         comboBox->setCurrentText(formatMap.value(SAKDataStruct::OutputFormatHex));
+
+        // Reset the iterator...
+        while (mapIterator.hasPrevious()) {
+            mapIterator.previous();
+        }
+
+        // Set item data of combo box
+        int index = 0;
+        while (mapIterator.hasNext()) {
+            mapIterator.next();
+            comboBox->setItemData(index, QVariant::fromValue(mapIterator.key()));
+            index += 1;
+        }
     }
 }
 

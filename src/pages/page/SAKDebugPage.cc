@@ -24,6 +24,7 @@
 #include "SAKSettings.hh"
 #include "SAKDebugPage.hh"
 #include "SAKDataStruct.hh"
+#include "SAKSqlDatabase.hh"
 #include "SAKCRCInterface.hh"
 #include "SAKDebugPageDevice.hh"
 #include "SAKOtherAnalyzerThread.hh"
@@ -67,10 +68,6 @@ SAKDebugPage::SAKDebugPage(int type, QWidget *parent)
 SAKDebugPage::~SAKDebugPage()
 {
     if (mDevice){
-        mDevice->requestInterruption();
-        mDevice->wakeMe();
-        mDevice->exit();
-        mDevice->wait();
         delete mDevice;
         mDevice = Q_NULLPTR;
     }
@@ -169,6 +166,11 @@ SAKDebugPageStatisticsController *SAKDebugPage::statisticsController()
     return mStatisticsController;
 }
 
+QSqlDatabase *SAKDebugPage::sqlDatabase()
+{
+    return SAKSqlDatabase::instance()->sqlDatabase();
+}
+
 void SAKDebugPage::initializingPage()
 {
     setupController();
@@ -237,10 +239,13 @@ void SAKDebugPage::setupDevice()
 #if 0
         connect(device, &SAKDevice::bytesRead, this, &SAKDebugPage::bytesRead);
 #else
-        // The bytes read will be input to analyzer, after analuzing, the bytes will be input to debug page
+        // The bytes read will be input to analyzer, after analyzing, the bytes will be input to debug page
         SAKOtherAnalyzerThreadManager *analyzerManager = mOtherController->analyzerThreadManager();
         connect(mDevice, &SAKDebugPageDevice::bytesRead, analyzerManager, &SAKOtherAnalyzerThreadManager::inputBytes);
-        connect(analyzerManager, &SAKOtherAnalyzerThreadManager::bytesAnalysed, this, &SAKDebugPage::bytesRead);
+
+        // The function may be called multiple times, so do something to ensure that the signal named bytesAnalysed
+        // and the slot named bytesRead are connected once.
+        connect(analyzerManager, &SAKOtherAnalyzerThreadManager::bytesAnalysed, this, &SAKDebugPage::bytesRead, static_cast<Qt::ConnectionType>(Qt::AutoConnection|Qt::UniqueConnection));
 #endif
         connect(mDevice, &SAKDebugPageDevice::messageChanged, this, &SAKDebugPage::outputMessage);
         connect(mDevice, &SAKDebugPageDevice::deviceStateChanged, this, &SAKDebugPage::changedDeviceState);
@@ -342,6 +347,6 @@ void SAKDebugPage::on_dataVisualizationPushButton_clicked()
         mChartsController->activateWindow();
     }
 #else
-    QMessageBox::warning(this, tr("Unsupport function"), tr("The function has benn disable, beause the platform is not support!"));
+    QMessageBox::warning(this, tr("Unsupport function"), tr("The function has benn disable, beause the platform is not supported!"));
 #endif
 }

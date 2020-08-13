@@ -15,6 +15,7 @@
 #include <QDialog>
 #include <QGroupBox>
 #include <QCheckBox>
+#include <QSettings>
 #include <QListWidget>
 #include <QPushButton>
 #include <QProgressBar>
@@ -26,6 +27,7 @@ namespace Ui {
     class SAKUpdateManager;
 }
 
+/// @brief Check for update
 class SAKUpdateManager:public QDialog
 {
     Q_OBJECT
@@ -33,45 +35,42 @@ public:
     SAKUpdateManager(QWidget *parent =  Q_NULLPTR);
     ~SAKUpdateManager();
 
+    /**
+     * @brief checkForUpdate: Check for update
+     */
     void checkForUpdate();
+
+    /**
+     * @brief enableAutoCheckedForUpdate: Get the application update flag
+     * @return update flag
+     */
     bool enableAutoCheckedForUpdate();
-private:
-    Ui::SAKUpdateManager *ui;
-    QLabel *currentVersionLabel;
-    QLabel *newVersionLabel;
-    QLabel *updateProgressLabel;
-    QProgressBar *updateProgressBar;
-    QLabel *noNewVersionTipLabel;
-    QGroupBox *newVersionCommentsGroupBox;
-    QTextBrowser *newVersionCommentsTextBrowser;
-    QListWidget *downloadListListWidget;
-    QCheckBox *autoCheckForUpdateCheckBox;
-    QPushButton *visitWebPushButton;
-    QPushButton *checkForUpdatePushButton;
-    QLabel *infoLabel;
 
-private slots:
-    void on_autoCheckForUpdateCheckBox_clicked();
-    void on_visitWebPushButton_clicked();
-    void on_checkForUpdatePushButton_clicked();
-
+    /**
+     * @brief setSettings: Set settings instance,
+     * if settings is valid, some operation will save to the settings file
+     * @param settings: settings instance
+     */
+    void setSettings(QSettings *settings);
 private:
     struct UpdateInfo{
-        bool isValid;                   // 是否可用
-        QString errorString;            // 错误信息
+        bool isValid; // true: the information is valid, false: the information is invalid
+        QString errorString; // error description
 
-        QString htmlUrl;                // 发布页面地址
-        QString name;                   // 最新版本号
-        QStringList browserDownloadUrl; // 下载链接
-        QString body;                   // 发布描述
-        QString tarballUrl;             // 源码包（tar.tz）
-        QString zipballUrl;             // 源码包（zip）
-    }updateInfo;
+        QString htmlUrl; // url of release site
+        QString name; // verison name, such as 1.0.0
+        QStringList browserDownloadUrl; // update packet url
+        QString body; // release description
+        QString tarballUrl; // source packet(tar.tz)
+        QString zipballUrl; // source packet(zip)
+    }mUpdateInfo;
 
-    QTimer clearInfoTimer;
-    QNetworkAccessManager networkAccessManager;
-    QNetworkReply *networkReply;
-
+    QTimer mClearInfoTimer;
+    QNetworkAccessManager mNetworkAccessManager;
+    QNetworkReply *mNetworkReply;
+    QSettings *mSettings;
+    const QString mSettingsKeyUpdateAutomaticallyEnable;
+    bool isInitializing;
 private:
     void outputInfo(QString info, bool isError = false);
     void clearInfo();
@@ -82,6 +81,25 @@ private:
     bool isNewVersion(QString remoteVersion);
     void setupDownloadList(UpdateInfo info);
     void clearDownloadList();
+    void appendPacketItem(UpdateInfo info, QString icon, QString key);
+private:
+    Ui::SAKUpdateManager *mUi;
+    QLabel *mCurrentVersionLabel;
+    QLabel *mNewVersionLabel;
+    QLabel *mUpdateProgressLabel;
+    QProgressBar *mUpdateProgressBar;
+    QLabel *mNoNewVersionTipLabel;
+    QGroupBox *mNewVersionCommentsGroupBox;
+    QTextBrowser *mNewVersionCommentsTextBrowser;
+    QListWidget *mDownloadListListWidget;
+    QCheckBox *mAutoCheckForUpdateCheckBox;
+    QPushButton *mVisitWebPushButton;
+    QPushButton *mCheckForUpdatePushButton;
+    QLabel *mInfoLabel;
+private slots:
+    void on_autoCheckForUpdateCheckBox_clicked();
+    void on_visitWebPushButton_clicked();
+    void on_checkForUpdatePushButton_clicked();
 };
 
 #endif

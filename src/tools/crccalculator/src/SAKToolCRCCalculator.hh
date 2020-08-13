@@ -22,15 +22,12 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 
-#include "SAKToolBase.hh"
-#include "SAKCRCInterface.hh"
-
 namespace Ui {
     class SAKToolCRCCalculator;
 }
 
-/// @brief crc计算器
-class SAKToolCRCCalculator:public SAKToolBase
+class SAKCRCInterface;
+class SAKToolCRCCalculator:public QWidget
 {
     Q_OBJECT
 public:
@@ -39,8 +36,8 @@ public:
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 private:
-    const char *logCategory;
-    SAKCRCInterface crcInterface;
+    const char *mLogCategory;
+    SAKCRCInterface *mCrcInterface;
 private:
     void initParameterModel();
 private slots:
@@ -48,26 +45,21 @@ private slots:
     void textFormatControl();
     void changedParameterModel(int index);
 private:
-    Ui::SAKToolCRCCalculator* ui;
-    QComboBox* widthComboBox;
-    QComboBox* parameterComboBox;
-
-    QCheckBox* refinCheckBox;
-    QCheckBox* refoutCheckBox;
-    QLineEdit* polyLineEdit;
-    QLineEdit* initLineEdit;
-    QLineEdit* xorLineEdit;
-
-    QRadioButton* hexRadioBt;
-    QRadioButton* asciiRadioBt;
-
-    QLineEdit* hexCRCOutput;
-    QLineEdit* binCRCOutput;
-
-    QTextEdit* inputTextEdit;
-
-    QPushButton* calculatedBt;
-    QLabel *labelPolyFormula;
-    QLabel *labelInfo;
+    Ui::SAKToolCRCCalculator* mUi;
+    QComboBox* mWidthComboBox;
+    QComboBox* mParameterComboBox;
+    QCheckBox* mRefinCheckBox;
+    QCheckBox* mRefoutCheckBox;
+    QLineEdit* mPolyLineEdit;
+    QLineEdit* mInitLineEdit;
+    QLineEdit* mXorLineEdit;
+    QRadioButton* mHexRadioBt;
+    QRadioButton* mAsciiRadioBt;
+    QLineEdit* mHexCRCOutput;
+    QLineEdit* mBinCRCOutput;
+    QTextEdit* mInputTextEdit;
+    QPushButton* mCalculatedBt;
+    QLabel *mLabelPolyFormula;
+    QLabel *mLabelInfo;
 };
 #endif

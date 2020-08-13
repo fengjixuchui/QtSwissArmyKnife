@@ -41,8 +41,8 @@ public:
     ~SAKChartsXYSerialWidget();
 
     /**
-     * @brief inputBytes 数据输入接口，参数bytes按照一帧数据来处理
-     * @param bytes 数据
+     * @brief inputBytes: Input data to the module
+     * @param bytes: Data that input to the module
      */
     void inputBytes(QByteArray bytes);
 private:
@@ -52,18 +52,17 @@ private:
     QChart *mChart;
     QValueAxis *mYAxis;
     QDateTimeAxis *mXAxis;
-    /// @brief 映射的键为曲线或者散点图的实例地址，值为曲线图或散点图的参数实例指针，数据类型为：SAKXYSerialEditDialog::ParametersContext
+
     QMap<QXYSeries *, void *> mXYSerialParametersMap;
     QMenu *mDeleteMenu;
     QMenu *mEditMenu;
-    /// @brief 将数据类型映射为添加坐标点的接口
     QMap<int, void (SAKChartsXYSerialWidget::*)(QByteArray, QXYSeries *)> mAppendPointInterfaceMap;
 private slots:
     void deleteXYSerial();
     void editXYSerial();
 private:
     QAction *senderToAction(QObject *sender);
-    /// @brief 添加坐标点, parametersCtx类型为SAKXYSerialEditDialog::ParametersContext实例指针
+
     void appendPoint(QXYSeries *xySerial, QByteArray frame, void *parametersCtx);
     void appendPointInt8(QByteArray data, QXYSeries *xySerial);
     void appendPointUint8(QByteArray data, QXYSeries *xySerial);
@@ -75,7 +74,7 @@ private:
     void appendPointUint64(QByteArray data, QXYSeries *xySerial);
     void appendPointFloat32(QByteArray data, QXYSeries *xySerial);
     void appendPointFloat64(QByteArray data, QXYSeries *xySerial);
-    /// @brief 添加坐标点函数模板
+
     template<typename T>
     void appendPointActually(QByteArray data, QXYSeries *xySerial){
         if (data.length() < sizeof(T)){
@@ -83,13 +82,11 @@ private:
             return;
         }
 
-        /// @brief 添加坐标点
         T *ptr = reinterpret_cast<T *>(data.data());
         qreal xValue = qreal(QDateTime::currentMSecsSinceEpoch());
         T yValue = *ptr;
         xySerial->append(xValue, qreal(yValue));
 
-        /// @brief 移动图表，使得新显示在可见区域
         if (mXAxis->max().toMSecsSinceEpoch() < xValue){
             mChart->scroll(10, 0);
         }
