@@ -27,9 +27,8 @@ public:
      */
     SAKTcpServerDeviceController *controllerInstance();
 protected:
-    void refreshDevice() final;
-    QWidget *controllerWidget() final;
-    SAKDebugPageDevice* createDevice() final;
+    SAKDebugPageController *deviceController() final;
+    SAKDebugPageDevice* device() final;
     void setUiEnable(bool enable);
 private:
     SAKTcpServerDeviceController *tcpServerDeviceController;

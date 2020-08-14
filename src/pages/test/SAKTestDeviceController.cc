@@ -8,15 +8,16 @@
  * the file LICENCE in the root of the source code directory.
  */
 #include <QList>
+#include <QDebug>
 #include <QMetaEnum>
 #include <QLineEdit>
 
 #include "SAKGlobal.hh"
 #include "SAKTestDeviceController.hh"
 #include "ui_SAKTestDeviceController.h"
-SAKTestDeviceController::SAKTestDeviceController(QWidget *parent)
-    :QWidget (parent)
-    ,mUi (new Ui::SAKTestDeviceController)
+SAKTestDeviceController::SAKTestDeviceController(SAKDebugPage *debugPage, QWidget *parent)
+    :SAKDebugPageController(debugPage, parent)
+    ,mUi(new Ui::SAKTestDeviceController)
 {
     mUi->setupUi(this);
     mParameters.openFailed = false;
@@ -24,14 +25,19 @@ SAKTestDeviceController::SAKTestDeviceController(QWidget *parent)
     mParameters.readInterval = 500;
     mParameters.writeCyclic = false;
     mParameters.writtingInterval = 500;
+
+    qRegisterMetaType<SAKTestDeviceController::ParametersContext>("SAKTestDeviceController::ParametersContext");
 }
 
 SAKTestDeviceController::~SAKTestDeviceController()
 {
     delete mUi;
+#ifdef QT_DEBUG
+    qDebug() << __FUNCTION__ << __LINE__;
+#endif
 }
 
-SAKTestDeviceController::ParametersContext SAKTestDeviceController::parameters()
+QVariant SAKTestDeviceController::parameters()
 {
     ParametersContext paras;
     mParametersMutex.lock();
@@ -43,7 +49,13 @@ SAKTestDeviceController::ParametersContext SAKTestDeviceController::parameters()
     paras.writtingInterval = mParameters.writtingInterval;
     mParametersMutex.unlock();
 
-    return paras;
+    return QVariant::fromValue(paras);
+}
+
+void SAKTestDeviceController::setUiEnable(bool opened)
+{
+    mUi->openFailedCheckBox->setEnabled(!opened);
+    mUi->errorStringLineEdit->setEnabled(!opened);
 }
 
 void SAKTestDeviceController::on_openFailedCheckBox_clicked()

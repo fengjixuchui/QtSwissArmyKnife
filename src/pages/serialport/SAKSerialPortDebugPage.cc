@@ -18,41 +18,26 @@
 #include "SAKSerialPortDeviceController.hh"
 
 SAKSerialPortDebugPage::SAKSerialPortDebugPage(QWidget *parent)
-    :SAKDebugPage (SAKDataStruct::DebugPageTypeCOM, parent)
-    ,controller (new SAKSerialPortDeviceController)
+    :SAKDebugPage(SAKDataStruct::DebugPageTypeCOM, parent)
+
 {
-    initializingPage();
+    mDeviceController = new SAKSerialPortDeviceController(this);
+    mDevice = new SAKSerialPortDevice(this);
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeCOM));
+    initializingPage();
 }
 
 SAKSerialPortDebugPage::~SAKSerialPortDebugPage()
 {
-    delete controller;
+    delete mDeviceController;
 }
 
-SAKSerialPortDeviceController *SAKSerialPortDebugPage::controllerInstance()
+SAKDebugPageController *SAKSerialPortDebugPage::deviceController()
 {
-    return controller;
+    return mDeviceController;
 }
 
-SAKDebugPageDevice *SAKSerialPortDebugPage::createDevice()
+SAKDebugPageDevice *SAKSerialPortDebugPage::device()
 {
-    SAKSerialPortDevice *ret = new SAKSerialPortDevice(this);
-    return ret;
-}
-
-void SAKSerialPortDebugPage::refreshDevice()
-{
-    controller->refresh();
-}
-
-QWidget *SAKSerialPortDebugPage::controllerWidget()
-{
-    return controller;
-}
-
-void SAKSerialPortDebugPage::setUiEnable(bool enable)
-{
-    controller->setEnabled(enable);
-    mRefreshPushButton->setEnabled(enable);
+    return mDevice;
 }

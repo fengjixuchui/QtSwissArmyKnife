@@ -16,15 +16,18 @@
 #include <QComboBox>
 #include <QSerialPort>
 
+#include "SAKDebugPageController.hh"
+
 namespace Ui {
     class SAKSerialPortDeviceController;
 }
 
-class SAKSerialPortDeviceController:public QWidget
+class SAKDebugPage;
+class SAKSerialPortDeviceController:public SAKDebugPageController
 {
     Q_OBJECT
 public:
-    struct SerialParameters {
+    struct SerialPortParameters {
         enum QSerialPort::DataBits dataBits;
         enum QSerialPort::StopBits stopBits;
         enum QSerialPort::Parity parity;
@@ -33,24 +36,19 @@ public:
         quint32 baudRate;
     };
 
-    SAKSerialPortDeviceController(QWidget *parent = Q_NULLPTR);
+    SAKSerialPortDeviceController(SAKDebugPage *debugPage, QWidget *parent = Q_NULLPTR);
     ~SAKSerialPortDeviceController();
 
-    enum QSerialPort::DataBits dataBits();
-    enum QSerialPort::StopBits stopBits();
-    enum QSerialPort::Parity parity();
-    enum QSerialPort::FlowControl flowControl();
-    QString name();
-    qint32 baudRate();
-
-    void refresh();
-    void setUiEnable(bool enable);
+    QVariant parameters() final;
+    void setUiEnable(bool opened) final;
+    void refreshDevice() final;
 private:
-    QMutex uiMutex;
-    SerialParameters mSerialParameters;
+    QMutex mParametersMutex;
+    SerialPortParameters mParameters;
+private:
+    void setBaudRate(quint32 bd);
 private:
     Ui::SAKSerialPortDeviceController *ui;
-
     QComboBox *serialportsComboBox;
     QComboBox *baudrateComboBox;
     QComboBox *databitsComboBox;
@@ -60,6 +58,14 @@ private:
     QCheckBox *customBaudrateCheckBox;
 private slots:
     void on_customBaudrateCheckBox_clicked();
+    void on_serialportsComboBox_currentTextChanged(const QString &arg1);
+    void on_baudrateComboBox_currentIndexChanged(int index);
+    void on_databitsComboBox_currentIndexChanged(int index);
+    void on_stopbitsComboBox_currentIndexChanged(int index);
+    void on_parityComboBox_currentIndexChanged(int index);
+    void on_flowControlComboBox_currentIndexChanged(int index);
+    void on_baudrateComboBox_editTextChanged(const QString &arg1);
 };
 
+Q_DECLARE_METATYPE(SAKSerialPortDeviceController::SerialPortParameters);
 #endif

@@ -24,7 +24,7 @@ public:
     /**
      * @brief wakeMe: wake the thread
      */
-    void wakeMe();
+    void requestWakeup();
 
     /**
      * @brief writeBytes: write bytes to device
@@ -36,6 +36,22 @@ protected:
     QWaitCondition mThreadWaitCondition;
 protected:
     QByteArray takeWaitingForWrittingBytes();
+    void run() override;
+
+    // Realize these functions in the subclass only, do not call them.
+    virtual bool initializing(QString &errorString);
+    virtual bool open(QString &errorString);
+    virtual QByteArray read();
+    virtual QByteArray write(QByteArray bytes);
+    virtual bool checkSomething(QString &errorString);
+    virtual void close();
+    virtual void free();
+
+    /**
+     * @brief writeForTest: The interface is just for debugging data stream, do not override the interface
+     * @return Test data
+     */
+    virtual QByteArray writeForTest();
 private:
     QMutex mWaitingForWritingBytesListMutex;
     QList<QByteArray> mWaitingForWritingBytesList;

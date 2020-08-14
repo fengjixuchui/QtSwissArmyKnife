@@ -19,8 +19,8 @@
 
 SAKUdpClientDebugPage::SAKUdpClientDebugPage(QWidget *parent)
     :SAKDebugPage (SAKDataStruct::DebugPageTypeUdpClient, parent)
-    ,udpDeviceController (new SAKUdpClientDeviceController)
 {
+    udpDeviceController = new SAKUdpClientDeviceController(this);
     initializingPage();
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeUdpClient));
 }
@@ -35,25 +35,14 @@ SAKUdpClientDeviceController *SAKUdpClientDebugPage::controllerInstance()
     return udpDeviceController;
 }
 
-void SAKUdpClientDebugPage::refreshDevice()
-{
-    udpDeviceController->refresh();
-}
-
-QWidget *SAKUdpClientDebugPage::controllerWidget()
+SAKDebugPageController *SAKUdpClientDebugPage::deviceController()
 {
     return udpDeviceController;
 }
 
-SAKDebugPageDevice *SAKUdpClientDebugPage::createDevice()
+SAKDebugPageDevice *SAKUdpClientDebugPage::device()
 {
     SAKUdpClientDevice *ptr = new SAKUdpClientDevice(this);
     udpDeviceController->setUdpDevice(ptr);
     return ptr;
-}
-
-void SAKUdpClientDebugPage::setUiEnable(bool enable)
-{
-    udpDeviceController->setUiEnable(enable);
-    mRefreshPushButton->setEnabled(enable);
 }

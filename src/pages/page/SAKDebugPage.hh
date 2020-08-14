@@ -33,6 +33,7 @@
 class SAKDataFactory;
 class SAKCRCInterface;
 class SAKDebugPageDevice;
+class SAKDebugPageController;
 class SAKOtherHighlighterManager;
 class SAKDebugPageOtherController;
 class SAKDebugPageInputController;
@@ -94,6 +95,12 @@ public:
     QSettings *settings();
 
     /**
+     * @brief sqlDatabase: Get the database instance
+     * @return Database instance
+     */
+    QSqlDatabase *sqlDatabase();
+
+    /**
      * @brief settingsGroup: Get the settings group
      * @param pageType: The type of debug page
      * @return Settings group
@@ -131,43 +138,27 @@ public:
      * @return SAKDebugPageStatisticsController instance pointer
      */
     SAKDebugPageStatisticsController *statisticsController();
-
+public:
     /**
-     * @brief sqlDatabase: Get the database instance
-     * @return Database instance
-     */
-    QSqlDatabase *sqlDatabase();
-protected:
-    /**
-     * @brief refreshDevice: Refresh system device
-     */
-    virtual void refreshDevice() = 0;
-
-    /**
-     * @brief controllerWidget: Get device control widget
-     * @return Device control widget
-     */
-    virtual QWidget *controllerWidget() = 0;
-
-    /**
-     * @brief createDevice: Create the device instance
+     * @brief deviceController: Get the device controller instance.
      * @return Device instance pointer
      */
-    virtual SAKDebugPageDevice* createDevice() = 0;
+    virtual SAKDebugPageController *deviceController() = 0;
 
     /**
-     * @brief setUiEnable: Set some components enable or disable
-     * @param ebable: true-enable ui components, false-disable ui components
+     * @brief createDevice: Get the device instance,
+     * SAKDebugPage takes ownership of the pointer and deletes it at the appropriate time.
+     * @return Device instance pointer
      */
-    virtual void setUiEnable(bool ebable) = 0;
-
+    virtual SAKDebugPageDevice* device() = 0;
+protected:
     /**
-     * @brief initializingPage: Initializing,
-     * the function must be called in the constructor of child class
+     * @brief initializingPage: Initializing, the function must be called in the constructor of subclass.
      */
     void initializingPage();
 private:
     SAKDebugPageDevice *mDevice;
+    SAKDebugPageController *mDeviceController;
     bool mIsInitializing;
     int mDebugPageType;
     QString mSettingKey;

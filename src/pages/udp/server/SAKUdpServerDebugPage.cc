@@ -19,8 +19,8 @@
 
 SAKUdpServerDebugPage::SAKUdpServerDebugPage(QWidget *parent)
     :SAKDebugPage (SAKDataStruct::DebugPageTypeUdpServer, parent)
-    ,mDeviceController (new SAKUdpServerDeviceController)
 {
+    mDeviceController = new SAKUdpServerDeviceController(this);
     initializingPage();
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeUdpServer));
 }
@@ -35,23 +35,12 @@ SAKUdpServerDeviceController *SAKUdpServerDebugPage::controllerInstance()
     return mDeviceController;
 }
 
-void SAKUdpServerDebugPage::refreshDevice()
-{
-    mDeviceController->refresh();
-}
-
-QWidget *SAKUdpServerDebugPage::controllerWidget()
+SAKDebugPageController *SAKUdpServerDebugPage::deviceController()
 {
     return mDeviceController;
 }
 
-void SAKUdpServerDebugPage::setUiEnable(bool enable)
-{
-    mDeviceController->setUiEnable(enable);
-    mRefreshPushButton->setEnabled(enable);
-}
-
-SAKDebugPageDevice* SAKUdpServerDebugPage::createDevice()
+SAKDebugPageDevice* SAKUdpServerDebugPage::device()
 {
     SAKUdpServerDevice *device = new SAKUdpServerDevice(this);
     return device;

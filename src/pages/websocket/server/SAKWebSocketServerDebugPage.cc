@@ -19,8 +19,8 @@
 
 SAKWebSocketServerDebugPage::SAKWebSocketServerDebugPage(QWidget *parent)
     :SAKDebugPage (SAKDataStruct::DebugPageTypeTCPServer, parent)
-    ,tcpServerDeviceController (new SAKWebSocketServerDeviceController)
 {
+    tcpServerDeviceController = new SAKWebSocketServerDeviceController(this);
     initializingPage();
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeTCPServer));
 }
@@ -35,12 +35,7 @@ SAKWebSocketServerDeviceController *SAKWebSocketServerDebugPage::controllerInsta
     return tcpServerDeviceController;
 }
 
-void SAKWebSocketServerDebugPage::refreshDevice()
-{
-    tcpServerDeviceController->refresh();
-}
-
-QWidget *SAKWebSocketServerDebugPage::controllerWidget()
+SAKDebugPageController *SAKWebSocketServerDebugPage::deviceController()
 {
     return tcpServerDeviceController;
 }
@@ -51,7 +46,7 @@ void SAKWebSocketServerDebugPage::setUiEnable(bool enable)
     mRefreshPushButton->setEnabled(enable);
 }
 
-SAKDebugPageDevice* SAKWebSocketServerDebugPage::createDevice()
+SAKDebugPageDevice* SAKWebSocketServerDebugPage::device()
 {
     SAKWebSocketServerDevice *device = new SAKWebSocketServerDevice(this);
     return device;

@@ -20,19 +20,23 @@ class SAKTcpClientDevice:public SAKDebugPageDevice
 {
     Q_OBJECT
 public:
-    SAKTcpClientDevice(SAKTcpClientDebugPage *debugPage, QObject *parent = Q_NULLPTR);
+    SAKTcpClientDevice(SAKTcpClientDebugPage *mDebugPage, QObject *parent = Q_NULLPTR);
 private:
-    void run() final;
+    bool initializing(QString &errorString) final;
+    bool open(QString &errorString) final;
+    QByteArray read() final;
+    QByteArray write(QByteArray bytes) final;
+    bool checkSomething(QString &errorString) final;
+    void close() final;
+    void free() final;
 private:
-    QString localHost;
-    quint16 localPort;
-    bool enableCustomLocalSetting;
-    QString serverHost;
-    quint16 serverPort;
-    SAKTcpClientDebugPage *debugPage;
-    QTcpSocket *tcpSocket;
-private:
-    void afterDisconnected();
+    QString mLocalHost;
+    quint16 mLocalPort;
+    bool mSpecifyClientAddressAndPort;
+    QString mServerHost;
+    quint16 mServerPort;
+    SAKTcpClientDebugPage *mDebugPage;
+    QTcpSocket *mTcpSocket;
 };
 
 #endif

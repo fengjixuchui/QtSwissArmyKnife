@@ -19,40 +19,26 @@
 
 SAKTestDebugPage::SAKTestDebugPage(QWidget *parent)
     :SAKDebugPage (SAKDataStruct::DebugPageTypeTest, parent)
-    ,mController (new SAKTestDeviceController)
+    ,mDevice(Q_NULLPTR)
+    ,mDeviceController(Q_NULLPTR)
 {
-    initializingPage();
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeTest));
+    initializingPage();
 }
 
-SAKTestDebugPage::~SAKTestDebugPage()
+SAKDebugPageDevice *SAKTestDebugPage::device()
 {
-    delete mController;
+    if (!mDevice){
+        mDevice = new SAKTestDevice(this);
+    }
+
+    return mDevice;
 }
 
-SAKTestDeviceController *SAKTestDebugPage::controller()
+SAKDebugPageController *SAKTestDebugPage::deviceController()
 {
-    return mController;
-}
-
-SAKDebugPageDevice *SAKTestDebugPage::createDevice()
-{
-    SAKTestDevice *ret = new SAKTestDevice(this);
-    return ret;
-}
-
-void SAKTestDebugPage::refreshDevice()
-{
-    mController->refresh();
-}
-
-QWidget *SAKTestDebugPage::controllerWidget()
-{
-    return mController;
-}
-
-void SAKTestDebugPage::setUiEnable(bool enable)
-{
-    mController->setEnabled(enable);
-    mRefreshPushButton->setEnabled(enable);
+    if (!mDeviceController){
+        mDeviceController = new SAKTestDeviceController(this);
+    }
+    return mDeviceController;
 }

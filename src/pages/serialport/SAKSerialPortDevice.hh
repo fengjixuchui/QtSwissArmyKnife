@@ -11,30 +11,29 @@
 #define SAKSERIALPORTDEVICET_HH
 
 #include <QMutex>
-#include <QThread>
 #include <QSerialPort>
 #include <QWaitCondition>
 
 #include "SAKDebugPageDevice.hh"
 
 class SAKSerialPortDebugPage;
+class SAKSerialPortDeviceController;
 class SAKSerialPortDevice:public SAKDebugPageDevice
 {
     Q_OBJECT
 public:
-    SAKSerialPortDevice(SAKSerialPortDebugPage *mDebugPage, QObject *parent = Q_NULLPTR);
-    ~SAKSerialPortDevice();
-protected:
-    void run() final;
+    SAKSerialPortDevice(SAKSerialPortDebugPage *debugPage, QObject *parent = Q_NULLPTR);
+
+    bool initializing(QString &errorString) final;
+    bool open(QString &errorString) final;
+    QByteArray read() final;
+    QByteArray write(QByteArray bytes) final;
+    void close() final;
+    void free() final;
 private:
-    QString mName;
-    qint32 mBaudRate;
-    QSerialPort::DataBits mDataBits;
-    QSerialPort::StopBits mStopBits;
-    QSerialPort::Parity mParity;
-    QSerialPort::FlowControl mFlowControl;
     QSerialPort *mSerialPort;
     SAKSerialPortDebugPage *mDebugPage;
+    SAKSerialPortDeviceController *mController;
 };
 
 #endif

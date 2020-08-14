@@ -12,6 +12,7 @@
 
 #include "SAKDebugPage.hh"
 
+class SAKDebugPageController;
 class SAKWebSocketServerDevice;
 class SAKWebSocketServerDeviceController;
 /// @brief web socket服务器调试页面
@@ -28,9 +29,8 @@ public:
      */
     SAKWebSocketServerDeviceController *controllerInstance();
 protected:
-    void refreshDevice() final;
-    QWidget *controllerWidget() final;
-    SAKDebugPageDevice* createDevice() final;
+    SAKDebugPageController *deviceController() final;
+    SAKDebugPageDevice* device() final;
     void setUiEnable(bool enable);
 private:
     SAKWebSocketServerDeviceController *tcpServerDeviceController;

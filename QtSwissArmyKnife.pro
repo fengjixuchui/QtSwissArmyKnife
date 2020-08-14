@@ -113,6 +113,7 @@ INCLUDEPATH += \
     src/pages \
     src/pages/page \
     src/pages/page/common \
+    src/pages/page/controller \
     src/pages/page/device \
     src/pages/page/input \
     src/pages/page/input/crcsettings \
@@ -183,6 +184,7 @@ HEADERS += \
     src/mainwindow/SAKMainWindowTabPageNameEditDialog.hh \
     src/pages/page/SAKDebugPage.hh \
     src/pages/page/common/SAKDebugPageCommonDatabaseInterface.hh \
+    src/pages/page/controller/SAKDebugPageController.hh \
     src/pages/page/device/SAKDebugPageDevice.hh \
     src/pages/page/input/SAKDebugPageInputController.hh \
     src/pages/page/input/crcsettings/SAKInputCrcSettingsDialog.hh \
@@ -247,6 +249,7 @@ SOURCES += \
     src/mainwindow/SAKMainWindowTabPageNameEditDialog.cc \
     src/pages/page/SAKDebugPage.cc \
     src/pages/page/common/SAKDebugPageCommonDatabaseInterface.cc \
+    src/pages/page/controller/SAKDebugPageController.cc \
     src/pages/page/device/SAKDebugPageDevice.cc \
     src/pages/page/input/SAKDebugPageInputController.cc \
     src/pages/page/input/crcsettings/SAKInputCrcSettingsDialog.cc \

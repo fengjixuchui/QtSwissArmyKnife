@@ -27,6 +27,7 @@
 #include "SAKSqlDatabase.hh"
 #include "SAKCRCInterface.hh"
 #include "SAKDebugPageDevice.hh"
+#include "SAKDebugPageController.hh"
 #include "SAKOtherAnalyzerThread.hh"
 #include "SAKOtherHighlighterManager.hh"
 #include "SAKDebugPageOtherController.hh"
@@ -44,6 +45,7 @@
 SAKDebugPage::SAKDebugPage(int type, QWidget *parent)
     :QWidget(parent)
     ,mDevice(Q_NULLPTR)
+    ,mDeviceController(Q_NULLPTR)
     ,mIsInitializing(true)
     ,mDebugPageType(type)
     ,mUi(new Ui::SAKDebugPage)
@@ -67,22 +69,11 @@ SAKDebugPage::SAKDebugPage(int type, QWidget *parent)
 
 SAKDebugPage::~SAKDebugPage()
 {
-    if (mDevice){
-        delete mDevice;
-        mDevice = Q_NULLPTR;
-    }
-
-    if (mUi){
-        delete mUi;
-        mUi = Q_NULLPTR;
-    }
-
+    delete mDevice;
 #ifdef SAK_IMPORT_CHARTS_MODULE
-    if (mChartsController){
-        delete mChartsController;
-        mChartsController = Q_NULLPTR;
-    }
+    delete mChartsController;
 #endif
+    delete mUi;
 }
 
 void SAKDebugPage::write(QByteArray data)
@@ -123,6 +114,11 @@ quint32 SAKDebugPage::pageType()
 QSettings *SAKDebugPage::settings()
 {
     return SAKSettings::instance();
+}
+
+QSqlDatabase *SAKDebugPage::sqlDatabase()
+{
+    return SAKSqlDatabase::instance()->sqlDatabase();
 }
 
 QString SAKDebugPage::settingsGroup()
@@ -166,11 +162,6 @@ SAKDebugPageStatisticsController *SAKDebugPage::statisticsController()
     return mStatisticsController;
 }
 
-QSqlDatabase *SAKDebugPage::sqlDatabase()
-{
-    return SAKSqlDatabase::instance()->sqlDatabase();
-}
-
 void SAKDebugPage::initializingPage()
 {
     setupController();
@@ -182,8 +173,8 @@ void SAKDebugPage::changedDeviceState(bool opened)
     mSendPushButton->setEnabled(opened);
     mSendPresetPushButton->setEnabled(opened);
     mCycleEnableCheckBox->setEnabled(opened);
-
-    setUiEnable(!opened);
+    mRefreshPushButton->setEnabled(!opened);
+    mDeviceController->setUiEnable(opened);
 }
 
 void SAKDebugPage::cleanInfo()
@@ -221,7 +212,7 @@ void SAKDebugPage::closeDevice()
 {
     if (mDevice){
         mDevice->requestInterruption();
-        mDevice->wakeMe();
+        mDevice->requestWakeup();
         mDevice->exit();
         mDevice->wait();
         mDevice->deleteLater();
@@ -232,7 +223,7 @@ void SAKDebugPage::closeDevice()
 
 void SAKDebugPage::setupDevice()
 {
-    mDevice = createDevice();
+    mDevice = device();
     if (mDevice){
         connect(this, &SAKDebugPage::requestWriteData, mDevice, &SAKDebugPageDevice::writeBytes);
         connect(mDevice, &SAKDebugPageDevice::bytesWritten, this, &SAKDebugPage::bytesWritten);
@@ -255,18 +246,23 @@ void SAKDebugPage::setupDevice()
 
 void SAKDebugPage::setupController()
 {
-    QWidget *controller = controllerWidget();
+    SAKDebugPageController *controller = deviceController();
     if (controller){
         QHBoxLayout *layout = new QHBoxLayout(mDeviceSettingFrame);
         mDeviceSettingFrame->setLayout(layout);
         layout->addWidget(controller);
         layout->setContentsMargins(0, 0, 0, 0);
+        mDeviceController = controller;
     }
 }
 
 void SAKDebugPage::on_refreshPushButton_clicked()
 {
-    refreshDevice();
+    if (mDeviceController){
+        mDeviceController->refreshDevice();
+    }else{
+        Q_ASSERT_X(false, __FUNCTION__, "A null pointer!");
+    }
 }
 
 void SAKDebugPage::on_switchPushButton_clicked()

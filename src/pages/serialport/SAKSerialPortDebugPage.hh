@@ -12,6 +12,9 @@
 
 #include "SAKDebugPage.hh"
 
+class SAKDebugPageDevice;
+class SAKSerialPortDevice;
+class SAKDebugPageController;
 class SAKSerialPortDeviceController;
 class SAKSerialPortDebugPage : public SAKDebugPage
 {
@@ -20,18 +23,11 @@ public:
     SAKSerialPortDebugPage(QWidget *parent = Q_NULLPTR);
     ~SAKSerialPortDebugPage();
 
-    /**
-     * @brief controllerInstance: Get the controller instance
-     * @return Controller instance
-     */
-    SAKSerialPortDeviceController *controllerInstance();
-protected:
-    SAKDebugPageDevice *createDevice() final;
-    void refreshDevice() final;
-    QWidget *controllerWidget() final;
-    void setUiEnable(bool enable) final;
+    SAKDebugPageController *deviceController() final;
+    SAKDebugPageDevice *device() final;
 private:
-    SAKSerialPortDeviceController *controller;
+    SAKSerialPortDeviceController *mDeviceController;
+    SAKSerialPortDevice *mDevice;
 };
 
 #endif

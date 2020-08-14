@@ -15,11 +15,14 @@
 #include <QCheckBox>
 #include <QComboBox>
 
+#include "SAKDebugPageController.hh"
+
 namespace Ui {
     class SAKTestDeviceController;
 }
 
-class SAKTestDeviceController:public QWidget
+class SAKDebugPage;
+class SAKTestDeviceController:public SAKDebugPageController
 {
     Q_OBJECT
 public:
@@ -32,19 +35,11 @@ public:
         QString errorString;
     };
 
-    SAKTestDeviceController(QWidget *parent = Q_NULLPTR);
+    SAKTestDeviceController(SAKDebugPage *debugPage, QWidget *parent = Q_NULLPTR);
     ~SAKTestDeviceController();
 
-    /**
-     * @brief refresh: Nothing to do
-     */
-    void refresh(){};
-
-    /**
-     * @brief parameters: Get the context of parameters
-     * @return The context of parameters
-     */
-    ParametersContext parameters();
+    QVariant parameters() final;
+    void setUiEnable(bool opened) final;
 private:
     ParametersContext mParameters;
     QMutex mParametersMutex;
@@ -59,4 +54,5 @@ private:
     Ui::SAKTestDeviceController *mUi;
 };
 
+Q_DECLARE_METATYPE(SAKTestDeviceController::ParametersContext);
 #endif

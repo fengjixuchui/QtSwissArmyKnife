@@ -24,7 +24,7 @@ SAKDebugPageDevice::~SAKDebugPageDevice()
     wait();
 }
 
-void SAKDebugPageDevice::wakeMe()
+void SAKDebugPageDevice::requestWakeup()
 {
     mThreadWaitCondition.wakeAll();
 }
@@ -50,4 +50,115 @@ QByteArray SAKDebugPageDevice::takeWaitingForWrittingBytes()
     mWaitingForWritingBytesListMutex.unlock();
 
     return bytes;
+}
+
+void SAKDebugPageDevice::run()
+{
+    QEventLoop eventLoop;
+    QString errorString;
+    if (!initializing(errorString)){
+        emit deviceStateChanged(false);
+        emit messageChanged(errorString, false);
+        free();
+        return;
+    }
+
+    // Open the device
+    if (open(errorString)){
+        emit deviceStateChanged(true);
+        while (true){
+            if (isInterruptionRequested()){
+                break;
+            }
+
+            // Read bytes from device
+            QByteArray bytes = read();
+            if (bytes.length() > 0){
+                emit bytesRead(bytes);
+            }
+
+            // Write bytes to device
+            while (true) {
+                bytes = takeWaitingForWrittingBytes();
+                if (bytes.length() > 0){
+                    bytes = write(bytes);
+                    emit bytesWritten(bytes);
+                }else{
+                    break;
+                }
+            }
+
+            // Just for debugging data stream
+            bytes = writeForTest();
+            if (bytes.length()){
+                emit bytesWritten(bytes);
+            }
+
+            // Chcked device state
+            eventLoop.processEvents();
+            if(!checkSomething(errorString)){
+                emit messageChanged(errorString, false);
+                break;
+            }
+
+            if(isInterruptionRequested()){
+                break;
+            }else{
+                // Do something to make cpu happy
+                mThreadMutex.lock();
+                mThreadWaitCondition.wait(&mThreadMutex, SAK_DEVICE_THREAD_SLEEP_INTERVAL);
+                mThreadMutex.unlock();
+            }
+        }
+
+        close();
+    }else{
+        emit messageChanged(errorString, false);
+    }
+
+    emit deviceStateChanged(false);
+    free();
+}
+
+bool SAKDebugPageDevice::initializing(QString &errorString)
+{
+    errorString = QString("Need to override");
+    return false;
+}
+
+bool SAKDebugPageDevice::open(QString &errorString)
+{
+    errorString = QString("Need to override");
+    return false;
+}
+
+QByteArray SAKDebugPageDevice::read()
+{
+    return QByteArray();
+}
+
+QByteArray SAKDebugPageDevice::write(QByteArray bytes)
+{
+    return bytes;
+}
+
+bool SAKDebugPageDevice::checkSomething(QString &errorString)
+{
+    errorString = QString("Need to override");
+    return false;
+}
+
+void SAKDebugPageDevice::close()
+{
+    // Nothing to do
+}
+
+void SAKDebugPageDevice::free()
+{
+    // Nothing to do
+}
+
+QByteArray SAKDebugPageDevice:: writeForTest()
+{
+    return QByteArray();
 }

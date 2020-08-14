@@ -15,34 +15,53 @@
 #include <QCheckBox>
 #include <QComboBox>
 
+#include "SAKDebugPageController.hh"
+
 namespace Ui {
     class SAKTcpClientDeviceController;
 }
 
-class SAKTcpClientDeviceController:public QWidget
+class SAKDebugPage;
+class SAKTcpClientDeviceController:public SAKDebugPageController
 {
     Q_OBJECT
 public:
-    SAKTcpClientDeviceController(QWidget *parent = Q_NULLPTR);
+    struct TcpClientParameters {
+        QString localHost;
+        quint16 localPort;
+        QString serverHost;
+        quint16 serverPort;
+        bool specifyClientAddressAndPort;
+    };
+
+    SAKTcpClientDeviceController(SAKDebugPage *debugPage, QWidget *parent = Q_NULLPTR);
     ~SAKTcpClientDeviceController();
+
+    QVariant parameters() final;
+    void setUiEnable(bool enable) final;
+    void refreshDevice() final;
 
     QString localHost();
     quint16 localPort();
     QString serverHost();
     quint16 serverPort();
     bool enableCustomLocalSetting();
-
-    void refresh();
-    void setUiEnable(bool enable);
 private:
-    QMutex uiMutex;
+    QMutex mParametersMutex;
+    TcpClientParameters mParameters;
 private:
-    Ui::SAKTcpClientDeviceController *ui;
-    QComboBox *localhostComboBox;
-    QLineEdit *localPortlineEdit;
-    QCheckBox *enableLocalSettingCheckBox;
-    QLineEdit *serverHostLineEdit;
-    QLineEdit *serverPortLineEdit;
+    Ui::SAKTcpClientDeviceController *mUi;
+    QComboBox *mLocalhostComboBox;
+    QLineEdit *mLocalPortlineEdit;
+    QCheckBox *mSpecifyClientAddressAndPort;
+    QLineEdit *mServerHostLineEdit;
+    QLineEdit *mServerPortLineEdit;
+private slots:
+    void on_localhostComboBox_currentIndexChanged(int index);
+    void on_localPortlineEdit_textChanged(const QString &arg1);
+    void on_specifyClientAddressAndPort_clicked();
+    void on_serverHostLineEdit_textChanged(const QString &arg1);
+    void on_serverPortLineEdit_textChanged(const QString &arg1);
 };
-
+Q_DECLARE_METATYPE(SAKTcpClientDeviceController::TcpClientParameters);
 #endif
