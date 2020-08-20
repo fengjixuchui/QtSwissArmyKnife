@@ -8,6 +8,7 @@
  * the file LICENCE in the root of the source code directory.
  */
 #include <QList>
+#include <QDebug>
 #include <QMetaEnum>
 #include <QLineEdit>
 
@@ -23,11 +24,16 @@ SAKTcpClientDeviceController::SAKTcpClientDeviceController(SAKDebugPage *debugPa
     mLocalhostComboBox = mUi->localhostComboBox;
     mLocalPortlineEdit = mUi->localPortlineEdit;
     mSpecifyClientAddressAndPort = mUi->specifyClientAddressAndPort;
+    mClientInfoLineEdit = mUi->clientInfoLineEdit;
     mServerHostLineEdit = mUi->serverHostLineEdit;
     mServerPortLineEdit = mUi->serverPortLineEdit;
 
     qRegisterMetaType<SAKTcpClientDeviceController::TcpClientParameters>("SAKTcpClientDeviceController::TcpClientParameters");
+    mParameters.localHost = mLocalhostComboBox->currentText();
+    mParameters.localPort = mLocalPortlineEdit->text().toInt();
     mParameters.specifyClientAddressAndPort = mSpecifyClientAddressAndPort->isChecked();
+    mParameters.serverHost = mServerHostLineEdit->text();
+    mParameters.serverPort = mServerPortLineEdit->text().toInt();
     refreshDevice();
 }
 
@@ -50,13 +56,13 @@ QVariant SAKTcpClientDeviceController::parameters()
     return QVariant::fromValue(parameters);
 }
 
-void SAKTcpClientDeviceController::setUiEnable(bool enable)
+void SAKTcpClientDeviceController::setUiEnable(bool opened)
 {
-    mLocalhostComboBox->setEnabled(enable);
-    mLocalPortlineEdit->setEnabled(enable);
-    mSpecifyClientAddressAndPort->setEnabled(enable);
-    mServerHostLineEdit->setEnabled(enable);
-    mServerPortLineEdit->setEnabled(enable);
+    mLocalhostComboBox->setEnabled(!opened);
+    mLocalPortlineEdit->setEnabled(!opened);
+    mSpecifyClientAddressAndPort->setEnabled(!opened);
+    mServerHostLineEdit->setEnabled(!opened);
+    mServerPortLineEdit->setEnabled(!opened);
 }
 
 void SAKTcpClientDeviceController::refreshDevice()
@@ -64,45 +70,9 @@ void SAKTcpClientDeviceController::refreshDevice()
     SAKGlobal::initIpComboBox(mLocalhostComboBox);
 }
 
-QString SAKTcpClientDeviceController::localHost()
+void SAKTcpClientDeviceController::setClientInfo(QString info)
 {
-    mParametersMutex.lock();
-    QString ret = mLocalhostComboBox->currentText();
-    mParametersMutex.unlock();
-    return ret;
-}
-
-quint16 SAKTcpClientDeviceController::localPort()
-{
-    mParametersMutex.lock();
-    quint16 ret = static_cast<quint16>(mLocalPortlineEdit->text().toInt());
-    mParametersMutex.unlock();
-    return ret;
-}
-
-QString SAKTcpClientDeviceController::serverHost()
-{
-    mParametersMutex.lock();
-    QString ret = mServerHostLineEdit->text();
-    mParametersMutex.unlock();
-    return ret;
-}
-
-quint16 SAKTcpClientDeviceController::serverPort()
-{
-    mParametersMutex.lock();
-    quint16 ret = static_cast<quint16>(mServerPortLineEdit->text().toInt());
-    mParametersMutex.unlock();
-
-    return ret;
-}
-
-bool SAKTcpClientDeviceController::enableCustomLocalSetting()
-{
-    mParametersMutex.lock();
-    bool ret = mSpecifyClientAddressAndPort->isChecked();
-    mParametersMutex.unlock();
-    return ret;
+    mClientInfoLineEdit->setText(info);
 }
 
 void SAKTcpClientDeviceController::on_localhostComboBox_currentIndexChanged(int index)
@@ -131,7 +101,7 @@ void SAKTcpClientDeviceController::on_specifyClientAddressAndPort_clicked()
 void SAKTcpClientDeviceController::on_serverHostLineEdit_textChanged(const QString &arg1)
 {
     mParametersMutex.lock();
-    mParameters.serverHost = static_cast<quint16>(arg1.toInt());
+    mParameters.serverHost = arg1;
     mParametersMutex.unlock();
 }
 

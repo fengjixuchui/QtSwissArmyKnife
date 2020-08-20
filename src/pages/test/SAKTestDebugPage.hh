@@ -12,19 +12,17 @@
 
 #include "SAKDebugPage.hh"
 
-class SAKTestDevice;
 class SAKTestDeviceController;
-// The debugging page is used for developer only.
+// The debugging page is used by developer only.
 class SAKTestDebugPage : public SAKDebugPage
 {
     Q_OBJECT
 public:
     SAKTestDebugPage(QWidget *parent = Q_NULLPTR);
 
-    SAKDebugPageDevice *device() final;
     SAKDebugPageController *deviceController() final;
+    SAKDebugPageDevice *createDevice() final;
 private:
-    SAKTestDevice *mDevice;
     SAKTestDeviceController *mDeviceController;
 };
 

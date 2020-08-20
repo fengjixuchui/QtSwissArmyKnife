@@ -12,19 +12,19 @@
 #include <QFile>
 #include <QDebug>
 #include <QMetaEnum>
-#ifdef SAK_IMPORT_COM_MODULE
-#include <QSerialPort>
-#endif
+#include <QSslSocket>
 #include <QHostAddress>
 #include <QApplication>
 #include <QMapIterator>
 #include <QStandardItem>
 #include <QStandardPaths>
-#ifdef SAK_IMPORT_COM_MODULE
-#include <QSerialPortInfo>
-#endif
 #include <QNetworkInterface>
 #include <QStandardItemModel>
+
+#ifdef SAK_IMPORT_COM_MODULE
+#include <QSerialPort>
+#include <QSerialPortInfo>
+#endif
 
 #include "SAKGlobal.hh"
 #include "SAKDataStruct.hh"
@@ -118,6 +118,12 @@ QString SAKGlobal::debugPageNameFromType(int type)
         break;
     case SAKDataStruct::DebugPageTypeTCPServer:
         name = tr("TCP-S");
+        break;
+    case SAKDataStruct::DebugPageTypeSslSocketClient:
+        name = tr("SSL-C");
+        break;
+    case SAKDataStruct::DebugPageTypeSslSocketServer:
+        name = tr("SSL-S");
         break;
 #ifdef SAK_IMPORT_SCTP_MODULE
     case SAKDataStruct::DebugPageTypeSCTPClient:
@@ -274,7 +280,6 @@ void SAKGlobal::initIpComboBox(QComboBox *comboBox, bool appendHostAny)
             }
         }
 
-        comboBox->addItem(QString("255.255.255.255"));
         if (appendHostAny){
             comboBox->addItem(QString(SAK_HOST_ADDRESS_ANY));
         }

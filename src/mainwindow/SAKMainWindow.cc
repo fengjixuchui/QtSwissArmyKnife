@@ -48,6 +48,8 @@
 #include "SAKTcpClientDebugPage.hh"
 #include "SAKTcpServerDebugPage.hh"
 #include "SAKMainWindowQrCodeView.hh"
+#include "SAKSslSocketClientDebugPage.hh"
+#include "SAKSslSocketServerDebugPage.hh"
 #include "SAKMainWindowMoreInformationDialog.hh"
 #include "SAKMainWindowTabPageNameEditDialog.hh"
 
@@ -308,7 +310,7 @@ void SAKMainWindow::initOptionMenu()
         mTestPageAction->setChecked(false);
     }
 
-    QAction *action = new QAction(tr("Clear configuration"));
+    QAction *action = new QAction(tr("Clear configuration"), this);
     optionMenu->addAction(action);
     connect(action, &QAction::triggered, this, &SAKMainWindow::clearConfiguration);
 }
@@ -492,6 +494,12 @@ QWidget *SAKMainWindow::debugPageFromType(int type)
         break;
     case SAKDataStruct::DebugPageTypeUdpServer:
         widget = new SAKUdpServerDebugPage;
+        break;
+    case SAKDataStruct::DebugPageTypeSslSocketClient:
+        widget = new SAKSslSocketClientDebugPage;
+        break;
+    case SAKDataStruct::DebugPageTypeSslSocketServer:
+        widget = new SAKSslSocketServerDebugPage;
         break;
     case SAKDataStruct::DebugPageTypeTCPClient:
         widget = new SAKTcpClientDebugPage;

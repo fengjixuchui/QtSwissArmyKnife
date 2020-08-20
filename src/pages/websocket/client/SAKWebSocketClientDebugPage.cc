@@ -20,27 +20,22 @@
 SAKWebSocketClientDebugPage::SAKWebSocketClientDebugPage(QWidget *parent)
     :SAKDebugPage (SAKDataStruct::DebugPageTypeTCPClient, parent)
 {
-    webSocketClientDeviceController = new SAKWebSocketClientDeviceController(this, this);
-    initializingPage();
+    mWebSocketClientDeviceController = new SAKWebSocketClientDeviceController(this, this);
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeTCPClient));
+    initializingPage();
 }
 
 SAKWebSocketClientDebugPage::~SAKWebSocketClientDebugPage()
 {
-    webSocketClientDeviceController->deleteLater();
-}
-
-SAKWebSocketClientDeviceController *SAKWebSocketClientDebugPage::controllerInstance()
-{
-    return webSocketClientDeviceController;
+    mWebSocketClientDeviceController->deleteLater();
 }
 
 SAKDebugPageController *SAKWebSocketClientDebugPage::deviceController()
 {
-    return webSocketClientDeviceController;
+    return mWebSocketClientDeviceController;
 }
 
-SAKDebugPageDevice *SAKWebSocketClientDebugPage::device()
+SAKDebugPageDevice *SAKWebSocketClientDebugPage::createDevice()
 {
     SAKWebSocketClientDevice *device = new SAKWebSocketClientDevice(this);
     return device;

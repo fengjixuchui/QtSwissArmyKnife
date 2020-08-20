@@ -12,7 +12,6 @@
 
 #include "SAKDebugPage.hh"
 
-class SAKTcpClientDevice;
 class SAKTcpClientDeviceController;
 class SAKTcpClientDebugPage : public SAKDebugPage
 {
@@ -21,10 +20,9 @@ public:
     SAKTcpClientDebugPage(QWidget *parent = Q_NULLPTR);
 
     SAKDebugPageController *deviceController() final;
-    SAKDebugPageDevice* device() final;
+    SAKDebugPageDevice* createDevice() final;
 private:
     SAKTcpClientDeviceController *mTcpClientDeviceController;
-    SAKTcpClientDevice *mTcpClientDevice;
 };
 
 #endif

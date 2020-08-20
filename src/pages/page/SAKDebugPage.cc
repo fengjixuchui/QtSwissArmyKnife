@@ -175,6 +175,8 @@ void SAKDebugPage::changedDeviceState(bool opened)
     mCycleEnableCheckBox->setEnabled(opened);
     mRefreshPushButton->setEnabled(!opened);
     mDeviceController->setUiEnable(opened);
+
+    mSwitchPushButton->setEnabled(true);
 }
 
 void SAKDebugPage::cleanInfo()
@@ -185,7 +187,6 @@ void SAKDebugPage::cleanInfo()
 
 void SAKDebugPage::openOrColoseDevice()
 {
-    mSwitchPushButton->setEnabled(false);
     if (!mDevice){
         setupDevice();
     }
@@ -197,7 +198,6 @@ void SAKDebugPage::openOrColoseDevice()
             openDevice();
         }
     }
-    mSwitchPushButton->setEnabled(true);
 }
 
 void SAKDebugPage::openDevice()
@@ -223,7 +223,7 @@ void SAKDebugPage::closeDevice()
 
 void SAKDebugPage::setupDevice()
 {
-    mDevice = device();
+    mDevice = createDevice();
     if (mDevice){
         connect(this, &SAKDebugPage::requestWriteData, mDevice, &SAKDebugPageDevice::writeBytes);
         connect(mDevice, &SAKDebugPageDevice::bytesWritten, this, &SAKDebugPage::bytesWritten);
@@ -267,6 +267,7 @@ void SAKDebugPage::on_refreshPushButton_clicked()
 
 void SAKDebugPage::on_switchPushButton_clicked()
 {
+    mSwitchPushButton->setEnabled(false);
     openOrColoseDevice();
 }
 
@@ -343,6 +344,6 @@ void SAKDebugPage::on_dataVisualizationPushButton_clicked()
         mChartsController->activateWindow();
     }
 #else
-    QMessageBox::warning(this, tr("Unsupport function"), tr("The function has benn disable, beause the platform is not supported!"));
+    QMessageBox::warning(this, tr("Unsupported function"), tr("The function has been disable, beause of developer's Qt version is not supported!"));
 #endif
 }

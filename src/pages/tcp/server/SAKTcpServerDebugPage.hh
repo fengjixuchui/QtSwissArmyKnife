@@ -19,19 +19,11 @@ class SAKTcpServerDebugPage : public SAKDebugPage
     Q_OBJECT
 public:
     SAKTcpServerDebugPage(QWidget *parent = Q_NULLPTR);
-    ~SAKTcpServerDebugPage();
 
-    /**
-     * @brief controllerInstance 获取控制类实例指针
-     * @return 控制类实例
-     */
-    SAKTcpServerDeviceController *controllerInstance();
-protected:
     SAKDebugPageController *deviceController() final;
-    SAKDebugPageDevice* device() final;
-    void setUiEnable(bool enable);
+    SAKDebugPageDevice* createDevice() final;
 private:
-    SAKTcpServerDeviceController *tcpServerDeviceController;
+    SAKTcpServerDeviceController *mDeviceController;
 };
 
 #endif

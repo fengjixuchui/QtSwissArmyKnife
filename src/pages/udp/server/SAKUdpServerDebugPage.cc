@@ -21,8 +21,8 @@ SAKUdpServerDebugPage::SAKUdpServerDebugPage(QWidget *parent)
     :SAKDebugPage (SAKDataStruct::DebugPageTypeUdpServer, parent)
 {
     mDeviceController = new SAKUdpServerDeviceController(this);
-    initializingPage();
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeUdpServer));
+    initializingPage();
 }
 
 SAKUdpServerDebugPage::~SAKUdpServerDebugPage()
@@ -30,17 +30,12 @@ SAKUdpServerDebugPage::~SAKUdpServerDebugPage()
     mDeviceController->deleteLater();
 }
 
-SAKUdpServerDeviceController *SAKUdpServerDebugPage::controllerInstance()
-{
-    return mDeviceController;
-}
-
 SAKDebugPageController *SAKUdpServerDebugPage::deviceController()
 {
     return mDeviceController;
 }
 
-SAKDebugPageDevice* SAKUdpServerDebugPage::device()
+SAKDebugPageDevice* SAKUdpServerDebugPage::createDevice()
 {
     SAKUdpServerDevice *device = new SAKUdpServerDevice(this);
     return device;

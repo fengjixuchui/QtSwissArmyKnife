@@ -20,33 +20,17 @@
 SAKTcpServerDebugPage::SAKTcpServerDebugPage(QWidget *parent)
     :SAKDebugPage (SAKDataStruct::DebugPageTypeTCPServer, parent)
 {
-    tcpServerDeviceController = new SAKTcpServerDeviceController(this);
-    initializingPage();
+    mDeviceController = new SAKTcpServerDeviceController(this);
     setWindowTitle(SAKGlobal::debugPageNameFromType(SAKDataStruct::DebugPageTypeTCPServer));
-}
-
-SAKTcpServerDebugPage::~SAKTcpServerDebugPage()
-{
-    tcpServerDeviceController->deleteLater();
-}
-
-SAKTcpServerDeviceController *SAKTcpServerDebugPage::controllerInstance()
-{
-    return tcpServerDeviceController;
+    initializingPage();
 }
 
 SAKDebugPageController *SAKTcpServerDebugPage::deviceController()
 {
-    return tcpServerDeviceController;
+    return mDeviceController;
 }
 
-void SAKTcpServerDebugPage::setUiEnable(bool enable)
-{
-    tcpServerDeviceController->setUiEnable(enable);
-    mRefreshPushButton->setEnabled(enable);
-}
-
-SAKDebugPageDevice* SAKTcpServerDebugPage::device()
+SAKDebugPageDevice* SAKTcpServerDebugPage::createDevice()
 {
     SAKTcpServerDevice *device = new SAKTcpServerDevice(this);
     return device;

@@ -26,8 +26,9 @@ SAKTcpClientDevice::SAKTcpClientDevice(SAKTcpClientDebugPage *debugPage, QObject
 bool SAKTcpClientDevice::initializing(QString &errorString)
 {
     QEventLoop eventLoop;
-    SAKTcpClientDeviceController *deviceController = qobject_cast<SAKTcpClientDeviceController*>(mDebugPage->deviceController());
-    auto parameters = deviceController->parameters().value<SAKTcpClientDeviceController::TcpClientParameters>();
+    mDeviceController = qobject_cast<SAKTcpClientDeviceController*>(mDebugPage->deviceController());
+    connect(this, &SAKTcpClientDevice::clientInfoChange, mDeviceController, &SAKTcpClientDeviceController::setClientInfo);
+    auto parameters = mDeviceController->parameters().value<SAKTcpClientDeviceController::TcpClientParameters>();
     mLocalHost = parameters.localHost;
     mLocalPort = parameters.localPort;
     mServerHost = parameters.serverHost;
@@ -45,12 +46,17 @@ bool SAKTcpClientDevice::initializing(QString &errorString)
     if (!bindResult){
         errorString = tr("Binding failed:") + mTcpSocket->errorString();
         return false;
+    }else{
+        QString info = mTcpSocket->localAddress().toString();
+        info.append(":");
+        info.append(QString::number(mTcpSocket->localPort()));
+        emit clientInfoChange(info);
     }
 
     mTcpSocket->connectToHost(mServerHost, mServerPort);
     if (mTcpSocket->state() != QTcpSocket::ConnectedState){
         if (!mTcpSocket->waitForConnected()){
-            errorString = tr("Connect to server failed:")+mTcpSocket->errorString();
+            errorString = tr("Connect to server failed:") + mTcpSocket->errorString();
             return false;
         }
     }
@@ -61,7 +67,7 @@ bool SAKTcpClientDevice::initializing(QString &errorString)
 bool SAKTcpClientDevice::open(QString &errorString)
 {
     if (mTcpSocket->open(QTcpSocket::ReadWrite)){
-        errorString = tr("Unknow error.");
+        errorString = tr("Unknow error");
         return true;
     }else{
         errorString = tr("Can not open device:") + mTcpSocket->errorString();
@@ -90,7 +96,7 @@ bool SAKTcpClientDevice::checkSomething(QString &errorString)
         errorString = tr("Connection has been disconnected.");
         return false;
     }else{
-        errorString = tr("Unknow error.");
+        errorString = tr("Unknow error");
         return true;
     }
 }
@@ -99,12 +105,14 @@ void SAKTcpClientDevice::close()
 {
     if (mTcpSocket->state() == QTcpSocket::ConnectedState){
         mTcpSocket->disconnectFromHost();
-        mTcpSocket->waitForDisconnected();
     }
+
     mTcpSocket->close();
+    emit clientInfoChange(QString());
 }
 
 void SAKTcpClientDevice::free()
 {
     delete mTcpSocket;
+    mTcpSocket = Q_NULLPTR;
 }

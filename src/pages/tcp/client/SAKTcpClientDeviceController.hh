@@ -38,14 +38,10 @@ public:
     ~SAKTcpClientDeviceController();
 
     QVariant parameters() final;
-    void setUiEnable(bool enable) final;
+    void setUiEnable(bool opened) final;
     void refreshDevice() final;
 
-    QString localHost();
-    quint16 localPort();
-    QString serverHost();
-    quint16 serverPort();
-    bool enableCustomLocalSetting();
+    void setClientInfo(QString info);
 private:
     QMutex mParametersMutex;
     TcpClientParameters mParameters;
@@ -54,6 +50,7 @@ private:
     QComboBox *mLocalhostComboBox;
     QLineEdit *mLocalPortlineEdit;
     QCheckBox *mSpecifyClientAddressAndPort;
+    QLineEdit *mClientInfoLineEdit;
     QLineEdit *mServerHostLineEdit;
     QLineEdit *mServerPortLineEdit;
 private slots:

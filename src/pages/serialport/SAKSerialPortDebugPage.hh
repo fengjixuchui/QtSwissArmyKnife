@@ -13,7 +13,6 @@
 #include "SAKDebugPage.hh"
 
 class SAKDebugPageDevice;
-class SAKSerialPortDevice;
 class SAKDebugPageController;
 class SAKSerialPortDeviceController;
 class SAKSerialPortDebugPage : public SAKDebugPage
@@ -24,10 +23,9 @@ public:
     ~SAKSerialPortDebugPage();
 
     SAKDebugPageController *deviceController() final;
-    SAKDebugPageDevice *device() final;
+    SAKDebugPageDevice *createDevice() final;
 private:
     SAKSerialPortDeviceController *mDeviceController;
-    SAKSerialPortDevice *mDevice;
 };
 
 #endif
