@@ -8,8 +8,11 @@
  * the file LICENCE in the root of the source code directory.
  */
 #include <QSsl>
+#include <QFile>
+#include <QSslKey>
 #include <QMetaEnum>
 #include <QStandardItem>
+#include <QSslCertificate>
 #include <QStandardItemModel>
 
 #include "SAKDebugPageCommonSslConfigurationWidget.hh"
@@ -46,9 +49,9 @@ SAKDebugPageCommonSslConfigurationWidget::SAKDebugPageCommonSslConfigurationWidg
     mUsingInnnerCertCheckBox = mUi->usingInnerCertCheckBox;
     mUsingInnerKeyCheckBox = mUi->usingInnerKeyCheckBox;
     mVerifyModeComboBox = mUi->verifyModeComboBox;
-    mVerifyDepthComboBox = mUi->verifyDepthComboBox;
-    mNameLineEdit = mUi->nameLineEdit;
+    mVerifyDepthLineEdit = mUi->verifyDepthLineEdit;
     mOutportPushButton = mUi->outportPushButton;
+    mLongNameCheckBox = mUi->longNameCheckBox;
 
     setupSslProtocolToComboBox(mSslProtocolComboBox);
     setupEllipticCurveToComboBox(mEllipticCurveComboBox, true);
@@ -69,8 +72,7 @@ SAKDebugPageCommonSslConfigurationWidget::SAKDebugPageCommonSslConfigurationWidg
         mUsingInnnerCertCheckBox->setChecked(mSettings->value(mSettingKeyUsingInnnerCert).toBool());
         mUsingInnerKeyCheckBox->setChecked(mSettings->value(mSettingKeyUsingInnerKey).toBool());
         mVerifyModeComboBox->setCurrentText(mSettings->value(mSettingKeyVerifyMode).toString());
-        mVerifyDepthComboBox->setCurrentText(mSettings->value(mSettingKeyVerifyDepth).toString());
-        mNameLineEdit->setText(mSettings->value(mSettingKeyPeerName).toString());
+        mVerifyDepthLineEdit->setText(mSettings->value(mSettingKeyVerifyDepth).toString());
     }
 
     mEnableSetting = true;
@@ -83,7 +85,27 @@ SAKDebugPageCommonSslConfigurationWidget::~SAKDebugPageCommonSslConfigurationWid
 
 QSslConfiguration SAKDebugPageCommonSslConfigurationWidget::sslConfiguration()
 {
-    return QSslConfiguration();
+    QSsl::SslProtocol protocol = static_cast<QSsl::SslProtocol>(mSslProtocolComboBox->currentData().toInt());
+    QSsl::KeyAlgorithm keyAlgorithm = static_cast<QSsl::KeyAlgorithm>(mKeyAlgorithmComboBox->currentData().toInt());
+    QSsl::EncodingFormat encodingFormat = static_cast<QSsl::EncodingFormat>(mEncodingFormatComboBox->currentData().toInt());
+    QSslSocket::PeerVerifyMode peerVerifyMode = static_cast<QSslSocket::PeerVerifyMode>(mVerifyModeComboBox->currentData().toInt());
+
+    QSslConfiguration sslConfiguration;
+    sslConfiguration.setProtocol(protocol);
+    QFile certFile(QString(mCertificationLineEdit->text()));
+    QFile keyFile(QString(mKeyPathLineEdit->text()));
+    certFile.open(QIODevice::ReadOnly);
+    keyFile.open(QIODevice::ReadOnly);
+    QSslCertificate certificate(&certFile, encodingFormat);
+    QSslKey sslKey(&keyFile, keyAlgorithm, encodingFormat);
+    certFile.close();
+    keyFile.close();
+    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConfiguration.setLocalCertificate(certificate);
+    sslConfiguration.setPrivateKey(sslKey);
+    sslConfiguration.setPeerVerifyMode(peerVerifyMode);
+
+    return sslConfiguration;
 }
 
 void SAKDebugPageCommonSslConfigurationWidget::setupSslProtocolToComboBox(QComboBox *comboBox)
@@ -113,6 +135,7 @@ void SAKDebugPageCommonSslConfigurationWidget::setupSslProtocolToComboBox(QCombo
         comboBox->addItem(QString("TlsV1_3"), (QSsl::TlsV1_3));
         comboBox->addItem(QString("TlsV1_3OrLater"), (QSsl::TlsV1_3OrLater));
 #endif
+        comboBox->setCurrentText(QString("SecureProtocols"));
     }else{
         Q_ASSERT_X(false, __FUNCTION__, "The parameter can not be a null value.");
     }
@@ -123,7 +146,7 @@ void SAKDebugPageCommonSslConfigurationWidget::setupEllipticCurveToComboBox(QCom
     if (comboBox){
         comboBox->clear();
         for (auto var : QSslConfiguration::supportedEllipticCurves()){
-            comboBox->addItem(var.shortName(), longName ? var.longName() : var.shortName());
+            comboBox->addItem(longName ? var.longName() : var.shortName());
         }
     }else{
         Q_ASSERT_X(false, __FUNCTION__, "The parameter can not be a null value.");
@@ -148,7 +171,8 @@ void SAKDebugPageCommonSslConfigurationWidget::setupCipherSuiteToComboBox(QCombo
     if (comboBox){
         comboBox->clear();
         QStandardItemModel *itemModel = new QStandardItemModel(comboBox);
-        for (auto var : QSslConfiguration::supportedCiphers()){
+        QList<QSslCipher> sslCipher = QSslConfiguration::supportedCiphers();
+        for (auto var : sslCipher){
             QStandardItem *item = new QStandardItem(var.name());
             item->setToolTip(var.name());
             itemModel->appendRow(item);
@@ -190,24 +214,10 @@ void SAKDebugPageCommonSslConfigurationWidget::on_sslProtocolComboBox_currentTex
     }
 }
 
-void SAKDebugPageCommonSslConfigurationWidget::on_ellipticCurveComboBox_currentTextChanged(const QString &arg1)
-{
-    if (mEnableSetting && mSettings){
-        mSettings->setValue(mSettingKeyEllipticCurve, arg1);
-    }
-}
-
 void SAKDebugPageCommonSslConfigurationWidget::on_keyAlgorithmComboBox_currentTextChanged(const QString &arg1)
 {
     if (mEnableSetting && mSettings){
         mSettings->setValue(mSettingKeyKeyAlgorithm, arg1);
-    }
-}
-
-void SAKDebugPageCommonSslConfigurationWidget::on_cipherSuiteComboBox_currentTextChanged(const QString &arg1)
-{
-    if (mEnableSetting && mSettings){
-        mSettings->setValue(mSettingKeyCipherSuite, arg1);
     }
 }
 
@@ -263,21 +273,19 @@ void SAKDebugPageCommonSslConfigurationWidget::on_verifyModeComboBox_currentText
     }
 }
 
-void SAKDebugPageCommonSslConfigurationWidget::on_verifyDepthComboBox_editTextChanged(const QString &arg1)
+void SAKDebugPageCommonSslConfigurationWidget::on_verifyDepthLineEdit_textChanged(const QString &arg1)
 {
     if (mEnableSetting && mSettings){
         mSettings->setValue(mSettingKeyVerifyDepth, arg1);
     }
 }
 
-void SAKDebugPageCommonSslConfigurationWidget::on_nameLineEdit_textChanged(const QString &arg1)
-{
-    if (mEnableSetting && mSettings){
-        mSettings->setValue(mSettingKeyPeerName, arg1);
-    }
-}
-
 void SAKDebugPageCommonSslConfigurationWidget::on_outportPushButton_clicked()
 {
 
+}
+
+void SAKDebugPageCommonSslConfigurationWidget::on_longNameCheckBox_clicked()
+{
+    setupEllipticCurveToComboBox(mEllipticCurveComboBox, mLongNameCheckBox->isChecked());
 }

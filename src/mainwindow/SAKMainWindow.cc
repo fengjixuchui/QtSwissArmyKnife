@@ -34,7 +34,7 @@
 #include "SAKGlobal.hh"
 #include "SAKSettings.hh"
 #include "SAKSettings.hh"
-#include "SAKDataStruct.hh"
+#include "SAKCommonDataStructure.hh"
 #include "SAKMainWindow.hh"
 #include "QtAppStyleApi.hh"
 #include "SAKApplication.hh"
@@ -157,11 +157,11 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
 #endif
 
     // Create debugging page
-    QMetaEnum metaEnum = QMetaEnum::fromType<SAKDataStruct::SAKEnumDebugPageType>();
+    QMetaEnum metaEnum = QMetaEnum::fromType<SAKCommonDataStructure::SAKEnumDebugPageType>();
     for (int i = 0; i < metaEnum.keyCount(); i++){
         // Test page is selectable
         bool enableTestPage = SAKSettings::instance()->value(mSettingKeyEnableTestPage).toBool();
-        if (!enableTestPage && (metaEnum.value(i) == SAKDataStruct::DebugPageTypeTest)){
+        if (!enableTestPage && (metaEnum.value(i) == SAKCommonDataStructure::DebugPageTypeTest)){
             continue;
         }
 
@@ -182,7 +182,7 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
     }
 
     // Initializing the tools menu
-    QMetaEnum toolTypeMetaEnum = QMetaEnum::fromType<SAKDataStruct::SAKEnumToolType>();
+    QMetaEnum toolTypeMetaEnum = QMetaEnum::fromType<SAKCommonDataStructure::SAKEnumToolType>();
     for (int i = 0; i < toolTypeMetaEnum.keyCount(); i++){
         QString name = SAKGlobal::toolNameFromType(toolTypeMetaEnum.value(i));
         QAction *action = new QAction(name, this);
@@ -208,7 +208,12 @@ const QString SAKMainWindow::settingKeyClearConfiguration()
 
 void SAKMainWindow::initMenuBar()
 {
-    QMenuBar *menuBar = new QMenuBar(Q_NULLPTR);
+#if 0
+    // The menu bar is not show on ubuntu 16.04
+   QMenuBar *menuBar = new QMenuBar(Q_NULLPTR);
+#else
+    QMenuBar *menuBar = this->menuBar();
+#endif
     setMenuBar(menuBar);
     initFileMenu();
     initToolMenu();
@@ -226,7 +231,7 @@ void SAKMainWindow::initFileMenu()
 
     QMenu *tabMenu = new QMenu(tr("New page"), this);
     fileMenu->addMenu(tabMenu);
-    QMetaEnum enums = QMetaEnum::fromType<SAKDataStruct::SAKEnumDebugPageType>();
+    QMetaEnum enums = QMetaEnum::fromType<SAKCommonDataStructure::SAKEnumDebugPageType>();
     for (int i = 0; i < enums.keyCount(); i++){
         QAction *a = new QAction(SAKGlobal::debugPageNameFromType(i), this);
         a->setObjectName(SAKGlobal::debugPageNameFromType(i));
@@ -486,45 +491,11 @@ QWidget *SAKMainWindow::debugPageFromType(int type)
 {
     QWidget *widget = Q_NULLPTR;
     switch (type) {
-    case SAKDataStruct::DebugPageTypeTest:
+    case SAKCommonDataStructure::DebugPageTypeTest:
         widget = new SAKTestDebugPage;
         break;
-    case SAKDataStruct::DebugPageTypeUdpClient:
-        widget = new SAKUdpClientDebugPage;
-        break;
-    case SAKDataStruct::DebugPageTypeUdpServer:
-        widget = new SAKUdpServerDebugPage;
-        break;
-    case SAKDataStruct::DebugPageTypeSslSocketClient:
-        widget = new SAKSslSocketClientDebugPage;
-        break;
-    case SAKDataStruct::DebugPageTypeSslSocketServer:
-        widget = new SAKSslSocketServerDebugPage;
-        break;
-    case SAKDataStruct::DebugPageTypeTCPClient:
-        widget = new SAKTcpClientDebugPage;
-        break;
-    case SAKDataStruct::DebugPageTypeTCPServer:
-        widget = new SAKTcpServerDebugPage;
-        break;
-#ifdef SAK_IMPORT_SCTP_MODULE
-    case SAKDataStruct::DebugPageTypeSCTPClient:
-        widget = new SAKSctpClientDebugPage;
-        break;
-    case SAKDataStruct::DebugPageTypeSCTPServer:
-        widget = new SAKSctpServerDebugPage;
-        break;
-#endif
-#ifdef SAK_IMPORT_WEBSOCKET_MODULE
-    case SAKDataStruct::DebugPageTypeWebSocketClient:
-        widget = new SAKWebSocketClientDebugPage;
-        break;
-    case SAKDataStruct::DebugPageTypeWebSocketServer:
-        widget = new SAKWebSocketServerDebugPage;
-        break;
-#endif
 #ifdef SAK_IMPORT_COM_MODULE
-    case SAKDataStruct::DebugPageTypeCOM:
+    case SAKCommonDataStructure::DebugPageTypeCOM:
         widget = new SAKSerialPortDebugPage;
         break;
 #endif
@@ -538,12 +509,46 @@ QWidget *SAKMainWindow::debugPageFromType(int type)
         widget = new SAKUsbDebugPage;
         break;
 #endif
+    case SAKCommonDataStructure::DebugPageTypeUdpClient:
+        widget = new SAKUdpClientDebugPage;
+        break;
+    case SAKCommonDataStructure::DebugPageTypeUdpServer:
+        widget = new SAKUdpServerDebugPage;
+        break;
+    case SAKCommonDataStructure::DebugPageTypeTCPClient:
+        widget = new SAKTcpClientDebugPage;
+        break;
+    case SAKCommonDataStructure::DebugPageTypeTCPServer:
+        widget = new SAKTcpServerDebugPage;
+        break;
+    case SAKCommonDataStructure::DebugPageTypeSslSocketClient:
+        widget = new SAKSslSocketClientDebugPage;
+        break;
+    case SAKCommonDataStructure::DebugPageTypeSslSocketServer:
+        widget = new SAKSslSocketServerDebugPage;
+        break;
+#ifdef SAK_IMPORT_SCTP_MODULE
+    case SAKDataStruct::DebugPageTypeSCTPClient:
+        widget = new SAKSctpClientDebugPage;
+        break;
+    case SAKDataStruct::DebugPageTypeSCTPServer:
+        widget = new SAKSctpServerDebugPage;
+        break;
+#endif
 #ifdef SAK_IMPORT_BLUETOOTH_MODULE
     case SAKDataStruct::DebugPageTypeBluetoothClient:
         widget = new SAKBluetoothClientDebugPage;
         break;
     case SAKDataStruct::DebugPageTypeBluetoothServer:
         widget = new SAKBluetoothServerDebugPage;
+        break;
+#endif
+#ifdef SAK_IMPORT_WEBSOCKET_MODULE
+    case SAKCommonDataStructure::DebugPageTypeWebSocketClient:
+        widget = new SAKWebSocketClientDebugPage;
+        break;
+    case SAKCommonDataStructure::DebugPageTypeWebSocketServer:
+        widget = new SAKWebSocketServerDebugPage;
         break;
 #endif
     default:

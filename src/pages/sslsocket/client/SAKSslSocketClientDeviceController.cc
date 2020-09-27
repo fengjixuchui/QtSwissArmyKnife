@@ -13,11 +13,15 @@
 #include <QLineEdit>
 
 #include "SAKGlobal.hh"
+#include "SAKDebugPage.hh"
 #include "SAKSslSocketClientDeviceController.hh"
+#include "SAKDebugPageCommonSslConfigurationWidget.hh"
+
 #include "ui_SAKSslSocketClientDeviceController.h"
 
 SAKSslSocketClientDeviceController::SAKSslSocketClientDeviceController(SAKDebugPage *debugPage, QWidget *parent)
     :SAKDebugPageController(debugPage, parent)
+    ,mSslConfigurationWidget(Q_NULLPTR)
     ,mUi(new Ui::SAKSslSocketClientDeviceController)
 {
     mUi->setupUi(this);
@@ -28,6 +32,7 @@ SAKSslSocketClientDeviceController::SAKSslSocketClientDeviceController(SAKDebugP
     mClientInfoLineEdit = mUi->clientInfoLineEdit;
     mServerHostLineEdit = mUi->serverHostLineEdit;
     mServerPortLineEdit = mUi->serverPortLineEdit;
+    mSslConfigurationPushButton = mUi->sslConfigurationPushButton;
 
     qRegisterMetaType<SAKSslSocketClientDeviceController::SslSocketClientParameters>("SAKSslSocketClientDeviceController::SslSocketClientParameters");
     mParameters.localHost = mLocalhostComboBox->currentText();
@@ -36,11 +41,14 @@ SAKSslSocketClientDeviceController::SAKSslSocketClientDeviceController(SAKDebugP
     mParameters.serverHost = mServerHostLineEdit->text();
     mParameters.serverPort = mServerPortLineEdit->text().toInt();
     refreshDevice();
+
+    mSslConfigurationWidget = new SAKDebugPageCommonSslConfigurationWidget(debugPage->settings());
 }
 
 SAKSslSocketClientDeviceController::~SAKSslSocketClientDeviceController()
 {
     delete mUi;
+    mSslConfigurationWidget->deleteLater();
 }
 
 QVariant SAKSslSocketClientDeviceController::parameters()
@@ -74,6 +82,11 @@ void SAKSslSocketClientDeviceController::refreshDevice()
 void SAKSslSocketClientDeviceController::setClientInfo(QString info)
 {
     mClientInfoLineEdit->setText(info);
+}
+
+SAKDebugPageCommonSslConfigurationWidget *SAKSslSocketClientDeviceController::sslConfigurationWidget()
+{
+    return mSslConfigurationWidget;
 }
 
 void SAKSslSocketClientDeviceController::on_localhostComboBox_currentIndexChanged(int index)
@@ -111,4 +124,13 @@ void SAKSslSocketClientDeviceController::on_serverPortLineEdit_textChanged(const
     mParametersMutex.lock();
     mParameters.serverPort = static_cast<quint16>(arg1.toInt());
     mParametersMutex.unlock();
+}
+
+void SAKSslSocketClientDeviceController::on_sslConfigurationPushButton_clicked()
+{
+    if(mSslConfigurationWidget->isHidden()){
+        mSslConfigurationWidget->show();
+    }else{
+        mSslConfigurationWidget->activateWindow();
+    }
 }
