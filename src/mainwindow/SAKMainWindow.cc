@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QFile>
 #include <QRect>
+#include <QDebug>
 #include <QLocale>
 #include <QTabBar>
 #include <QAction>
@@ -27,6 +28,7 @@
 #include <QMessageBox>
 #include <QStyleFactory>
 #include <QJsonDocument>
+#include <QDesktopWidget>
 #include <QJsonParseError>
 #include <QDesktopServices>
 
@@ -34,7 +36,6 @@
 #include "SAKGlobal.hh"
 #include "SAKSettings.hh"
 #include "SAKSettings.hh"
-#include "SAKCommonDataStructure.hh"
 #include "SAKMainWindow.hh"
 #include "QtAppStyleApi.hh"
 #include "SAKApplication.hh"
@@ -47,9 +48,8 @@
 #include "SAKUdpServerDebugPage.hh"
 #include "SAKTcpClientDebugPage.hh"
 #include "SAKTcpServerDebugPage.hh"
+#include "SAKCommonDataStructure.hh"
 #include "SAKMainWindowQrCodeView.hh"
-#include "SAKSslSocketClientDebugPage.hh"
-#include "SAKSslSocketServerDebugPage.hh"
 #include "SAKMainWindowMoreInformationDialog.hh"
 #include "SAKMainWindowTabPageNameEditDialog.hh"
 
@@ -80,6 +80,11 @@
 #ifdef SAK_IMPORT_FILECHECKER_MODULE
 #include "SAKToolFileChecker.hh"
 #endif
+#ifdef SAK_IMPORT_MODULE_SSLSOCKET
+#include "SAKSslSocketClientDebugPage.hh"
+#include "SAKSslSocketServerDebugPage.hh"
+#endif
+
 
 #include "ui_SAKMainWindow.h"
 
@@ -100,31 +105,27 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
     mUpdateManager->setSettings(SAKSettings::instance());
     mQrCodeDialog = new SAKMainWindowQrCodeView(this);
 
-    QHBoxLayout *layout = new QHBoxLayout();
-    layout->addWidget(mTabWidget);
-#if 0
+#ifdef Q_OS_ANDROID
     setWindowFlags(Qt::FramelessWindowHint);
-    QScrollArea* scrollArea = new QScrollArea(this);
+    QScrollArea* scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     setCentralWidget(scrollArea);
-    scrollArea->setLayout(layout);
-    scrollArea->layout()->setContentsMargins(6, 6, 6, 6);
-    scrollArea->setWidget(tabWidget);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollArea->setWidget(mTabWidget);
 
-    QDesktopWidget *desktop = QApplication::desktop();
-    QRect rect = desktop->screenGeometry(tabWidget);
-    tabWidget->setFixedWidth(rect.width());
+    //QDesktopWidget *desktop = QApplication::desktop();
+    //mTabWidget->setFixedWidth(desktop->width() - scrollArea->verticalScrollBar()->width());
 #else
+    QHBoxLayout *layout = new QHBoxLayout();
+    layout->addWidget(mTabWidget);
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
     centralWidget->setLayout(layout);
     centralWidget->layout()->setContentsMargins(6, 6, 6, 6);
-#endif
     QString title = QString(tr("Qt Swiss Army Knife"));
     title.append(QString(" "));
     title.append(QString("v") + SAK::instance()->version());
     setWindowTitle(title);
+#endif
 
     mTabWidget->setTabsClosable(true);
     connect(mTabWidget, &QTabWidget::tabCloseRequested, this, &SAKMainWindow::removeRemovableDebugPage);
@@ -521,12 +522,14 @@ QWidget *SAKMainWindow::debugPageFromType(int type)
     case SAKCommonDataStructure::DebugPageTypeTCPServer:
         widget = new SAKTcpServerDebugPage;
         break;
+#ifdef SAK_IMPORT_MODULE_SSLSOCKET
     case SAKCommonDataStructure::DebugPageTypeSslSocketClient:
         widget = new SAKSslSocketClientDebugPage;
         break;
     case SAKCommonDataStructure::DebugPageTypeSslSocketServer:
         widget = new SAKSslSocketServerDebugPage;
         break;
+#endif
 #ifdef SAK_IMPORT_SCTP_MODULE
     case SAKDataStruct::DebugPageTypeSCTPClient:
         widget = new SAKSctpClientDebugPage;
