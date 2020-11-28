@@ -18,12 +18,7 @@ class SAKTestDebugPage : public SAKDebugPage
 {
     Q_OBJECT
 public:
-    SAKTestDebugPage(QWidget *parent = Q_NULLPTR);
-
-    SAKDebugPageController *deviceController() final;
-    SAKDebugPageDevice *createDevice() final;
-private:
-    SAKTestDeviceController *mDeviceController;
+    Q_INVOKABLE SAKTestDebugPage(int type, QString name, QWidget *parent = Q_NULLPTR);
 };
 
 #endif

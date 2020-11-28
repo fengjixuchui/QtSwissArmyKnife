@@ -10,13 +10,13 @@
 #include <QDebug>
 #include <QMetaType>
 
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
 #include <QSerialPortInfo>
 Q_DECLARE_METATYPE(QSerialPortInfo)
 #endif
 
-#include "SAKGlobal.hh"
 #include "SAKDebugPage.hh"
+#include "SAKCommonInterface.hh"
 #include "SAKOtherTransmissionItem.hh"
 #include "SAKOtherTransmissionItemCom.hh"
 
@@ -24,12 +24,12 @@ Q_DECLARE_METATYPE(QSerialPortInfo)
 
 SAKOtherTransmissionItemCom::SAKOtherTransmissionItemCom(SAKDebugPage *_debugPage, QWidget *parent)
     :SAKOtherTransmissionItem (_debugPage, parent)
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
     ,mUi (new Ui::SAKOtherTransmissionItemCom)
     ,mSerialPort (Q_NULLPTR)
 #endif
 {    
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
     mUi->setupUi(this);
     mEnableCheckBox = mUi->enableCheckBox;
     mHandleReceiveDataCheckBox = mUi->handleReceiveDataCheckBox;
@@ -40,11 +40,11 @@ SAKOtherTransmissionItemCom::SAKOtherTransmissionItemCom(SAKDebugPage *_debugPag
     mStopBitscomboBox = mUi->stopBitscomboBox;
     mParityComboBox = mUi->parityComboBox;
 
-    SAKGlobal::initComComboBox(mComComboBox);
-    SAKGlobal::initBaudRateComboBox(mBaudRateComboBox);
-    SAKGlobal::initDataBitsComboBox(mDataBitscomboBox);
-    SAKGlobal::initStopBitsComboBox(mStopBitscomboBox);
-    SAKGlobal::initParityComboBox(mParityComboBox);
+    SAKCommonInterface::addSerialPortNametItemsToComboBox(mComComboBox);
+    SAKCommonInterface::addSerialPortBaudRateItemsToComboBox(mBaudRateComboBox);
+    SAKCommonInterface::addSerialPortDataBitItemsToComboBox(mDataBitscomboBox);
+    SAKCommonInterface::addSerialPortStopBitItemsToComboBox(mStopBitscomboBox);
+    SAKCommonInterface::addSerialPortParityItemsToComboBox(mParityComboBox);
 
     mHandleReceiveDataCheckBox->setChecked(true);
 #else
@@ -58,14 +58,14 @@ SAKOtherTransmissionItemCom::SAKOtherTransmissionItemCom(SAKDebugPage *_debugPag
 #endif
 }
 
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
 SAKOtherTransmissionItemCom::~SAKOtherTransmissionItemCom()
 {
     delete mUi;
 }
 #endif
 
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
 void SAKOtherTransmissionItemCom::write(QByteArray data)
 {
     if (mSerialPort){
@@ -78,7 +78,7 @@ void SAKOtherTransmissionItemCom::write(QByteArray data)
 }
 #endif
 
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
 void SAKOtherTransmissionItemCom::on_enableCheckBox_clicked()
 {
     // c++11 lambda
@@ -121,14 +121,14 @@ void SAKOtherTransmissionItemCom::on_enableCheckBox_clicked()
 }
 #endif
 
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
 void SAKOtherTransmissionItemCom::on_customBaudrateCheckBox_clicked()
 {
     mBaudRateComboBox->setEditable(mCustomBaudrateCheckBox->isChecked());
 }
 #endif
 
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
 void SAKOtherTransmissionItemCom::read()
 {
     if (mSerialPort){
@@ -142,7 +142,7 @@ void SAKOtherTransmissionItemCom::read()
 }
 #endif
 
-#ifdef SAK_IMPORT_COM_MODULE
+#ifdef SAK_IMPORT_MODULE_SERIALPORT
 void SAKOtherTransmissionItemCom::setUiEnable(bool enable)
 {
     mComComboBox->setEnabled(enable);

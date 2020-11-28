@@ -11,27 +11,15 @@
 #include <QWidget>
 #include <QHBoxLayout>
 
-#include "SAKGlobal.hh"
 #include "SAKCommonDataStructure.hh"
 #include "SAKTcpServerDevice.hh"
 #include "SAKTcpServerDebugPage.hh"
 #include "SAKTcpServerDeviceController.hh"
 
-SAKTcpServerDebugPage::SAKTcpServerDebugPage(QWidget *parent)
-    :SAKDebugPage (SAKCommonDataStructure::DebugPageTypeTCPServer, parent)
+SAKTcpServerDebugPage::SAKTcpServerDebugPage(int type, QString name, QWidget *parent)
+    :SAKDebugPage (type, name, parent)
 {
     mDeviceController = new SAKTcpServerDeviceController(this);
-    setWindowTitle(SAKGlobal::debugPageNameFromType(SAKCommonDataStructure::DebugPageTypeTCPServer));
-    initializingPage();
-}
-
-SAKDebugPageController *SAKTcpServerDebugPage::deviceController()
-{
-    return mDeviceController;
-}
-
-SAKDebugPageDevice* SAKTcpServerDebugPage::createDevice()
-{
-    SAKTcpServerDevice *device = new SAKTcpServerDevice(this);
-    return device;
+    mDevice = new SAKTcpServerDevice(this, this);
+    initializePage();
 }

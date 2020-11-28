@@ -11,12 +11,12 @@
 #include <QDebug>
 #include <QSqlError>
 
-#include "SAKGlobal.hh"
 #include "SAKDebugPage.hh"
-#include "SAKCommonDataStructure.hh"
-#include "SAKCommonCrcInterface.hh"
 #include "SAKInputDataFactory.hh"
+#include "SAKCommonCrcInterface.hh"
+#include "SAKCommonDataStructure.hh"
 #include "SAKInputDataPresetItem.hh"
+#include "SAKCommonDataStructure.hh"
 #include "SAKDebugPageInputController.hh"
 
 #include "ui_SAKInputDataPresetItem.h"
@@ -79,8 +79,7 @@ void SAKInputDataPresetItem::initializingItem()
     mTextFormatComboBox = mUi->textFormatComboBox;
     mDescriptionLineEdit = mUi->descriptionLineEdit;
     mInputTextEdit = mUi->inputTextEdit;
-
-    SAKGlobal::initInputTextFormatComboBox(mTextFormatComboBox);
+    SAKCommonDataStructure::setComboBoxTextInputFormat(mTextFormatComboBox);
 }
 
 void SAKInputDataPresetItem::on_textFormatComboBox_currentTextChanged(const QString &text)

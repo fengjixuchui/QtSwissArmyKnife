@@ -15,12 +15,12 @@
 #include <QStandardPaths>
 #include <QListWidgetItem>
 
-#include "SAKGlobal.hh"
 #include "SAKDebugPage.hh"
-#include "SAKCommonDataStructure.hh"
-#include "SAKCommonCrcInterface.hh"
 #include "SAKInputDataFactory.hh"
+#include "SAKCommonCrcInterface.hh"
+#include "SAKCommonDataStructure.hh"
 #include "SAKInputDataPresetItem.hh"
+#include "SAKCommonDataStructure.hh"
 #include "SAKInputCrcSettingsDialog.hh"
 #include "SAKDebugPageInputController.hh"
 #include "SAKInputDataPresetItemManager.hh"
@@ -83,8 +83,8 @@ SAKDebugPageInputController::SAKDebugPageInputController(SAKDebugPage *debugPage
     mSendPushButton->setEnabled(false);
     mSendPresetPushButton->setEnabled(false);
     mCycleEnableCheckBox->setEnabled(false);
-    SAKGlobal::initInputTextFormatComboBox(mInputModelComboBox);
-    SAKGlobal::initCRCComboBox(mCrcParameterModelsComboBox);
+    SAKCommonDataStructure::setComboBoxTextInputFormat(mInputModelComboBox);
+    SAKCommonCrcInterface::addCrcModelItemsToComboBox(mCrcParameterModelsComboBox);
     // The function must be called before connecting signals and slots
     readinSettings();
 
@@ -104,6 +104,8 @@ SAKDebugPageInputController::SAKDebugPageInputController(SAKDebugPage *debugPage
         mSettings->setValue(mSettingStringBigEndian, QVariant::fromValue(mInputParameters.bigEndian));
         mSettings->setValue(mSettingStringCrcStartByte, QVariant::fromValue(mInputParameters.startByte));
         mSettings->setValue(mSettingStringCrcEndByte, QVariant::fromValue(mInputParameters.endByte));
+
+        updateCRC();
     });
 
     connect(mInputModelComboBox, &QComboBox::currentTextChanged, this, &SAKDebugPageInputController::changeInputModel);
@@ -149,66 +151,9 @@ void SAKDebugPageInputController::formattingInputText(QTextEdit *textEdit, int m
     textEdit->blockSignals(true);
     QString plaintext = textEdit->toPlainText();
     if (!plaintext.isEmpty()){
-        if (model == SAKCommonDataStructure::InputFormatBin){
-            QString strTemp;
-            plaintext.remove(QRegExp("[^0-1]"));
-            for (int i = 0; i < plaintext.length(); i++){
-                if ((i != 0) && (i % 8 == 0)){
-                    strTemp.append(QChar(' '));
-                }
-                strTemp.append(plaintext.at(i));
-            }
-            textEdit->setText(strTemp);
-            textEdit->moveCursor(QTextCursor::End);
-        }else if(model == SAKCommonDataStructure::InputFormatOct) {
-            QString strTemp;
-            plaintext.remove(QRegExp("[^0-7]"));
-            for (int i = 0; i < plaintext.length(); i++){
-                if ((i != 0) && (i % 2 == 0)){
-                    strTemp.append(QChar(' '));
-                }
-                strTemp.append(plaintext.at(i));
-            }
-            textEdit->setText(strTemp);
-            textEdit->moveCursor(QTextCursor::End);
-        }else if(model == SAKCommonDataStructure::InputFormatDec) {
-            QString strTemp;
-            plaintext.remove(QRegExp("[^0-9]"));
-            for (int i = 0; i < plaintext.length(); i++){
-                if ((i != 0) && (i % 2 == 0)){
-                    strTemp.append(QChar(' '));
-                }
-                strTemp.append(plaintext.at(i));
-            }
-            textEdit->setText(strTemp);
-            textEdit->moveCursor(QTextCursor::End);
-        }else if(model == SAKCommonDataStructure::InputFormatHex) {
-            QString strTemp;
-            plaintext.remove(QRegExp("[^0-9a-fA-F]"));
-            for (int i = 0; i < plaintext.length(); i++){
-                if ((i != 0) && (i % 2 == 0)){
-                    strTemp.append(QChar(' '));
-                }
-                strTemp.append(plaintext.at(i));
-            }
-            textEdit->setText(strTemp.toUpper());
-            textEdit->moveCursor(QTextCursor::End);
-        }else if(model == SAKCommonDataStructure::InputFormatAscii) {
-            QString newString;
-            for (int i = 0; i < plaintext.count(); i++){
-                if (plaintext.at(i).unicode() <= 127){
-                    newString.append(plaintext.at(i));
-                }
-            }
-            textEdit->setText(newString);
-            textEdit->moveCursor(QTextCursor::End);
-        }else if(model == SAKCommonDataStructure::InputFormatUtf8) {
-            /// nothing to do
-        }else if(model == SAKCommonDataStructure::InputFormatLocal) {
-            /// nothing to do
-        }else {
-            Q_ASSERT_X(false, __FUNCTION__, "Unknow input model");
-        }
+        QString cookedString = SAKCommonDataStructure::formattingString(plaintext, static_cast<SAKCommonDataStructure::SAKEnumTextInputFormat>(model));
+        textEdit->setText(cookedString);
+        textEdit->moveCursor(QTextCursor::End);
     }
     textEdit->blockSignals(false);
 }
@@ -253,7 +198,7 @@ void SAKDebugPageInputController::saveInputDataToFile()
     QString fileName = QFileDialog::getSaveFileName(Q_NULLPTR,
                                                     tr("Save File"),
                                                     QStandardPaths::writableLocation(QStandardPaths::DesktopLocation).append("/").append(defaultName),
-                                                    tr("txt (*.txt);;all (*.txt)"));
+                                                    tr("txt (*.txt);;all (*.*)"));
 
     if (fileName.isEmpty()){
         return;
@@ -348,6 +293,11 @@ void SAKDebugPageInputController::initParameters()
     mInputParameters.cycleTime = mCycleTimeLineEdit->text().toInt();
     mInputParameters.inputModel = mInputModelComboBox->currentData().toInt();
     mInputParameters.crcModel = mCrcParameterModelsComboBox->currentData().toInt();
+
+    SAKInputCrcSettingsDialog::ParameterContext ctx = mCrcSettingsDialog->parametersContext();
+    mInputParameters.startByte = ctx.startByte;
+    mInputParameters.endByte = ctx.endByte;
+    mInputParameters.bigEndian = ctx.bigEndianCRC;
 }
 
 void SAKDebugPageInputController::setCycleEnable()
@@ -377,9 +327,10 @@ void SAKDebugPageInputController::cycleTimerTimeout()
 void SAKDebugPageInputController::updateCRC()
 {
     QString rawData = mInputTextEdit->toPlainText();
-    QByteArray cookedData = mInputDataFactory->rawDataToArray(rawData, mInputParameters);
+    QByteArray data = mInputDataFactory->rawDataToArray(rawData, mInputParameters);
+    QByteArray crcInputData = mInputDataFactory->extractCrcData(data, mInputParameters);
 
-    quint32 crc = mInputDataFactory->crcCalculate(cookedData, mInputParameters.crcModel);
+    quint32 crc = mInputDataFactory->crcCalculate(crcInputData, mInputParameters.crcModel);
     int bits =  mCrcInterface->getBitsWidth(static_cast<SAKCommonCrcInterface::CRCModel>(mInputParameters.crcModel));
     mCrcLabel->setText(QString(QString("%1").arg(QString::number(crc, 16), (bits/8)*2, '0')).toUpper().prepend("0x"));
 }

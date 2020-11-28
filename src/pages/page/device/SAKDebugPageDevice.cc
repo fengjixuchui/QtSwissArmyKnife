@@ -7,13 +7,21 @@
  * QtSwissArmyKnife is licensed according to the terms in
  * the file LICENCE in the root of the source code directory.
  */
+#include <QWidget>
+#include <QDialog>
 #include <QEventLoop>
-#include "SAKDebugPageDevice.hh"
+#include <QApplication>
 
-SAKDebugPageDevice::SAKDebugPageDevice(QObject *parent)
+#include "SAKDebugPageDevice.hh"
+#include "SAKDebugPageDeviceMask.hh"
+
+SAKDebugPageDevice::SAKDebugPageDevice(SAKDebugPage *debugPage, QObject *parent)
     :QThread(parent)
+    ,mDebugPage(debugPage)
 {
-    // nothing to do
+    mDeviceMask = new SAKDebugPageDeviceMask(mDebugPage, Q_NULLPTR);
+    mDeviceMask->setWindowModality(Qt::ApplicationModal);
+    mSettingsPanelList << SettingsPanel{tr("Mask settings"), qobject_cast<QWidget*>(mDeviceMask)};
 }
 
 SAKDebugPageDevice::~SAKDebugPageDevice()
@@ -22,6 +30,11 @@ SAKDebugPageDevice::~SAKDebugPageDevice()
     mThreadWaitCondition.wakeAll();
     exit();
     wait();
+
+    for (auto var : mSettingsPanelList){
+        var.panel->close();
+        var.panel->deleteLater();
+    }
 }
 
 void SAKDebugPageDevice::requestWakeup()
@@ -38,6 +51,11 @@ void SAKDebugPageDevice::writeBytes(QByteArray bytes)
         mWaitingForWritingBytesList.append(QByteArray("empty"));
     }
     mWaitingForWritingBytesListMutex.unlock();
+}
+
+QList<SAKDebugPageDevice::SettingsPanel> SAKDebugPageDevice::settingsPanelList()
+{
+    return mSettingsPanelList;
 }
 
 QByteArray SAKDebugPageDevice::takeWaitingForWrittingBytes()
@@ -74,6 +92,16 @@ void SAKDebugPageDevice::run()
             // Read bytes from device
             QByteArray bytes = read();
             if (bytes.length() > 0){
+                auto parasCtx = mDeviceMask->parametersContext();
+                QByteArray temp;
+                if (parasCtx.enableMask){
+                    for (int i = 0; i < bytes.length(); i++){
+                        quint8 value =  quint8(bytes.at(i));
+                        value ^= parasCtx.rxMask;
+                        temp.append(reinterpret_cast<char*>(&value));
+                    }
+                    bytes = temp;
+                }
                 emit bytesRead(bytes);
             }
 
@@ -82,6 +110,16 @@ void SAKDebugPageDevice::run()
                 bytes = takeWaitingForWrittingBytes();
                 if (bytes.length() > 0){
                     bytes = write(bytes);
+                    auto parasCtx = mDeviceMask->parametersContext();
+                    QByteArray temp;
+                    if (parasCtx.enableMask){
+                        for (int i = 0; i < bytes.length(); i++){
+                            quint8 value =  quint8(bytes.at(i));
+                            value ^= parasCtx.txMask;
+                            temp.append(reinterpret_cast<char*>(&value));
+                        }
+                        bytes = temp;
+                    }
                     emit bytesWritten(bytes);
                 }else{
                     break;
@@ -91,6 +129,16 @@ void SAKDebugPageDevice::run()
             // Just for debugging data stream(for test page only)
             bytes = writeForTest();
             if (bytes.length()){
+                auto parasCtx = mDeviceMask->parametersContext();
+                QByteArray temp;
+                if (parasCtx.enableMask){
+                    for (int i = 0; i < bytes.length(); i++){
+                        quint8 value =  quint8(bytes.at(i));
+                        value ^= parasCtx.txMask;
+                        temp.append(reinterpret_cast<char*>(&value));
+                    }
+                    bytes = temp;
+                }
                 emit bytesWritten(bytes);
             }
 
@@ -144,7 +192,7 @@ QByteArray SAKDebugPageDevice::write(QByteArray bytes)
 
 bool SAKDebugPageDevice::checkSomething(QString &errorString)
 {
-    errorString = QString("Unknow error");
+    errorString = QString("Unknown error");
     return true;
 }
 

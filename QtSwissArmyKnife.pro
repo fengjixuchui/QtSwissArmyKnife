@@ -20,6 +20,11 @@ contains(CONFIG, debug, debug|release){
     TARGET = QtSwissArmyKnife
 }
 
+win32:mingw {
+    # It seems to be not effective
+    QMAKE_LFLAGS += -static-libgcc -static-libstdc++
+}
+
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -43,6 +48,7 @@ include(SAKSetup.pri)
 include(SAKTools.pri)
 include(SAKCommon.pri)
 include(SAKCharts.pri)
+include(SAKModbus.pri)
 include(SAKModules.pri)
 #include(SAKBluetooth.pri)
 include(SAKWebSocket.pri)
@@ -79,7 +85,9 @@ OBJECTS_DIR = $$OUT_PWD/obj
 win32 {
     RC_ICONS = Windows.ico
     msvc:{
-        QMAKE_CXXFLAGS += -execution-charset:utf-8
+        lessThan(QT_MAJOR_VERSION, 5){
+                QMAKE_CXXFLAGS += -execution-charset:utf-8
+        }
     }
 }
 
@@ -96,12 +104,12 @@ RESOURCES += \
 INCLUDEPATH += \
     src \
     src/common \
-    src/mainwindow \
     src/pages \
     src/pages/page \
     src/pages/page/common \
     src/pages/page/controller \
     src/pages/page/device \
+    src/pages/page/device/mask \
     src/pages/page/input \
     src/pages/page/input/crcsettings \
     src/pages/page/input/datafactory \
@@ -121,17 +129,13 @@ INCLUDEPATH += \
     src/pages/test \
     src/pages/udp/client \
     src/pages/udp/server \
-    src/splashscreen \
-    src/singleton \
     src/update
 
 FORMS += \
-    src/mainwindow/SAKMainWindow.ui \
-    src/mainwindow/SAKMainWindowMoreInformationDialog.ui \
-    src/mainwindow/SAKMainWindowQrCodeView.ui \
-    src/mainwindow/SAKMainWindowTabPageNameEditDialog.ui \
+    src/SAKMainWindow.ui \
     src/pages/page/SAKDebugPage.ui \
     src/pages/page/common/SAKDebugPageCommonSslConfigurationWidget.ui \
+    src/pages/page/device/mask/SAKDebugPageDeviceMask.ui \
     src/pages/page/input/crcsettings/SAKInputCrcSettingsDialog.ui \
     src/pages/page/input/datapreset/SAKInputDataPresetItem.ui \
     src/pages/page/input/datapreset/SAKInputDataPresetItemManager.ui \
@@ -154,29 +158,21 @@ FORMS += \
     src/pages/udp/client/SAKUdpClientDeviceController.ui \
     src/pages/udp/client/SAKUdpClientMulticastEditingDialog.ui \
     src/pages/udp/server/SAKUdpServerDeviceController.ui \
-    src/singleton/SAKSingletonErrorDialog.ui \
     src/update/SAKDownloadItemWidget.ui \
     src/update/SAKUpdateManager.ui
 
 HEADERS += \
-    src/SAK.hh \
     src/SAKApplication.hh \
-    src/SAKGlobal.hh \
-    src/SAKSqlDatabase.hh \
+    src/SAKMainWindow.hh \
     src/common/SAKCommonCrcInterface.hh \
     src/common/SAKCommonDataStructure.hh \
     src/common/SAKCommonInterface.hh \
-    src/mainwindow/SAKMainWindow.hh \
-    src/SAKSettings.hh \
-    src/mainwindow/SAKMainWindowMoreInformationDialog.hh \
-    src/mainwindow/SAKMainWindowQrCode.hh \
-    src/mainwindow/SAKMainWindowQrCodeView.hh \
-    src/mainwindow/SAKMainWindowTabPageNameEditDialog.hh \
     src/pages/page/SAKDebugPage.hh \
     src/pages/page/common/SAKDebugPageCommonDatabaseInterface.hh \
     src/pages/page/common/SAKDebugPageCommonSslConfigurationWidget.hh \
     src/pages/page/controller/SAKDebugPageController.hh \
     src/pages/page/device/SAKDebugPageDevice.hh \
+    src/pages/page/device/mask/SAKDebugPageDeviceMask.hh \
     src/pages/page/input/SAKDebugPageInputController.hh \
     src/pages/page/input/crcsettings/SAKInputCrcSettingsDialog.hh \
     src/pages/page/input/datafactory/SAKInputDataFactory.hh \
@@ -218,31 +214,21 @@ HEADERS += \
     src/pages/udp/server/SAKUdpServerDebugPage.hh \
     src/pages/udp/server/SAKUdpServerDevice.hh \
     src/pages/udp/server/SAKUdpServerDeviceController.hh \
-    src/singleton/SAKSingletonController.hh \
-    src/singleton/SAKSingletonErrorDialog.hh \
-    src/splashscreen/SAKSplashScreen.hh \
     src/update/SAKDownloadItemWidget.hh \
     src/update/SAKUpdateManager.hh
 
 SOURCES += \
-    src/SAK.cc \
     src/SAKApplication.cc \
-    src/SAKGlobal.cc \
-    src/SAKSqlDatabase.cc \
+    src/SAKMainWindow.cc \
     src/common/SAKCommonCrcInterface.cc \
     src/common/SAKCommonDataStructure.cc \
     src/common/SAKCommonInterface.cc \
-    src/mainwindow/SAKMainWindow.cc \
-    src/SAKSettings.cc \
-    src/mainwindow/SAKMainWindowMoreInformationDialog.cc \
-    src/mainwindow/SAKMainWindowQrCode.cc \
-    src/mainwindow/SAKMainWindowQrCodeView.cc \
-    src/mainwindow/SAKMainWindowTabPageNameEditDialog.cc \
     src/pages/page/SAKDebugPage.cc \
     src/pages/page/common/SAKDebugPageCommonDatabaseInterface.cc \
     src/pages/page/common/SAKDebugPageCommonSslConfigurationWidget.cc \
     src/pages/page/controller/SAKDebugPageController.cc \
     src/pages/page/device/SAKDebugPageDevice.cc \
+    src/pages/page/device/mask/SAKDebugPageDeviceMask.cc \
     src/pages/page/input/SAKDebugPageInputController.cc \
     src/pages/page/input/crcsettings/SAKInputCrcSettingsDialog.cc \
     src/pages/page/input/datafactory/SAKInputDataFactory.cc \
@@ -285,9 +271,6 @@ SOURCES += \
     src/pages/udp/server/SAKUdpServerDebugPage.cc \
     src/pages/udp/server/SAKUdpServerDevice.cc \
     src/pages/udp/server/SAKUdpServerDeviceController.cc \
-    src/singleton/SAKSingletonController.cc \
-    src/singleton/SAKSingletonErrorDialog.cc \
-    src/splashscreen/SAKSplashScreen.cc \
     src/update/SAKDownloadItemWidget.cc \
     src/update/SAKUpdateManager.cc
 

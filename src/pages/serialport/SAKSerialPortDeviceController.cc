@@ -13,12 +13,14 @@
 #include <QLineEdit>
 #include <QSerialPortInfo>
 
-#include "SAKGlobal.hh"
+#include "SAKDebugPage.hh"
+#include "SAKCommonInterface.hh"
 #include "SAKSerialPortDeviceController.hh"
 #include "ui_SAKSerialPortDeviceController.h"
 
 SAKSerialPortDeviceController::SAKSerialPortDeviceController(SAKDebugPage *debugPage, QWidget *parent)
     :SAKDebugPageController(debugPage, parent)
+    ,mDebugPage(debugPage)
     ,ui(new Ui::SAKSerialPortDeviceController)
     ,serialportsComboBox(Q_NULLPTR)
     ,baudrateComboBox(Q_NULLPTR)
@@ -74,12 +76,12 @@ void SAKSerialPortDeviceController::setUiEnable(bool opened)
 
 void SAKSerialPortDeviceController::refreshDevice()
 {
-    SAKGlobal::initComComboBox(serialportsComboBox);
-    SAKGlobal::initBaudRateComboBox(baudrateComboBox);
-    SAKGlobal::initDataBitsComboBox(databitsComboBox);
-    SAKGlobal::initStopBitsComboBox(stopbitsComboBox);
-    SAKGlobal::initParityComboBox(parityComboBox);
-    SAKGlobal::initFlowControlComboBox(flowControlComboBox);
+    SAKCommonInterface::addSerialPortNametItemsToComboBox(serialportsComboBox);
+    SAKCommonInterface::addSerialPortBaudRateItemsToComboBox(baudrateComboBox);
+    SAKCommonInterface::addSerialPortDataBitItemsToComboBox(databitsComboBox);
+    SAKCommonInterface::addSerialPortStopBitItemsToComboBox(stopbitsComboBox);
+    SAKCommonInterface::addSerialPortParityItemsToComboBox(parityComboBox);
+    SAKCommonInterface::addSerialPortFlowControlItemsToComboBox(flowControlComboBox);
 }
 
 void SAKSerialPortDeviceController::setBaudRate(quint32 bd)

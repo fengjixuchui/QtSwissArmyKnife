@@ -12,7 +12,8 @@
 #include <QMetaEnum>
 #include <QLineEdit>
 
-#include "SAKGlobal.hh"
+#include "SAKDebugPage.hh"
+#include "SAKCommonInterface.hh"
 #include "SAKTcpServerDeviceController.hh"
 #include "ui_SAKTcpServerDeviceController.h"
 
@@ -59,7 +60,7 @@ void SAKTcpServerDeviceController::setUiEnable(bool opened)
 
 void SAKTcpServerDeviceController::refreshDevice()
 {
-    SAKGlobal::initIpComboBox(mServerHostComboBox);
+    SAKCommonInterface::addIpItemsToComboBox(mServerHostComboBox);
 }
 
 void SAKTcpServerDeviceController::addClient(QString host, quint16 port, QTcpSocket *socket)

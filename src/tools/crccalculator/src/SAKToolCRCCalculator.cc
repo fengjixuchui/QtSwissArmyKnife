@@ -156,7 +156,7 @@ void SAKToolCRCCalculator::textFormatControl()
 
     QString strTemp;
     QString plaintext = mInputTextEdit->toPlainText();
-    plaintext.remove(QRegExp("[^0-9a-fA-F]"));
+    plaintext.remove(QRegularExpression("[^0-9a-fA-F]"));
     for (int i = 0; i < plaintext.length(); i++){
         if ((i != 0) && (i % 2 == 0)){
             strTemp.append(QChar(' '));
@@ -180,8 +180,8 @@ void SAKToolCRCCalculator::changedParameterModel(int index)
         model = static_cast<SAKCommonCrcInterface::CRCModel>(ret);
     }else{
         QLoggingCategory category(mLogCategory);
-        qCWarning(category) << "Unknow parameter model!";
-        Q_ASSERT_X(false, __FUNCTION__, "Unknow parameter model!");
+        qCWarning(category) << "Unknown parameter model!";
+        Q_ASSERT_X(false, __FUNCTION__, "Unknown parameter model!");
         return;
     }
 

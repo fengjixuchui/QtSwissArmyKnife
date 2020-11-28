@@ -23,7 +23,7 @@ extern "C" {
 #include "ui_SAKToolQRCodeCreator.h"
 
 SAKToolQRCodeCreator::SAKToolQRCodeCreator(QWidget *parent)
-    :SAKToolBase(parent)
+    :QWidget(parent)
     ,ui(new Ui::SAKToolQRCodeCreator)
 {
     ui->setupUi(this);
@@ -52,12 +52,12 @@ QPixmap SAKToolQRCodeCreator::encodeString(const QString &text, int width)
     }
 
     QRcode *qrcode = QRcode_encodeString(text.toLatin1().constData(), 0, QR_ECLEVEL_L, QR_MODE_8, 0);
-    if (qrcode == nullptr) {
+    if (qrcode == Q_NULLPTR) {
         return QPixmap();
     }
 
-    unsigned char *p = nullptr;
-    unsigned char *q = nullptr;
+    unsigned char *p = Q_NULLPTR;
+    unsigned char *q = Q_NULLPTR;
     int realwidth = qrcode->width;
     int x, y, bit;
 
@@ -102,7 +102,7 @@ void SAKToolQRCodeCreator::on_savePushButton_clicked()
     defaultFileName.append(QString("/"));
     defaultFileName.append(QString::number(QDateTime::currentMSecsSinceEpoch()));
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                   tr("保存二维码"),
+                                                   tr("Save QR Code"),
                                                    defaultFileName,
                                                    QString("JPG(*.jpg);;PNG(*.png)"));
     if (fileName.length()){

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>234</width>
-    <height>130</height>
+    <width>180</width>
+    <height>129</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>添加组播</string>
+   <string>Add Mlticast</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="4" column="1">

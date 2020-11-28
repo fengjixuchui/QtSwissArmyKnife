@@ -18,7 +18,7 @@
 #include "SAKUdpServerDeviceController.hh"
 
 SAKUdpServerDevice::SAKUdpServerDevice(SAKUdpServerDebugPage *debugPage, QObject *parent)
-    :SAKDebugPageDevice(parent)
+    :SAKDebugPageDevice(debugPage, parent)
     ,mDebugPage(debugPage)
     ,mUdpServer(Q_NULLPTR)
 {
@@ -43,7 +43,7 @@ bool SAKUdpServerDevice::initializing(QString &errorString)
 bool SAKUdpServerDevice::open(QString &errorString)
 {
     if (mUdpServer->open(QUdpSocket::ReadWrite)){
-        errorString = tr("Unknow error");
+        errorString = tr("Unknown error");
         return true;
     }else{
         errorString = tr("Open device failed:") + mUdpServer->errorString();
@@ -71,7 +71,7 @@ QByteArray SAKUdpServerDevice::read()
             }else{
                 QStringList clients = parameters.clients;
                 QString client = QString("%1:%2").arg(peerAddress.toString()).arg(QString::number(peerPort));
-                if (!client.contains(client)){
+                if (!clients.contains(client)){
                     emit addClient(peerAddress.toString(), peerPort);
                 }
 
@@ -100,7 +100,7 @@ QByteArray SAKUdpServerDevice::write(QByteArray bytes)
 
 bool SAKUdpServerDevice::checkSomething(QString &errorString)
 {
-    errorString = tr("Unknow error");
+    errorString = tr("Unknown error");
     return true;
 }
 

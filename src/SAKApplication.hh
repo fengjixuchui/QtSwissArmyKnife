@@ -10,11 +10,19 @@
 #ifndef SAKAPPLICATION_HH
 #define SAKAPPLICATION_HH
 
+#include <QSettings>
 #include <QTranslator>
 #include <QApplication>
 #include <QStyleFactory>
+#include <QSplashScreen>
 
-class SAKMainWindow;
+#ifdef SAK_IMPORT_SQL_MODULE
+#include <QSqlError>
+#include <QSqlDatabase>
+#endif
+
+#define sakApp (static_cast<SAKApplication *>(QCoreApplication::instance()))
+
 class SAKApplication:public QApplication
 {
     Q_OBJECT
@@ -22,22 +30,39 @@ public:
     explicit SAKApplication(int argc, char **argv);
     ~SAKApplication();
 
-    /**
-     * @brief installLanguage: Setup the language packet of application.
-     * the interface must be called before initalizing any text.
-     */
-    void installLanguage();
+    struct SettingsKeyContext {
+        QString lastDateTime; // The last time of starting
+        QString removeSettingsFile;
+        QString removeDatabase;
+        QString language;
+        QString appStyle;
+    };
 
-    /**
-     * @brief mainWindow: Get the instance of main window
-     * @return Instance of main window
-     */
-    SAKMainWindow *mainWindow();
+    void installLanguage();
+    QDateTime *buildDateTime();
+    QString dataPath();
+    QSettings *settings();
+    SettingsKeyContext *settingsKeyContext();
+    QSplashScreen *splashScreen();
+    void showSplashScreenMessage(QString msg);
+#ifdef SAK_IMPORT_SQL_MODULE
+    QSqlDatabase *sqlDatabase();
+#endif
 private:
+    SettingsKeyContext mSettingsKeyContext;
     QTranslator mQtTranslator;
     QTranslator mQtBaseTranslator;
     QTranslator mSakTranslator;
-    SAKMainWindow *mMainWindow;
+    QSettings *mSettings;
+    QString mDatabaseName;
+    QString mLastDataTime;
+    QString mSettingsFileName;
+    QSplashScreen *mSplashScreen;
+#ifdef SAK_IMPORT_SQL_MODULE
+    QSqlDatabase mSqlDatabase;
+#endif
+signals:
+    void activeMainWindow();
 };
 
 #endif

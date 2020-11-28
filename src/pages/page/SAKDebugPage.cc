@@ -7,6 +7,8 @@
  * QtSwissArmyKnife is licensed according to the terms in
  * the file LICENCE in the root of the source code directory.
  */
+#include <QMenu>
+#include <QAction>
 #include <QPixmap>
 #include <QDateTime>
 #include <QSettings>
@@ -17,47 +19,53 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QTextStream>
+#include <QHostAddress>
 #include <QIntValidator>
 #include <QLoggingCategory>
+#include <QNetworkInterface>
+#include <QStandardItemModel>
 
-#include "SAKGlobal.hh"
-#include "SAKSettings.hh"
 #include "SAKDebugPage.hh"
-#include "SAKCommonDataStructure.hh"
-#include "SAKSqlDatabase.hh"
-#include "SAKCommonCrcInterface.hh"
+#include "SAKApplication.hh"
 #include "SAKDebugPageDevice.hh"
+#include "SAKCommonCrcInterface.hh"
+#include "SAKCommonDataStructure.hh"
 #include "SAKDebugPageController.hh"
 #include "SAKOtherAnalyzerThread.hh"
 #include "SAKOtherHighlighterManager.hh"
 #include "SAKDebugPageOtherController.hh"
 #include "SAKDebugPageInputController.hh"
 #include "SAKDebugPageOutputController.hh"
-#ifdef SAK_IMPORT_CHARTS_MODULE
-#include "SAKDebugPageChartsController.hh"
-#endif
 #include "SAKOtherAnalyzerThreadManager.hh"
 #include "SAKOtherAutoResponseItemManager.hh"
 #include "SAKDebugPageStatisticsController.hh"
+#include "SAKDebugPageCommonDatabaseInterface.hh"
+
+#ifdef SAK_IMPORT_MODULE_CHARTS
+#include "SAKDebugPageChartsController.hh"
+#endif
 
 #include "ui_SAKDebugPage.h"
 
-SAKDebugPage::SAKDebugPage(int type, QWidget *parent)
+SAKDebugPage::SAKDebugPage(int type, QString name, QWidget *parent)
     :QWidget(parent)
     ,mDevice(Q_NULLPTR)
     ,mDeviceController(Q_NULLPTR)
     ,mIsInitializing(true)
     ,mDebugPageType(type)
+    ,mSettingGroup(name)
     ,mUi(new Ui::SAKDebugPage)
 {
     mUi->setupUi(this);
     initializingVariables();
 
+    mDatabaseInterface = new SAKDebugPageCommonDatabaseInterface(this, sakApp->sqlDatabase(), this);
+
     mOutputController = new SAKDebugPageOutputController(this, this);
     mOtherController = new SAKDebugPageOtherController(this, this);
     mStatisticsController = new SAKDebugPageStatisticsController(this, this);
     mInputController = new SAKDebugPageInputController(this, this);
-#ifdef SAK_IMPORT_CHARTS_MODULE
+#ifdef SAK_IMPORT_MODULE_CHARTS
     mChartsController= new SAKDebugPageChartsController(this);
 #endif
 
@@ -69,8 +77,12 @@ SAKDebugPage::SAKDebugPage(int type, QWidget *parent)
 
 SAKDebugPage::~SAKDebugPage()
 {
-    delete mDevice;
-#ifdef SAK_IMPORT_CHARTS_MODULE
+    if (device()->isRunning()){
+        device()->requestInterruption();
+        device()->wait();
+    }
+    delete device();
+#ifdef SAK_IMPORT_MODULE_CHARTS
     delete mChartsController;
 #endif
     delete mUi;
@@ -113,26 +125,17 @@ quint32 SAKDebugPage::pageType()
 
 QSettings *SAKDebugPage::settings()
 {
-    return SAKSettings::instance();
+    return static_cast<SAKApplication*>(qApp)->settings();
 }
 
 QSqlDatabase *SAKDebugPage::sqlDatabase()
 {
-    return SAKSqlDatabase::instance()->sqlDatabase();
+    return qobject_cast<SAKApplication*>(qApp)->sqlDatabase();
 }
 
 QString SAKDebugPage::settingsGroup()
 {
-    QString group;
-    int pageType = mDebugPageType;
-    QMetaEnum metaEnum = QMetaEnum::fromType<SAKCommonDataStructure::SAKEnumDebugPageType>();
-    for (int i = 0; i < metaEnum.keyCount(); i++){
-        if (metaEnum.value(i) == pageType){
-            group = QString(metaEnum.key(i));
-        }
-    }
-
-    return group;
+    return mSettingGroup;
 }
 
 SAKDebugPageOtherController *SAKDebugPage::otherController()
@@ -145,7 +148,7 @@ SAKDebugPageInputController *SAKDebugPage::inputController()
     return mInputController;
 }
 
-#ifdef SAK_IMPORT_CHARTS_MODULE
+#ifdef SAK_IMPORT_MODULE_CHARTS
 SAKDebugPageChartsController *SAKDebugPage::chartsController()
 {
    return mChartsController;
@@ -162,89 +165,39 @@ SAKDebugPageStatisticsController *SAKDebugPage::statisticsController()
     return mStatisticsController;
 }
 
-void SAKDebugPage::initializingPage()
+SAKDebugPageController *SAKDebugPage::deviceController()
 {
-    setupController();
-    setupDevice();
+    Q_ASSERT_X(mDeviceController, __FUNCTION__, "You must initialize mDeviceController in the subclass!");
+    return mDeviceController;
 }
 
-void SAKDebugPage::changedDeviceState(bool opened)
+SAKDebugPageCommonDatabaseInterface *SAKDebugPage::databaseInterface()
 {
-    mSendPushButton->setEnabled(opened);
-    mSendPresetPushButton->setEnabled(opened);
-    mCycleEnableCheckBox->setEnabled(opened);
-    mRefreshPushButton->setEnabled(!opened);
-    mDeviceController->setUiEnable(opened);
-
-    mSwitchPushButton->setEnabled(true);
+    return mDatabaseInterface;
 }
 
-void SAKDebugPage::cleanInfo()
+QString SAKDebugPage::tableNameAutoResponseTable()
 {
-    mClearInfoTimer.stop();
-    mInfoLabel->clear();
+    return settingsGroup().append(QString("AutoResponse"));
 }
 
-void SAKDebugPage::openOrColoseDevice()
+QString SAKDebugPage::tableNamePresettingDataTable()
 {
-    if (!mDevice){
-        setupDevice();
-    }
-
-    if (mDevice){
-        if (mDevice->isRunning()){
-            closeDevice();
-        }else{
-            openDevice();
-        }
-    }
+    return settingsGroup().append(QString("PresettingData"));
 }
 
-void SAKDebugPage::openDevice()
+QString SAKDebugPage::tableNameTimingSendingTable()
 {
-    if (mDevice){
-        mDevice->start();
-        mSwitchPushButton->setText(tr("Close"));
-    }
+    return settingsGroup().append(QString("TimingSending"));
 }
 
-void SAKDebugPage::closeDevice()
+SAKDebugPageDevice *SAKDebugPage::device()
 {
-    if (mDevice){
-        mDevice->requestInterruption();
-        mDevice->requestWakeup();
-        mDevice->exit();
-        mDevice->wait();
-        mDevice->deleteLater();
-        mDevice = Q_NULLPTR;
-        mSwitchPushButton->setText(tr("Open"));
-    }
+    Q_ASSERT_X(mDevice, __FUNCTION__, "You must initialize the mDevice in the subcalss!");
+    return mDevice;
 }
 
-void SAKDebugPage::setupDevice()
-{
-    mDevice = createDevice();
-    if (mDevice){
-        connect(this, &SAKDebugPage::requestWriteData, mDevice, &SAKDebugPageDevice::writeBytes);
-        connect(mDevice, &SAKDebugPageDevice::bytesWritten, this, &SAKDebugPage::bytesWritten);
-#if 0
-        connect(device, &SAKDevice::bytesRead, this, &SAKDebugPage::bytesRead);
-#else
-        // The bytes read will be input to analyzer, after analyzing, the bytes will be input to debug page
-        SAKOtherAnalyzerThreadManager *analyzerManager = mOtherController->analyzerThreadManager();
-        connect(mDevice, &SAKDebugPageDevice::bytesRead, analyzerManager, &SAKOtherAnalyzerThreadManager::inputBytes);
-
-        // The function may be called multiple times, so do something to ensure that the signal named bytesAnalysed
-        // and the slot named bytesRead are connected once.
-        connect(analyzerManager, &SAKOtherAnalyzerThreadManager::bytesAnalysed, this, &SAKDebugPage::bytesRead, static_cast<Qt::ConnectionType>(Qt::AutoConnection|Qt::UniqueConnection));
-#endif
-        connect(mDevice, &SAKDebugPageDevice::messageChanged, this, &SAKDebugPage::outputMessage);
-        connect(mDevice, &SAKDebugPageDevice::deviceStateChanged, this, &SAKDebugPage::changedDeviceState);
-        connect(mDevice, &SAKDebugPageDevice::finished, this, &SAKDebugPage::closeDevice);
-    }
-}
-
-void SAKDebugPage::setupController()
+void SAKDebugPage::initializePage()
 {
     SAKDebugPageController *controller = deviceController();
     if (controller){
@@ -254,9 +207,81 @@ void SAKDebugPage::setupController()
         layout->setContentsMargins(0, 0, 0, 0);
         mDeviceController = controller;
     }
+
+    connect(this, &SAKDebugPage::requestWriteData, device(), &SAKDebugPageDevice::writeBytes);
+    connect(device(), &SAKDebugPageDevice::bytesWritten, this, &SAKDebugPage::bytesWritten);
+#if 0
+    connect(device, &SAKDevice::bytesRead, this, &SAKDebugPage::bytesRead);
+#else
+    // The bytes read will be input to analyzer, after analyzing, the bytes will be input to debug page
+    SAKOtherAnalyzerThreadManager *analyzerManager = mOtherController->analyzerThreadManager();
+    connect(device(), &SAKDebugPageDevice::bytesRead, analyzerManager, &SAKOtherAnalyzerThreadManager::inputBytes);
+
+    // The function may be called multiple times, so do something to ensure that the signal named bytesAnalysed
+    // and the slot named bytesRead are connected once.
+    connect(analyzerManager, &SAKOtherAnalyzerThreadManager::bytesAnalysed, this, &SAKDebugPage::bytesRead, static_cast<Qt::ConnectionType>(Qt::AutoConnection|Qt::UniqueConnection));
+#endif
+    connect(device(), &SAKDebugPageDevice::messageChanged, this, &SAKDebugPage::outputMessage);
+    connect(device(), &SAKDebugPageDevice::deviceStateChanged, this, &SAKDebugPage::changedDeviceState);
+    connect(device(), &SAKDebugPageDevice::finished, this, &SAKDebugPage::closeDevice, Qt::QueuedConnection);
+
+
+    // Initialize the more button, the firs thing to do is clear the old actions and delete the old menu.
+    auto deviceMorePushButtonMenu = mDeviceMorePushButton->menu();
+    if (deviceMorePushButtonMenu){
+        deviceMorePushButtonMenu->clear();
+        deviceMorePushButtonMenu->deleteLater();
+    }
+
+    // Create "Refresh" action.
+    deviceMorePushButtonMenu = new QMenu(mDeviceMorePushButton);
+    mDeviceMorePushButton->setMenu(deviceMorePushButtonMenu);
+    mRefreshAction = new QAction(tr("Refresh"), deviceMorePushButtonMenu);
+    deviceMorePushButtonMenu->addAction(mRefreshAction);
+    connect(mRefreshAction, &QAction::triggered, this, &SAKDebugPage::refreshDevice);
+
+    // Create new menu and add actions to the menu.
+    auto infos = device()->settingsPanelList();
+    for (auto var : infos){
+        QAction *action = new QAction(var.name, deviceMorePushButtonMenu);
+        deviceMorePushButtonMenu->addAction(action);
+        connect(action, &QAction::triggered, [=](){
+            if (var.panel->isHidden()){
+                var.panel->show();
+            }else{
+                var.panel->show();
+            }
+        });
+    }
 }
 
-void SAKDebugPage::on_refreshPushButton_clicked()
+void SAKDebugPage::changedDeviceState(bool opened)
+{
+    mSendPushButton->setEnabled(opened);
+    mSendPresetPushButton->setEnabled(opened);
+    mCycleEnableCheckBox->setEnabled(opened);
+    mRefreshAction->setEnabled(!opened);
+    mDeviceController->setUiEnable(opened);
+
+    mSwitchPushButton->setEnabled(true);
+}
+
+void SAKDebugPage::openDevice()
+{
+    device()->start();
+    mSwitchPushButton->setText(tr("Close"));
+}
+
+void SAKDebugPage::closeDevice()
+{
+    device()->requestInterruption();
+    device()->requestWakeup();
+    device()->exit();
+    device()->wait();
+    mSwitchPushButton->setText(tr("Open"));
+}
+
+void SAKDebugPage::refreshDevice()
 {
     if (mDeviceController){
         mDeviceController->refreshDevice();
@@ -265,17 +290,34 @@ void SAKDebugPage::on_refreshPushButton_clicked()
     }
 }
 
+void SAKDebugPage::cleanInfo()
+{
+    mClearInfoTimer.stop();
+    mInfoLabel->clear();
+}
+
+void SAKDebugPage::setupController()
+{
+
+}
+
 void SAKDebugPage::on_switchPushButton_clicked()
 {
     mSwitchPushButton->setEnabled(false);
-    openOrColoseDevice();
+    if (device()){
+        if (!device()->isRunning()){
+            openDevice();
+        }else{
+            closeDevice();
+        }
+    }
 }
 
 void SAKDebugPage::initializingVariables()
 {
     // Devce control
     mSwitchPushButton = mUi->switchPushButton;
-    mRefreshPushButton = mUi->refreshPushButton;
+    mDeviceMorePushButton = mUi->deviceMorePushButton;
     mDeviceSettingFrame = mUi->deviceSettingFrame;
 
     // Message output
@@ -337,7 +379,7 @@ void SAKDebugPage::initializingVariables()
 
 void SAKDebugPage::on_dataVisualizationPushButton_clicked()
 {
-#ifdef SAK_IMPORT_CHARTS_MODULE
+#ifdef SAK_IMPORT_MODULE_CHARTS
     if (mChartsController->isHidden()){
         mChartsController->show();
     }else{

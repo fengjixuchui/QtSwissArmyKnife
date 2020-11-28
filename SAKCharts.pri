@@ -2,12 +2,12 @@ isEqual(QT_MAJOR_VERSION, 5){
     greaterThan(QT_MINOR_VERSION, 9){
         qtHaveModule(charts){
             QT  += charts
-            DEFINES+=SAK_IMPORT_CHARTS_MODULE
+            DEFINES+=SAK_IMPORT_MODULE_CHARTS
         }
     }
 }
 
-contains(DEFINES, SAK_IMPORT_CHARTS_MODULE){
+contains(DEFINES, SAK_IMPORT_MODULE_CHARTS){
 INCLUDEPATH += \
     $$PWD/src/pages/page/charts \
     $$PWD/src/pages/page/charts/throughput \
@@ -35,5 +35,5 @@ SOURCES += \
     $$PWD/src/pages/page/charts/xyserial/SAKChartsXYSerialEditDialog.cc \
     $$PWD/src/pages/page/charts/xyserial/SAKChartsXYSerialWidget.cc
 }else {
-    message("The Qt edition has no charts module, the program will not has chart debugging function.")
+    message("The Qt edition has no charts module, the program will not have chart debugging function.")
 }

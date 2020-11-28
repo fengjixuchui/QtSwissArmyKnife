@@ -11,28 +11,15 @@
 #include <QWidget>
 #include <QHBoxLayout>
 
-#include "SAKGlobal.hh"
 #include "SAKCommonDataStructure.hh"
 #include "SAKTestDevice.hh"
 #include "SAKTestDebugPage.hh"
 #include "SAKTestDeviceController.hh"
 
-SAKTestDebugPage::SAKTestDebugPage(QWidget *parent)
-    :SAKDebugPage (SAKCommonDataStructure::DebugPageTypeTest, parent)
-    ,mDeviceController(Q_NULLPTR)
+SAKTestDebugPage::SAKTestDebugPage(int type, QString name, QWidget *parent)
+    :SAKDebugPage(type, name, parent)
 {
     mDeviceController = new SAKTestDeviceController(this);
-    setWindowTitle(SAKGlobal::debugPageNameFromType(SAKCommonDataStructure::DebugPageTypeTest));
-    initializingPage();
-}
-
-SAKDebugPageController *SAKTestDebugPage::deviceController()
-{
-    return mDeviceController;
-}
-
-SAKDebugPageDevice *SAKTestDebugPage::createDevice()
-{
-    auto ret = new SAKTestDevice(this);
-    return ret;
+    mDevice = new SAKTestDevice(this, this);
+    initializePage();
 }

@@ -19,7 +19,7 @@
 #include "SAKWebSocketServerDeviceController.hh"
 
 SAKWebSocketServerDevice::SAKWebSocketServerDevice(SAKWebSocketServerDebugPage *debugPage, QObject *parent)
-    :SAKDebugPageDevice(parent)
+    :SAKDebugPageDevice(debugPage, parent)
     ,mWebSocketServer(Q_NULLPTR)
     ,mDebugPage(debugPage)
 {
@@ -47,7 +47,7 @@ bool SAKWebSocketServerDevice::initializing(QString &errorString)
 
 bool SAKWebSocketServerDevice::open(QString &errorString)
 {
-    errorString = tr("Unknow error");
+    errorString = tr("Unknown error");
     return true;
 }
 
@@ -96,7 +96,7 @@ bool SAKWebSocketServerDevice::checkSomething(QString &errorString)
                 readBytesActually(socket, message);
             });
 
-            // Remove the socket which is offline
+            // Remove the socket which is offline(It seems to be not effective)
             connect(socket, &QWebSocket::disconnected, [&](){
                 emit removeClient(socket);
                 mClientList.removeOne(socket);
@@ -104,8 +104,24 @@ bool SAKWebSocketServerDevice::checkSomething(QString &errorString)
         }
     }
 
+    QList<QWebSocket*> needTobeDeleteSocketList;
+    for (auto var : mClientList){
+        if (var->state() == QAbstractSocket::UnconnectedState){
+            needTobeDeleteSocketList.append(var);
+        }
+    }
 
-    errorString = tr("Unknow error");
+    for (auto var : needTobeDeleteSocketList){
+        emit removeClient(var);
+    }
+
+    while (needTobeDeleteSocketList.count()) {
+        auto var = needTobeDeleteSocketList.takeFirst();
+        mClientList.removeOne(var);
+        var->deleteLater();
+    }
+
+    errorString = tr("Unknown error");
     return true;
 }
 

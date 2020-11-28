@@ -11,34 +11,15 @@
 #include <QWidget>
 #include <QHBoxLayout>
 
-#include "SAKGlobal.hh"
 #include "SAKCommonDataStructure.hh"
 #include "SAKSerialPortDevice.hh"
 #include "SAKSerialPortDebugPage.hh"
 #include "SAKSerialPortDeviceController.hh"
 
-SAKSerialPortDebugPage::SAKSerialPortDebugPage(QWidget *parent)
-    :SAKDebugPage(SAKCommonDataStructure::DebugPageTypeCOM, parent)
-
+SAKSerialPortDebugPage::SAKSerialPortDebugPage(int type, QString name, QWidget *parent)
+    :SAKDebugPage(type, name, parent)
 {
     mDeviceController = new SAKSerialPortDeviceController(this);
-    setWindowTitle(SAKGlobal::debugPageNameFromType(SAKCommonDataStructure::DebugPageTypeCOM));
-    initializingPage();
-}
-
-SAKSerialPortDebugPage::~SAKSerialPortDebugPage()
-{
-    delete mDeviceController;
-}
-
-SAKDebugPageController *SAKSerialPortDebugPage::deviceController()
-{
-    return mDeviceController;
-}
-
-SAKDebugPageDevice *SAKSerialPortDebugPage::createDevice()
-{
-    // The ret will be destroied when closing device
-    auto ret = new SAKSerialPortDevice(this);
-    return ret;
+    mDevice = new SAKSerialPortDevice(this, this);
+    initializePage();
 }

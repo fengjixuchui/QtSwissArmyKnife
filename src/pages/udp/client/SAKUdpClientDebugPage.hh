@@ -18,13 +18,7 @@ class SAKUdpClientDebugPage : public SAKDebugPage
 {
     Q_OBJECT
 public:
-    SAKUdpClientDebugPage(QWidget *parent = Q_NULLPTR);
-    ~SAKUdpClientDebugPage();
-
-    SAKDebugPageController *deviceController() final;
-    SAKDebugPageDevice* createDevice() final;
-private:
-    SAKUdpClientDeviceController *mUdpDeviceController;
+    Q_INVOKABLE SAKUdpClientDebugPage(int type, QString name, QWidget *parent = Q_NULLPTR);
 };
 
 #endif

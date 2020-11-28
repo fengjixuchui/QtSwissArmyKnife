@@ -12,9 +12,11 @@
 #include <QMetaEnum>
 #include <QLineEdit>
 
-#include "SAKGlobal.hh"
+#include "SAKDebugPage.hh"
+#include "SAKCommonInterface.hh"
 #include "SAKTcpClientDeviceController.hh"
 #include "ui_SAKTcpClientDeviceController.h"
+
 SAKTcpClientDeviceController::SAKTcpClientDeviceController(SAKDebugPage *debugPage, QWidget *parent)
     :SAKDebugPageController(debugPage, parent)
     ,mUi(new Ui::SAKTcpClientDeviceController)
@@ -67,7 +69,7 @@ void SAKTcpClientDeviceController::setUiEnable(bool opened)
 
 void SAKTcpClientDeviceController::refreshDevice()
 {
-    SAKGlobal::initIpComboBox(mLocalhostComboBox);
+    SAKCommonInterface::addIpItemsToComboBox(mLocalhostComboBox);
 }
 
 void SAKTcpClientDeviceController::setClientInfo(QString info)

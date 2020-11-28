@@ -11,7 +11,6 @@
 #include <QtEndian>
 #include <QEventLoop>
 
-#include "SAKGlobal.hh"
 #include "SAKCommonDataStructure.hh"
 #include "SAKCommonCrcInterface.hh"
 #include "SAKInputDataFactory.hh"
@@ -74,39 +73,30 @@ quint32 SAKInputDataFactory::crcCalculate(QByteArray data, int model)
 
 QByteArray SAKInputDataFactory::rawDataToArray(QString rawData, SAKDebugPageInputController::InputParametersContext parameters)
 {
-    QByteArray data;
-    if (parameters.inputModel == SAKCommonDataStructure::InputFormatBin){
-        QStringList strList = rawData.split(' ');
-        for (QString str:strList){
-            data.append(static_cast<int8_t>(QString(str).toInt(Q_NULLPTR, 2)));
-        }
-    }else if (parameters.inputModel == SAKCommonDataStructure::InputFormatOct){
-        QStringList strList = rawData.split(' ');
-        for (QString str:strList){
-            data.append(static_cast<int8_t>(QString(str).toInt(Q_NULLPTR, 8)));
-        }
-    }else if (parameters.inputModel == SAKCommonDataStructure::InputFormatDec){
-        QStringList strList = rawData.split(' ');
-        for (QString str:strList){
-            data.append(static_cast<int8_t>(QString(str).toInt(Q_NULLPTR, 10)));
-        }
-    }else if (parameters.inputModel == SAKCommonDataStructure::InputFormatHex){
-        QStringList strList = rawData.split(' ');
-        for (QString str:strList){
-            data.append(static_cast<int8_t>(QString(str).toInt(Q_NULLPTR, 16)));
-        }
-    }else if (parameters.inputModel == SAKCommonDataStructure::InputFormatAscii){
-        data = rawData.toLatin1();
-    }else if (parameters.inputModel == SAKCommonDataStructure::InputFormatUtf8){
-        data = rawData.toUtf8();
-    }else if (parameters.inputModel == SAKCommonDataStructure::InputFormatLocal){
-        data = rawData.toLocal8Bit();
-    }else {
-        data = rawData.toLocal8Bit();
-        Q_ASSERT_X(false, __FUNCTION__, "Unknow input mode");
+    return SAKCommonDataStructure::stringToByteArray(rawData, static_cast<SAKCommonDataStructure::SAKEnumTextInputFormat>(parameters.inputModel));
+}
+
+QByteArray SAKInputDataFactory::extractCrcData(QByteArray crcData, SAKDebugPageInputController::InputParametersContext parameters)
+{
+    QByteArray crcInputData;
+    int startIndex = parameters.startByte - 1;
+    startIndex = startIndex < 0 ? 0 : startIndex;
+
+    int endIndex = (crcData.length() - 1) - (parameters.endByte - 1);
+    endIndex = endIndex < 0 ? 0 : endIndex;
+
+    if (((crcData.length() - 1) >= startIndex) && ((crcData.length() - 1) >= endIndex)){
+        int length = endIndex - startIndex + 1;
+        length = length < 0 ? 0 : length;
+        crcInputData = QByteArray(crcData.constData()+startIndex, length);
+    }else{
+        crcInputData = crcData;
     }
 
-    return data;
+#if 0
+    qDebug() << __FUNCTION__ << startIndex << endIndex << QString(crcInputData.toHex(' '));
+#endif
+    return crcInputData;
 }
 
 void SAKInputDataFactory::run()
@@ -157,17 +147,8 @@ void SAKInputDataFactory::innnerCookData(QString rawData, SAKDebugPageInputContr
 {
     QByteArray data = rawDataToArray(rawData, parameters);
     if (parameters.addCRC){
-        // Extract crc section
-        QByteArray crcInputData;
-        int startIndex = parameters.startByte - 1;
-        int endIndex = data.length() - (parameters.startByte - 1) - (parameters.endByte - 1);
-        if ((data.length() >= startIndex) && (data.length() >= endIndex)){
-            crcInputData = QByteArray(startIndex, endIndex);
-        }else{
-#ifdef QT_DEBUG
-            qWarning() << __FUNCTION__ << "The lenght of input data is error, can not extract crc section!";
-#endif
-        }
+        // Extract effective crc section
+        QByteArray crcInputData = extractCrcData(data, parameters);
 
         // Calculate the crc value of input data
         uint32_t crc  = crcCalculate(crcInputData, parameters.crcModel);
