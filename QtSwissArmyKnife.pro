@@ -41,18 +41,13 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 CONFIG += c++11
 
 #Sub project
-#include(SAKHID.pri)
-#include(SAKUSB.pri)
-#include(SAKSCTP.pri)
 include(SAKSetup.pri)
 include(SAKTools.pri)
 include(SAKCommon.pri)
 include(SAKCharts.pri)
 include(SAKModbus.pri)
 include(SAKModules.pri)
-#include(SAKBluetooth.pri)
 include(SAKWebSocket.pri)
-#include(SAKSslSocket.pri)
 include(SAKSerialPort.pri)
 
 exists(private/SAKPrivate.pri){
@@ -71,6 +66,9 @@ win32 {
     QMAKE_TARGET_COPYRIGHT      = "$${QSAK_APP_COPYRIGHT}"
     QMAKE_TARGET_PRODUCT        = "$${QSAK_APP_NAME}"
     QMAKE_TARGET_VERSION        = "$${SAK_VERSION}"
+    VERSION                     = 3.4.1.0
+}else {
+    VERSION = 3.4.1
 }
 
 #--------------------------------------------------------------------------------------------
@@ -85,7 +83,7 @@ OBJECTS_DIR = $$OUT_PWD/obj
 win32 {
     RC_ICONS = Windows.ico
     msvc:{
-        lessThan(QT_MAJOR_VERSION, 5){
+        lessThan(QT_MAJOR_VERSION, 6){
                 QMAKE_CXXFLAGS += -execution-charset:utf-8
         }
     }
@@ -95,8 +93,7 @@ win32 {
 #I18N
 TRANSLATIONS  += \
     translations/sak/SAK_en.ts \
-    translations/sak/SAK_zh_CN.ts \
-    translations/sak/SAK_zh_TW.ts
+    translations/sak/SAK_zh_CN.ts
 
 RESOURCES += \
     SAKResources.qrc

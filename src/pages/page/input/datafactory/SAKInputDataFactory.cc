@@ -146,15 +146,15 @@ SAKInputDataFactory::RawDataStruct SAKInputDataFactory::takeRawData()
 void SAKInputDataFactory::innnerCookData(QString rawData, SAKDebugPageInputController::InputParametersContext parameters)
 {
     QByteArray data = rawDataToArray(rawData, parameters);
-    if (parameters.addCRC){
+    if (parameters.appendCrc){
         // Extract effective crc section
         QByteArray crcInputData = extractCrcData(data, parameters);
 
         // Calculate the crc value of input data
-        uint32_t crc  = crcCalculate(crcInputData, parameters.crcModel);
+        uint32_t crc  = crcCalculate(crcInputData, parameters.crcParametersModel);
         uint8_t  crc8  = static_cast<uint8_t>(crc);
         uint16_t crc16 = static_cast<uint16_t>(crc);
-        int bitsWidth = mCrcInterface->getBitsWidth(static_cast<SAKCommonCrcInterface::CRCModel>(parameters.crcModel));
+        int bitsWidth = mCrcInterface->getBitsWidth(static_cast<SAKCommonCrcInterface::CRCModel>(parameters.crcParametersModel));
         if (parameters.bigEndian){
             crc16 = qToBigEndian(crc16);
             crc = qToBigEndian(crc);

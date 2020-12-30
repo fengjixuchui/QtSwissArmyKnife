@@ -35,25 +35,18 @@ public:
     SAKOtherAnalyzerThreadManager *analyzerThreadManager();
 private:
     SAKDebugPage *mDebugPage;
-
     QPushButton *moreSettingsPushButton;
     QPushButton *timingSendingPushButton;
-    QPushButton *highlightSettingPushButton;
-    QPushButton *mAnalyzerPushButton;
     QPushButton *autoResponseSettingPushButton;
     QPushButton *transmissionSettingPushButton;
+    QPushButton *mAnalyzerPushButton;
 
     SAKOtherTransmissionPageViewer *mTransmissionSettings;
     SAKOtherHighlighterManager *mHighlightSettingsWidget;
     SAKOtherAutoResponseItemManager *mAutoResponseSettingWidget;
     SAKOtherTimingSentItemManager *mTimingSendingSettingsWidget;
     SAKOtherAnalyzerThreadManager *mAnalyzerThreadManager;
-private slots:
-    void onTimingSendingPushButtonClicked();
-    void onHighlightSettingPushButtonClicked();
-    void onAnalyzerPushButtonClicked();
-    void onAutoresponseSettingPushbuttonClicked();
-    void onTransmissionSettingPushButtonClicked();
 };
 
 #endif
+

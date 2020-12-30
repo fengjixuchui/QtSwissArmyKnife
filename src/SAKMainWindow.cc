@@ -182,6 +182,9 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
     // Do soemthing to make the application look like more beautiful.
     connect(QtStyleSheetApi::instance(), &QtStyleSheetApi::styleSheetChanged, this, &SAKMainWindow::changeStylesheet);
     connect(QtAppStyleApi::instance(), &QtAppStyleApi::appStyleChanged, this, &SAKMainWindow::changeAppStyle);
+
+    // Golden ratio
+    resize(971, 600);
 }
 
 SAKMainWindow::~SAKMainWindow()
@@ -432,7 +435,8 @@ void SAKMainWindow::initLinksMenu()
              << Link{tr("Qt Official Blog"), QString("https://www.qt.io/blog"), QString(":/resources/images/Qt.png")}
              << Link{tr("Qt Official Release"), QString("https://wiki.qt.io/Qt_5.15_Release"), QString(":/resources/images/Qt.png")}
              << Link{tr("Download SAK from Github"), QString("%1/releases").arg(SAK_GITHUB_REPOSITORY_URL), QString(":/resources/images/GitHub.png")}
-             << Link{tr("Download SAK from Gitee"), QString("%1/releases").arg(SAK_GITEE_REPOSITORY_URL), QString(":/resources/images/Gitee.png")};
+             << Link{tr("Download SAK from Gitee"), QString("%1/releases").arg(SAK_GITEE_REPOSITORY_URL), QString(":/resources/images/Gitee.png")}
+             << Link{tr("Office Web Site"), QString("https://qsaker.gitee.io/qsak/"), QString(":/resources/images/Gitee.png")};
 
     for (auto var:linkList){
         QAction *action = new QAction(QIcon(var.iconPath), var.name, this);
@@ -609,9 +613,6 @@ void SAKMainWindow::initToosMetaObjectInfoList()
     mToolMetaObjectInfoList.append(SAKToolMetaObjectInfo{SAKToolCRCCalculator::staticMetaObject, tr("CRC Assistant")});
     mToolMetaObjectInfoList.append(SAKToolMetaObjectInfo{SAKToolFloatAssistant::staticMetaObject, tr("Float Assistant")});
     mToolMetaObjectInfoList.append(SAKToolMetaObjectInfo{SAKToolStringAssistant::staticMetaObject, tr("String Assistant")});
-#ifdef SAK_IMPORT_MODULE_QRCODE
-    mToolMetaObjectInfoList.append(SAKToolMetaObjectInfo{SAKToolQRCodeCreator::staticMetaObject, tr("QR Code Assistant")});
-#endif
 }
 
 void SAKMainWindow::showReleaseHistoryActionDialog()

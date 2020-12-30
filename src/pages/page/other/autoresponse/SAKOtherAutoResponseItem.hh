@@ -63,7 +63,6 @@ private:
     bool mForbiddenAllAutoResponse;
     SAKDebugPage *mDebugPage;
     quint64 mID;
-    bool mIsInitializing;
     // delay response
     struct DelayWritingInfo{
         quint64 expectedTimestamp;
@@ -79,6 +78,7 @@ private:
     void commonInitializing();
     void initDelayWritingTimer();
     void delayToWritBytes();
+    void blockUiSignals(bool block);
 private:
     Ui::SAKOtherAutoResponseItem *mUi;
     QLineEdit *mDescriptionLineEdit;
@@ -95,9 +95,9 @@ private slots:
     void on_referenceLineEdit_textChanged(const QString &text);
     void on_responseLineEdit_textChanged(const QString &text);
     void on_enableCheckBox_clicked();
-    void on_optionComboBox_currentIndexChanged(const QString &text);
-    void on_referenceDataFromatComboBox_currentIndexChanged(const QString &text);
-    void on_responseDataFormatComboBox_currentIndexChanged(const QString &text);
+    void on_optionComboBox_currentTextChanged(const QString &text);
+    void on_referenceDataFromatComboBox_currentTextChanged(const QString &text);
+    void on_responseDataFormatComboBox_currentTextChanged(const QString &text);
     void on_delayResponseCheckBox_clicked();
     void on_delayResponseLineEdit_textChanged(const QString &text);
 signals:
