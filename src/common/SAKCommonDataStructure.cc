@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
+ * Copyright 2018-2021 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoded using "utf8 with bom", it is a part
  * of QtSwissArmyKnife project.
@@ -43,8 +43,8 @@ void SAKCommonDataStructure::setComboBoxTextInputFormat(QComboBox *comboBox)
             formatMap.insert(InputFormatOct,   QString("OTC"));
             formatMap.insert(InputFormatDec,   QString("DEC"));
             formatMap.insert(InputFormatHex,   QString("HEX"));
-            formatMap.insert(InputFormatAscii, QString("ASCII"));
             formatMap.insert(InputFormatUtf8,  QString("UTF8"));
+            formatMap.insert(InputFormatAscii, QString("ASCII"));
             formatMap.insert(InputFormatLocal, QString("SYSTEM"));
             setComboBoxItems(comboBox, formatMap, InputFormatUtf8);
         }

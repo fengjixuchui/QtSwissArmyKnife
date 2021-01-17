@@ -241,7 +241,7 @@ void SAKDebugPage::initializePage()
 
     // Create new menu and add actions to the menu.
     auto infos = device()->settingsPanelList();
-    for (auto var : infos){
+    for (auto &var : infos){
         QAction *action = new QAction(var.name, deviceMorePushButtonMenu);
         deviceMorePushButtonMenu->addAction(action);
         connect(action, &QAction::triggered, [=](){
@@ -292,11 +292,6 @@ void SAKDebugPage::cleanInfo()
 {
     mClearInfoTimer.stop();
     mInfoLabel->clear();
-}
-
-void SAKDebugPage::setupController()
-{
-
 }
 
 void SAKDebugPage::on_switchPushButton_clicked()

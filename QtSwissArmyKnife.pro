@@ -4,13 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui network
-qtHaveModule(sql){
-    QT  += sql
-    DEFINES+=SAK_IMPORT_SQL_MODULE
-}else{
-    message("The Qt edition has no sql module, the program will not has function about sql.")
-}
+QT += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -40,13 +34,23 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 CONFIG += c++11
 
+# The file(SAKDefaultConfigure.pri) is use to control which module will be compiled.
+# It is not suggested to modify the file directly.
+# You should copy the file and rename it to SAKCustomConfigure.pri, then modify it.
+exists($$PWD/SAKCustomConfigure.pri){
+    include(SAKCustomConfigure.pri)
+}else{
+    include(SAKDefaultConfigure.pri)
+}
+
 #Sub project
+include(SAKTcp.pri)
+include(SAKUdp.pri)
 include(SAKSetup.pri)
 include(SAKTools.pri)
 include(SAKCommon.pri)
 include(SAKCharts.pri)
 include(SAKModbus.pri)
-include(SAKModules.pri)
 include(SAKWebSocket.pri)
 include(SAKSerialPort.pri)
 
@@ -66,9 +70,6 @@ win32 {
     QMAKE_TARGET_COPYRIGHT      = "$${QSAK_APP_COPYRIGHT}"
     QMAKE_TARGET_PRODUCT        = "$${QSAK_APP_NAME}"
     QMAKE_TARGET_VERSION        = "$${SAK_VERSION}"
-    VERSION                     = 3.4.1.0
-}else {
-    VERSION = 3.4.1
 }
 
 #--------------------------------------------------------------------------------------------
@@ -84,7 +85,7 @@ win32 {
     RC_ICONS = Windows.ico
     msvc:{
         lessThan(QT_MAJOR_VERSION, 6){
-                QMAKE_CXXFLAGS += -execution-charset:utf-8
+            QMAKE_CXXFLAGS += -execution-charset:utf-8
         }
     }
 }
@@ -121,11 +122,7 @@ INCLUDEPATH += \
     src/pages/page/output \
     src/pages/page/output/save2file \
     src/pages/page/statistics \
-    src/pages/tcp/client \
-    src/pages/tcp/server \
     src/pages/test \
-    src/pages/udp/client \
-    src/pages/udp/server \
     src/update
 
 FORMS += \
@@ -148,13 +145,7 @@ FORMS += \
     src/pages/page/other/transmission/SAKOtherTransmissionPage.ui \
     src/pages/page/other/transmission/SAKOtherTransmissionPageViewer.ui \
     src/pages/page/output/save2file/SAKOutputSave2FileDialog.ui \
-    src/pages/tcp/client/SAKTcpClientDeviceController.ui \
-    src/pages/tcp/server/SAKTcpServerDeviceController.ui \
     src/pages/test/SAKTestDeviceController.ui \
-    src/pages/udp/client/SAKUdpClientAdvanceSettingWidget.ui \
-    src/pages/udp/client/SAKUdpClientDeviceController.ui \
-    src/pages/udp/client/SAKUdpClientMulticastEditingDialog.ui \
-    src/pages/udp/server/SAKUdpServerDeviceController.ui \
     src/update/SAKDownloadItemWidget.ui \
     src/update/SAKUpdateManager.ui
 
@@ -194,23 +185,9 @@ HEADERS += \
     src/pages/page/output/save2file/SAKOutputSave2FileDialog.hh \
     src/pages/page/output/save2file/SAKOutputSave2FileThread.hh \
     src/pages/page/statistics/SAKDebugPageStatisticsController.hh \
-    src/pages/tcp/client/SAKTcpClientDebugPage.hh \
-    src/pages/tcp/client/SAKTcpClientDevice.hh \
-    src/pages/tcp/client/SAKTcpClientDeviceController.hh \
-    src/pages/tcp/server/SAKTcpServerDebugPage.hh \
-    src/pages/tcp/server/SAKTcpServerDevice.hh \
-    src/pages/tcp/server/SAKTcpServerDeviceController.hh \
     src/pages/test/SAKTestDebugPage.hh \
     src/pages/test/SAKTestDevice.hh \
     src/pages/test/SAKTestDeviceController.hh \
-    src/pages/udp/client/SAKUdpClientAdvanceSettingWidget.hh \
-    src/pages/udp/client/SAKUdpClientDebugPage.hh \
-    src/pages/udp/client/SAKUdpClientDevice.hh \
-    src/pages/udp/client/SAKUdpClientDeviceController.hh \
-    src/pages/udp/client/SAKUdpClientMulticastEditingDialog.hh \
-    src/pages/udp/server/SAKUdpServerDebugPage.hh \
-    src/pages/udp/server/SAKUdpServerDevice.hh \
-    src/pages/udp/server/SAKUdpServerDeviceController.hh \
     src/update/SAKDownloadItemWidget.hh \
     src/update/SAKUpdateManager.hh
 
@@ -251,34 +228,17 @@ SOURCES += \
     src/main.cc \
     src/pages/page/output/save2file/SAKOutputSave2FileThread.cc \
     src/pages/page/statistics/SAKDebugPageStatisticsController.cc \
-    src/pages/tcp/client/SAKTcpClientDebugPage.cc \
-    src/pages/tcp/client/SAKTcpClientDevice.cc \
-    src/pages/tcp/client/SAKTcpClientDeviceController.cc \
-    src/pages/tcp/server/SAKTcpServerDebugPage.cc \
-    src/pages/tcp/server/SAKTcpServerDevice.cc \
-    src/pages/tcp/server/SAKTcpServerDeviceController.cc \
     src/pages/test/SAKTestDebugPage.cc \
     src/pages/test/SAKTestDevice.cc \
     src/pages/test/SAKTestDeviceController.cc \
-    src/pages/udp/client/SAKUdpClientAdvanceSettingWidget.cc \
-    src/pages/udp/client/SAKUdpClientDebugPage.cc \
-    src/pages/udp/client/SAKUdpClientDevice.cc \
-    src/pages/udp/client/SAKUdpClientDeviceController.cc \
-    src/pages/udp/client/SAKUdpClientMulticastEditingDialog.cc \
-    src/pages/udp/server/SAKUdpServerDebugPage.cc \
-    src/pages/udp/server/SAKUdpServerDevice.cc \
-    src/pages/udp/server/SAKUdpServerDeviceController.cc \
     src/update/SAKDownloadItemWidget.cc \
     src/update/SAKUpdateManager.cc
 
-DISTFILES += \
-    android/AndroidManifest.xml \
-    android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.jar \
-    android/gradle/wrapper/gradle-wrapper.properties \
-    android/gradlew \
-    android/gradlew.bat \
-    android/res/values/libs.xml
-ANDROID_ABIS = armeabi-v7a
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
-
+android {
+     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+     ANDROID_ABIS = armeabi-v7a
+     DISTFILES += \
+         android/AndroidManifest.xml \
+         android/build.gradle \
+         android/res/values/libs.xml
+ }

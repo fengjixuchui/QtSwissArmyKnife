@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
+ * Copyright 2018-2021 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoded using "utf8 with bom", it is a part
  * of QtSwissArmyKnife project.
@@ -34,7 +34,9 @@ public:
 
     // Debug page type supported by QtSwissArmyKnife
     enum SAKEnumDebugPageType {
+#ifdef QT_DEBUG
         DebugPageTypeTest,
+#endif
 #ifdef SAK_IMPORT_MODULE_SERIALPORT
         DebugPageTypeCOM,
 #endif
@@ -44,10 +46,14 @@ public:
 #ifdef SAK_IMPORT_USB_MODULE
         DebugPageTypeUSB,
 #endif
+#ifdef SAK_IMPORT_MODULE_UDP
         DebugPageTypeUdpClient,
         DebugPageTypeUdpServer,
+#endif
+#ifdef SAK_IMPORT_MODULE_TCP
         DebugPageTypeTCPClient,
         DebugPageTypeTCPServer,
+#endif
 #ifdef SAK_IMPORT_MODULE_SSLSOCKET
         DebugPageTypeSslSocketClient,
         DebugPageTypeSslSocketServer,
@@ -83,7 +89,6 @@ public:
 private:
     struct SettingsKeyContext {
         QString enableTestPage;
-        QString appStylesheet;
         QString currentTabPage;
     }mSettingsKeyContext;
 
@@ -102,7 +107,6 @@ private:
 
     QMenu *mWindowsMenu;
     QAction *mTestPageAction;
-    QAction *mDefaultStyleSheetAction;
     SAKUpdateManager *mUpdateManager;
     const QString mSettingKeyEnableTestPage;
 private: 
@@ -115,9 +119,6 @@ private:
     void initHelpMenu();
     void initLinksMenu();
     void initDemoMenu();
-
-    void changeStylesheet(QString styleSheetName);
-    void changeAppStyle(QString appStyle);
 
     void aboutQsak();
     void removeRemovableDebugPage(int index);

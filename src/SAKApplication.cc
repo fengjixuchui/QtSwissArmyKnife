@@ -24,6 +24,7 @@
 #include <QTextCursor>
 #include <QTranslator>
 #include <QPushButton>
+#include <QStyleFactory>
 #include <QStandardPaths>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QDesktopWidget>
@@ -62,7 +63,7 @@ SAKApplication::SAKApplication(int argc, char **argv)
 
     // Initialize the settings file
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    mSettingsFileName = QString("%1/%2.ini").arg(path).arg(qApp->applicationName());
+    mSettingsFileName = QString("%1/%2.ini").arg(path, qApp->applicationName());
     mSettings = new QSettings(mSettingsFileName, QSettings::IniFormat);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     mSettings->setIniCodec(QTextCodec::codecForName("UTF-8"));
@@ -70,9 +71,8 @@ SAKApplication::SAKApplication(int argc, char **argv)
     mLastDataTime = mSettings->value(mSettingsKeyContext.lastDateTime).toString();
     mSettings->setValue(mSettingsKeyContext.lastDateTime, QDateTime::currentDateTime().toString(QLocale::system().dateFormat()));
 
-#ifdef SAK_IMPORT_SQL_MODULE
     // Initialize the data base
-    mDatabaseName = QString("%1/%2.sqlite3").arg(path).arg(qApp->applicationName());
+    mDatabaseName = QString("%1/%2.sqlite3").arg(path, qApp->applicationName());
 
     // Remove settings file and database
     if (mSettings->value(mSettingsKeyContext.removeSettingsFile).toBool()){
@@ -91,6 +91,16 @@ SAKApplication::SAKApplication(int argc, char **argv)
         }
     }
 
+    // Readin setting info, set the most beautiful style for the paltform.
+    if (mSettings->value(mSettingsKeyContext.appStyle).toString().isEmpty()){
+        const QString defauleStyle = QString(SAK_STYLE_DEFAULT);
+        auto styleKeys = QStyleFactory::keys();
+        if (styleKeys.contains(defauleStyle)){
+            setStyle(defauleStyle);
+            mSettings->setValue(mSettingsKeyContext.appStyle, defauleStyle);
+        }
+    }
+
     mSqlDatabase = QSqlDatabase::addDatabase("QSQLITE");
     mSqlDatabase.setDatabaseName(mDatabaseName);
     // Do something useless
@@ -102,7 +112,6 @@ SAKApplication::SAKApplication(int argc, char **argv)
         qWarning() << __FUNCTION__ << "QSAKDatabase.sqlite3 open failed: " << mSqlDatabase.lastError().text();
         Q_ASSERT_X(false, __FUNCTION__, "Open database failed!");
     }
-#endif
 
     // Set application version, if micro SAK_VERSION is not defined, the application version is "0.0.0"
 #ifndef SAK_VERSION
@@ -139,9 +148,11 @@ void SAKApplication::installLanguage()
     qApp->installTranslator(&mQtBaseTranslator);
 
     ret = mQtTranslator.load(QString(":/translations/qt/qt_%1.qm").arg(qmName));
+    Q_UNUSED(ret);
     qApp->installTranslator(&mQtTranslator);
 
     ret = mSakTranslator.load(QString(":/translations/sak/SAK_%1.qm").arg(qmName));
+    Q_UNUSED(ret);
     qApp->installTranslator(&mSakTranslator);
 }
 
@@ -180,9 +191,7 @@ void SAKApplication::showSplashScreenMessage(QString msg)
     mSplashScreen->showMessage(msg, Qt::AlignBottom, QColor(255, 255, 255));
 }
 
-#ifdef SAK_IMPORT_SQL_MODULE
 QSqlDatabase *SAKApplication::sqlDatabase()
 {
     return &mSqlDatabase;
 }
-#endif

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
+ * Copyright 2018-2021 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoded using "utf8 with bom", it is a part
  * of QtSwissArmyKnife project.
@@ -36,9 +36,7 @@
 #include <QDesktopServices>
 
 #include "SAKMainWindow.hh"
-#include "QtAppStyleApi.hh"
 #include "SAKApplication.hh"
-#include "QtStyleSheetApi.hh"
 #include "SAKUpdateManager.hh"
 #include "SAKTestDebugPage.hh"
 #include "SAKCommonDataStructure.hh"
@@ -59,10 +57,14 @@
 #ifdef SAK_IMPORT_MODULE_SERIALBUS
 #include "SAKModbusDebugPage.hh"
 #endif
+#ifdef SAK_IMPORT_MODULE_UDP
 #include "SAKUdpClientDebugPage.hh"
 #include "SAKUdpServerDebugPage.hh"
+#endif
+#ifdef SAK_IMPORT_MODULE_TCP
 #include "SAKTcpClientDebugPage.hh"
 #include "SAKTcpServerDebugPage.hh"
+#endif
 #ifdef SAK_IMPORT_MODULE_SERIALPORT
 #include "SAKSerialPortDebugPage.hh"
 #endif
@@ -75,19 +77,17 @@
 
 SAKMainWindow::SAKMainWindow(QWidget *parent)
     :QMainWindow(parent)
-    ,mDefaultStyleSheetAction(Q_NULLPTR)
+    ,mWindowsMenu(Q_NULLPTR)
     ,mUpdateManager(Q_NULLPTR)
     ,mSettingKeyEnableTestPage(QString("enableTestPage"))
     ,mUi(new Ui::SAKMainWindow)
     ,mTabWidget(new QTabWidget)
 {
     mSettingsKeyContext.enableTestPage = QString("%1/enableTestPage").arg(qApp->applicationName());
-    mSettingsKeyContext.appStylesheet = QString("%1/appStylesheet").arg(qApp->applicationName());
     mSettingsKeyContext.currentTabPage = QString("%1/currentTabPage").arg(qApp->applicationName());
 
     mUi->setupUi(this);
     mUpdateManager = new SAKUpdateManager(this);
-    mUpdateManager->setSettings(qobject_cast<SAKApplication*>(qApp)->settings());
 
     initToosMetaObjectInfoList();
     initializingMetaObject();
@@ -98,9 +98,7 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
     scrollArea->setWidgetResizable(true);
     setCentralWidget(scrollArea);
     scrollArea->setWidget(mTabWidget);
-
-    //QDesktopWidget *desktop = QApplication::desktop();
-    //mTabWidget->setFixedWidth(desktop->width() - scrollArea->verticalScrollBar()->width());
+    menuBar()->hide();
 #else
     QHBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(mTabWidget);
@@ -113,32 +111,9 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
     title.append(QString("v") + qobject_cast<SAKApplication*>(qApp)->applicationVersion());
     setWindowTitle(title);
 #endif
-
+#ifndef Q_OS_ANDROID
     // Initializing menu bar
     initMenuBar();
-
-    // The default application style of Windows paltform and Linux platform is "Fusion".
-    // Do not set applicaiton stype for android palrform.
-    // For macOS platform, do not use the application style named "Windows"
-#ifndef Q_OS_ANDROID
-    QString settingStyle = sakApp->settings()->value(sakApp->settingsKeyContext()->appStyle).toString();
-    if (settingStyle.isEmpty()){
-        QStringList styleKeys = QStyleFactory::keys();
-#ifdef Q_OS_MACOS
-        QString uglyStyle("Windows");
-        for(auto var:styleKeys){
-            if (var != uglyStyle){
-                changeAppStyle(var);
-                break;
-            }
-    }
-#else
-        QString defaultStyle("Fusion");
-        if (styleKeys.contains(defaultStyle)){
-            changeAppStyle(defaultStyle);
-        }
-#endif
-    }
 #endif
 
     // Connecting the signal of tab page to it's slot.
@@ -153,11 +128,13 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
     QMetaEnum metaEnum = QMetaEnum::fromType<SAKEnumDebugPageType>();
     mTabWidget->blockSignals(true);
     for (int i = 0; i < metaEnum.keyCount(); i++){
+#ifdef QT_DEBUG
         // Test page is selectable, it is for developer of the project.
         bool enableTestPage = sakApp->settings()->value(mSettingsKeyContext.enableTestPage).toBool();
         if (!enableTestPage && (metaEnum.value(i) == DebugPageTypeTest)){
             continue;
         }
+#endif
 
         // The page can not be closed.
         QWidget *page = debugPageFromDebugPageType(metaEnum.value(i));
@@ -167,7 +144,9 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
         }
     }
     mTabWidget->blockSignals(false);
-    mWindowsMenu->addSeparator();
+    if (mWindowsMenu){
+        mWindowsMenu->addSeparator();
+    }
 
     // Set the current page to last time
     int currentPage = sakApp->settings()->value(mSettingsKeyContext.currentTabPage).toInt();
@@ -178,13 +157,6 @@ SAKMainWindow::SAKMainWindow(QWidget *parent)
         mTabWidget->tabBar()->setTabButton(i, QTabBar::RightSide, Q_NULLPTR);
         mTabWidget->tabBar()->setTabButton(i, QTabBar::LeftSide, Q_NULLPTR);
     }
-
-    // Do soemthing to make the application look like more beautiful.
-    connect(QtStyleSheetApi::instance(), &QtStyleSheetApi::styleSheetChanged, this, &SAKMainWindow::changeStylesheet);
-    connect(QtAppStyleApi::instance(), &QtAppStyleApi::appStyleChanged, this, &SAKMainWindow::changeAppStyle);
-
-    // Golden ratio
-    resize(971, 600);
 }
 
 SAKMainWindow::~SAKMainWindow()
@@ -252,7 +224,7 @@ void SAKMainWindow::initToolMenu()
     QMenu *toolMenu = new QMenu(tr("&Tools"));
     menuBar()->addMenu(toolMenu);
 
-    for (auto var : mToolMetaObjectInfoList){
+    for (auto &var : mToolMetaObjectInfoList){
         QWidget *w = qobject_cast<QWidget*>(var.metaObject.newInstance());
         Q_ASSERT_X(w, __FUNCTION__, "A null pointer!");
         w->hide();
@@ -275,40 +247,38 @@ void SAKMainWindow::initOptionMenu()
     QMenu *optionMenu = new QMenu(tr("&Options"));
     menuBar()->addMenu(optionMenu);
 
-    // Initializing style sheet menu, the application need to be reboot after change the style sheet to Qt default.
-    QMenu *stylesheetMenu = new QMenu(tr("Skin"), this);
-    optionMenu->addMenu(stylesheetMenu);
-    mDefaultStyleSheetAction = new QAction(tr("Qt Default"), this);
-    mDefaultStyleSheetAction->setCheckable(true);
-    stylesheetMenu->addAction(mDefaultStyleSheetAction);
-    connect(mDefaultStyleSheetAction, &QAction::triggered, [=](){
-        for(auto var:QtStyleSheetApi::instance()->actions()){
-            var->setChecked(false);
-        }
-
-        changeStylesheet(QString());
-        mDefaultStyleSheetAction->setChecked(true);
-        rebootRequestion();
-    });
-
-    stylesheetMenu->addSeparator();
-    stylesheetMenu->addActions(QtStyleSheetApi::instance()->actions());
-    QString styleSheetName = sakApp->settings()->value(mSettingsKeyContext.appStylesheet).toString();
-    if (!styleSheetName.isEmpty()){
-        QtStyleSheetApi::instance()->setStyleSheet(styleSheetName);
-    }else{
-        mDefaultStyleSheetAction->setChecked(true);
-    }
-
     // Initializing application style menu.
     QMenu *appStyleMenu = new QMenu(tr("Application Style"), this);
     optionMenu->addMenu(appStyleMenu);
-    appStyleMenu->addActions(QtAppStyleApi::instance()->actions());
+    auto styleKeys = QStyleFactory::keys();
+    QList<QAction*> actionsList;
+    QActionGroup *actionGroup = new QActionGroup(this);
+    for (auto &var : styleKeys){
+        QAction *action = new QAction(var, this);
+        action->setObjectName(var);
+        action->setCheckable(true);
+        actionsList.append(action);
+        actionGroup->addAction(action);
+        connect(action, &QAction::triggered, this, [=](){
+            QString style = qobject_cast<QAction*>(sender())->objectName();
+            sakApp->setStyle(style);
+            sakApp->settings()->setValue(sakApp->settingsKeyContext()->appStyle, style);
+        });
+    }
+    // Readin the specified style.
     QString style = sakApp->settings()->value(sakApp->settingsKeyContext()->appStyle).toString();
-    QtAppStyleApi::instance()->setStyle(style);
+    if (style.length()){
+        for (auto &var : actionsList){
+            if (var->objectName().compare(style) == 0){
+                var->setChecked(true);
+                sakApp->settings()->setValue(sakApp->settingsKeyContext()->appStyle, style);
+            }
+        }
+    }
+    appStyleMenu->addActions(actionsList);
 
+#ifdef QT_DEBUG
     optionMenu->addSeparator();
-
     mTestPageAction = new QAction(tr("Enable Testing Page"), this);
     optionMenu->addAction(mTestPageAction);
     mTestPageAction->setCheckable(true);
@@ -319,7 +289,7 @@ void SAKMainWindow::initOptionMenu()
     }else{
         mTestPageAction->setChecked(false);
     }
-
+#endif
     QAction *action = new QAction(tr("Clear Configuration"), this);
     optionMenu->addAction(action);
     connect(action, &QAction::triggered, this, &SAKMainWindow::clearConfiguration);
@@ -364,7 +334,7 @@ void SAKMainWindow::initLanguageMenu()
             }
 
             QActionGroup *actionGroup = new QActionGroup(this);
-            for(auto var:infoList){
+            for(auto &var:infoList){
                 QAction *action = new QAction(var.name, languageMenu);
                 languageMenu->addAction(action);
                 action->setCheckable(true);
@@ -438,7 +408,7 @@ void SAKMainWindow::initLinksMenu()
              << Link{tr("Download SAK from Gitee"), QString("%1/releases").arg(SAK_GITEE_REPOSITORY_URL), QString(":/resources/images/Gitee.png")}
              << Link{tr("Office Web Site"), QString("https://qsaker.gitee.io/qsak/"), QString(":/resources/images/Gitee.png")};
 
-    for (auto var:linkList){
+    for (auto &var:linkList){
         QAction *action = new QAction(QIcon(var.iconPath), var.name, this);
         action->setObjectName(var.url);
         linksMenu->addAction(action);
@@ -462,7 +432,7 @@ void SAKMainWindow::initDemoMenu()
     QList<Link> linkList;
     linkList << Link{tr("Qt SerialPort Demo"), QString("https://gitee.com/qsaker/qt-demo-serial-port-widget.git"), QString(":/resources/images/Qt.png")};
 
-    for (auto var:linkList){
+    for (auto &var:linkList){
         QAction *action = new QAction(QIcon(var.iconPath), var.name, this);
         action->setObjectName(var.url);
         demoMenu->addAction(action);
@@ -471,19 +441,6 @@ void SAKMainWindow::initDemoMenu()
             QDesktopServices::openUrl(QUrl(sender()->objectName()));
         });
     }
-}
-
-void SAKMainWindow::changeStylesheet(QString styleSheetName)
-{
-    sakApp->settings()->setValue(mSettingsKeyContext.appStylesheet, styleSheetName);
-    if (!styleSheetName.isEmpty()){
-        mDefaultStyleSheetAction->setChecked(false);
-    }
-}
-
-void SAKMainWindow::changeAppStyle(QString appStyle)
-{
-    sakApp->settings()->setValue(sakApp->settingsKeyContext()->appStyle, appStyle);
 }
 
 void SAKMainWindow::aboutQsak()
@@ -511,7 +468,7 @@ void SAKMainWindow::aboutQsak()
 
     QGridLayout *gridLayout = new QGridLayout(&dialog);
     int i = 0;
-    for (auto var : infoList){
+    for (auto &var : infoList){
         QLabel *nameLabel = new QLabel(QString("<font color=green>%1</font>").arg(var.name), &dialog);
         QLabel *valueLabel = new QLabel(var.value, &dialog);
         gridLayout->addWidget(nameLabel, i, 0, 1, 1);
@@ -537,11 +494,13 @@ void SAKMainWindow::removeRemovableDebugPage(int index)
 
 void SAKMainWindow::appendWindowAction(QWidget *page)
 {
-    QAction *action = new QAction(page->windowTitle(), mWindowsMenu);
-    action->setData(QVariant::fromValue(page));
-    mWindowsMenu->addAction(action);
-    connect(action, &QAction::triggered, this, &SAKMainWindow::activePage);
-    connect(page, &QWidget::destroyed, action, &QAction::deleteLater);
+    if (mWindowsMenu){
+        QAction *action = new QAction(page->windowTitle(), mWindowsMenu);
+        action->setData(QVariant::fromValue(page));
+        mWindowsMenu->addAction(action);
+        connect(action, &QAction::triggered, this, &SAKMainWindow::activePage);
+        connect(page, &QWidget::destroyed, action, &QAction::deleteLater);
+    }
 }
 
 void SAKMainWindow::testPageActionTriggered()
@@ -555,6 +514,7 @@ void SAKMainWindow::testPageActionTriggered()
 
 void SAKMainWindow::clearConfiguration()
 {
+    sakApp->settings()->setValue(sakApp->settingsKeyContext()->appStyle, QString(""));
     sakApp->settings()->setValue(sakApp->settingsKeyContext()->removeSettingsFile, QVariant::fromValue(true));
     rebootRequestion();
 }
@@ -570,7 +530,9 @@ void SAKMainWindow::rebootRequestion()
 
 void SAKMainWindow::initializingMetaObject()
 {
+#ifdef QT_DEBUG
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeTest, SAKTestDebugPage::staticMetaObject, tr("Test")});
+#endif
 #ifdef SAK_IMPORT_MODULE_SERIALPORT
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeCOM, SAKSerialPortDebugPage::staticMetaObject, tr("COM")});
 #endif
@@ -580,10 +542,14 @@ void SAKMainWindow::initializingMetaObject()
 #ifdef SAK_IMPORT_USB_MODULE
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeUSB, SAKUSBDebugPage::staticMetaObject, tr("USB")});
 #endif
+#ifdef SAK_IMPORT_MODULE_UDP
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeUdpClient, SAKUdpClientDebugPage::staticMetaObject, tr("UDP-C")});
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeUdpServer, SAKUdpServerDebugPage::staticMetaObject, tr("UDP-S")});
+#endif
+#ifdef SAK_IMPORT_MODULE_TCP
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeTCPClient, SAKTcpClientDebugPage::staticMetaObject, tr("TCP-C")});
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeTCPServer, SAKTcpServerDebugPage::staticMetaObject, tr("TCP-S")});
+#endif
 #ifdef SAK_IMPORT_MODULE_SSLSOCKET
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{SAKSslSocketClientDebugPage::staticMetaObject, tr("SSL-C")});
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{SAKSslSocketServerDebugPage::staticMetaObject, tr("SSL-S")});
@@ -707,7 +673,7 @@ void SAKMainWindow::showQrCodeDialog()
                    << QrCodeInfo{tr("Qt QQ Group"), QString(":/resources/images/QtQQ.jpg")};
 
     QTabWidget *tabWidget = new QTabWidget(&dialog);
-    for (auto var : qrCodeInfoList){
+    for (auto &var : qrCodeInfoList){
         QLabel *label = new QLabel(tabWidget);
         label->setPixmap(QPixmap::fromImage(QImage(var.qrCode)));
         tabWidget->addTab(label, var.title);
@@ -776,7 +742,7 @@ QWidget *SAKMainWindow::debugPageFromDebugPageType(int type)
 {
     QWidget *widget = Q_NULLPTR;
     QMetaEnum metaEnum = QMetaEnum::fromType<SAKEnumDebugPageType>();
-    for (auto var : mDebugPageMetaInfoList){
+    for (auto &var : mDebugPageMetaInfoList){
         if (var.debugPageType == type){
             for (int i = 0; i < metaEnum.keyCount(); i++){
                 if (var.debugPageType == metaEnum.value(i)){
@@ -796,7 +762,7 @@ QString SAKMainWindow::debugPageTitleFromDebugPageType(int type)
 {
     QString title;
     QMetaEnum metaEnum = QMetaEnum::fromType<SAKEnumDebugPageType>();
-    for (auto var : mDebugPageMetaInfoList){
+    for (auto &var : mDebugPageMetaInfoList){
         if (var.debugPageType == type){
             for (int i = 0; i < metaEnum.keyCount(); i++){
                 if (var.debugPageType == metaEnum.value(i)){
@@ -809,9 +775,9 @@ QString SAKMainWindow::debugPageTitleFromDebugPageType(int type)
 
     if (title.isEmpty()){
         title = QString("UnknownDebugPage");
+        qWarning() << "Unknown debug page type:" << type;
         Q_ASSERT_X(false, __FUNCTION__, "Unknown debug page type!");
     }
 
     return title;
 }
-

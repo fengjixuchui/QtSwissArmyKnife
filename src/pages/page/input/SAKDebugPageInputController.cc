@@ -11,6 +11,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QAction>
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QListWidgetItem>
@@ -98,7 +99,7 @@ SAKDebugPageInputController::SAKDebugPageInputController(SAKDebugPage *debugPage
     // Add actions after new.
     mInputDataItemManager = new SAKInputDataPresetItemManager(debugPage);
     QList<SAKInputDataPresetItem*> list = mInputDataItemManager->itemList();
-    for (auto var : list){
+    for (auto &var : list){
         appendAction(var);
     }
 
@@ -239,7 +240,8 @@ void SAKDebugPageInputController::sendRawData()
 {
     QString data = mInputTextEdit->toPlainText();
     if (data.isEmpty()){
-        data = QString("(empty)");
+        auto ret = QMessageBox::warning(Q_NULLPTR, tr("Data is empty"), tr("Please input data then try again!"));
+        Q_UNUSED(ret);
     }
 
     emit rawDataChanged(data, mInputParameters);
@@ -318,7 +320,7 @@ void SAKDebugPageInputController::appendAction(SAKInputDataPresetItem *item)
 void SAKDebugPageInputController::removeAction(SAKInputDataPresetItem *item)
 {
     QList<QAction*> actionList = mWriteDataItemMenu->actions();
-    for (auto var : actionList){
+    for (auto &var : actionList){
         if (var->data().value<SAKInputDataPresetItem*>() == item){
             var->deleteLater();
             break;
@@ -329,7 +331,7 @@ void SAKDebugPageInputController::removeAction(SAKInputDataPresetItem *item)
 void SAKDebugPageInputController::changeDescription(SAKInputDataPresetItem *item)
 {
     QList<QAction*> actionList = mWriteDataItemMenu->actions();
-    for (auto var : actionList){
+    for (auto &var : actionList){
         if (var->data().value<SAKInputDataPresetItem*>() == item){
             var->setText(item->itemDescription());
             break;
