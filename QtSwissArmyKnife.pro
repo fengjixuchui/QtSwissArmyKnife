@@ -58,6 +58,13 @@ exists(private/SAKPrivate.pri){
     include(private/SAKPrivate.pri)
 }
 
+#------------------------------------------------------------------------------
+# Android settings
+# The package is qter.QtSwissArmyKnife
+android {
+    include(android/SAKAndroid.pri)
+}
+
 QSAK_APP_NAME        = "QtSwissArmyKnife"
 QSAK_ORG_NAME        = "Qter"
 QSAK_ORG_DOMAIN      = "IT"
@@ -233,12 +240,3 @@ SOURCES += \
     src/pages/test/SAKTestDeviceController.cc \
     src/update/SAKDownloadItemWidget.cc \
     src/update/SAKUpdateManager.cc
-
-android {
-     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
-     ANDROID_ABIS = armeabi-v7a
-     DISTFILES += \
-         android/AndroidManifest.xml \
-         android/build.gradle \
-         android/res/values/libs.xml
- }
