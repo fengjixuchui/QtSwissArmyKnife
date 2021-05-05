@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
+ * Copyright 2018-2021 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoded using "utf8 with bom", it is a part
  * of QtSwissArmyKnife project.
@@ -23,7 +23,9 @@
 #include <QWaitCondition>
 
 class SAKDebugPage;
+class SAKOutputLogDialog;
 class SAKOutputSave2FileDialog;
+class SAKOtherHighlighterManager;
 /// @brief output data controller
 class SAKDebugPageOutputController:public QThread
 {
@@ -31,12 +33,14 @@ class SAKDebugPageOutputController:public QThread
 public:
     SAKDebugPageOutputController(SAKDebugPage *mDebugPage, QObject *parent = Q_NULLPTR);
     ~SAKDebugPageOutputController();
+    void outputLog(QString log, bool isInfo = true);
 
     struct OutputParameters {
         bool showDate; // true: show date shen output data
         bool showTime; // true: show time when output data
         bool showMS; // true: show ms shen output data
         bool isReadData; // true: data is read data, false: data is written data
+        bool isRawData;
         int  format; // output data format, such as bin, otc and so on
     };
 protected:
@@ -45,6 +49,9 @@ private:
     SAKDebugPage *mDebugPage;
     QSettings *mSettings;
     SAKOutputSave2FileDialog *mSave2FileDialog;
+    SAKOutputLogDialog *mSAKOutputLogDialog;
+    SAKOtherHighlighterManager *mSAKOtherHighlighterManager;
+    bool mHasBeenClear;
 
     // Animation
     QTimer mUpdateRxAnimationTimer;
@@ -64,9 +71,9 @@ private:
     QCheckBox *mShowRxDataCheckBox;
     QCheckBox *mShowTxDataCheckBox;
     QCheckBox *mSaveOutputToFileCheckBox;
-    QPushButton *mOutputFilePathPushButton;
+    QCheckBox *mRawDataCheckBox;
+    QPushButton *mMoreOutputSettingsPushButton;
     QPushButton *mClearOutputPushButton;
-    QPushButton *mSaveOutputPushButton;
     QTextBrowser *mOutputTextBroswer;
 
     // Variables about settings
@@ -77,6 +84,7 @@ private:
     QString mSettingStringShowMs;
     QString mSettingStringShowRx;
     QString mSettingStringShowTx;
+    QString mSettingStringRawData;
 
     // Thread controller
     QMutex mThreadMutex;
@@ -100,7 +108,7 @@ private:
     void saveOutputDataToFile();
     void bytesRead(QByteArray data);
     void bytesWritten(QByteArray data);
-    void outputData(QString data);
+    void outputData(QString data, bool rawData);
     OutputParameters outputDataParameters(bool isReadData);
     RawDataStruct takeRawData();
     void readinSettings();
@@ -115,8 +123,9 @@ private:
     void onShowMsCheckBoxClicked();
     void onShowRxDataCheckBoxClicked();
     void onShowTxDataCheckBoxClicked();
+    void onRawDataCheckBoxClicked();
 signals:
-    void dataCooked(QString data);
+    void dataCooked(QString data, bool isRawData);
 };
 
 #endif

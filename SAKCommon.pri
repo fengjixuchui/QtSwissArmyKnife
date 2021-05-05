@@ -19,17 +19,24 @@ win32|unix {
     android {
         DEFINES += SAK_STYLE_DEFAULT=\"\\\"Windows\\\"\"
     } else {
-        DEFINES += SAK_STYLE_DEFAULT=\"\\\"macOS\\\"\"
+        #DEFINES += SAK_STYLE_DEFAULT=\"\\\"macintosh\\\"\"
+        DEFINES += SAK_STYLE_DEFAULT=\"\\\"Fusion\\\"\"
     }
 }
 
 #↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 # Application version
-DEFINES += SAK_VERSION=\"\\\"3.4.1\\\"\"
+DEFINES += SAK_VERSION=\"\\\"3.5.0\\\"\"
 # File information
 win32 {
-    VERSION = 3.4.1.0
+    VERSION = 3.5.0.0
 } else {
-    VERSION = 3.4.1
+    VERSION = 3.5.0
 }
+#↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+#↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+# Information of author
+DEFINES += SAK_AUTHOR=\"\\\"Qter\\\"\"
+DEFINES += SAK_AUTHOR_EMAIL=\"\\\"qsaker@foxmail.com\\\"\"
 #↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑

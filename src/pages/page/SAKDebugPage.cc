@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
+ * Copyright 2018-2021 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoded using "utf8 with bom", it is a part
  * of QtSwissArmyKnife project.
@@ -57,6 +57,11 @@ SAKDebugPage::SAKDebugPage(int type, QString name, QWidget *parent)
     ,mUi(new Ui::SAKDebugPage)
 {
     mUi->setupUi(this);
+    auto html = mUi->outputTextBroswer->toHtml();
+    html = html.replace(QString("1970"), sakApp->buildDate()->toString("yyyy"));
+    html = html.replace(QString("Author"), QString(SAK_AUTHOR));
+    html = html.replace(QString("Email"), QString(SAK_AUTHOR_EMAIL));
+    mUi->outputTextBroswer->setHtml(html);
     initializingVariables();
 
     mDatabaseInterface = new SAKDebugPageCommonDatabaseInterface(this, sakApp->sqlDatabase(), this);
@@ -99,6 +104,7 @@ void SAKDebugPage::writeRawData(QString rawData, int textFormat)
 
 void SAKDebugPage::outputMessage(QString msg, bool isInfo)
 {
+    mOutputController->outputLog(msg, isInfo);
     QString time = QDateTime::currentDateTime().toString("hh:mm:ss ");
     QString temp;
     temp.append(time);
@@ -335,9 +341,9 @@ void SAKDebugPage::initializingVariables()
     mShowRxDataCheckBox = mUi->showRxDataCheckBox;
     mShowTxDataCheckBox = mUi->showTxDataCheckBox;
     mSaveOutputToFileCheckBox = mUi->saveOutputToFileCheckBox;
-    mOutputFilePathPushButton = mUi->outputFilePathPushButton;
+    mRawDataCheckBox = mUi->rawDataCheckBox;
+    mMoreOutputSettingsPushButton = mUi->moreOutputSettingsPushButton;
     mClearOutputPushButton = mUi->clearOutputPushButton;
-    mSaveOutputPushButton = mUi->saveOutputPushButton;
     mOutputTextBroswer = mUi->outputTextBroswer;
 
     // Statistics

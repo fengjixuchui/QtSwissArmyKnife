@@ -68,9 +68,16 @@
 #ifdef SAK_IMPORT_MODULE_SERIALPORT
 #include "SAKSerialPortDebugPage.hh"
 #endif
+#ifdef SAK_IMPORT_MODULE_BLUETOOTH
+#include "SAKBluetoothClientDebugPage.hh"
+#include "SAKBluetoothServerDebugPage.hh"
+#endif
 #ifdef SAK_IMPORT_MODULE_WEBSOCKET
 #include "SAKWebSocketClientDebugPage.hh"
 #include "SAKWebSocketServerDebugPage.hh"
+#endif
+#ifdef SAK_IMPORT_MODULE_BLUETOOTHLOWENERGY
+#include "SAKBluetoothLowEnergyDebugPage.hh"
 #endif
 
 #include "ui_SAKMainWindow.h"
@@ -453,15 +460,17 @@ void SAKMainWindow::aboutQsak()
         bool valueIsUrl;
     };
 
-    auto dateaTime = qobject_cast<SAKApplication*>(qApp)->buildDateTime();
+    auto dateTimeString = sakApp->buildDate()->toString(QLocale::system().dateFormat());
+    dateTimeString = dateTimeString.append(" ");
+    dateTimeString = dateTimeString.append(sakApp->buildTime()->toString("hh:mm:ss"));
     QList<Info> infoList;
     infoList << Info{tr("Version"), QString(qApp->applicationVersion()), false}
-             << Info{tr("Author"), QString("Qsaker(Qter)"), false}
-             << Info{tr("Email"), QString("qsaker@qq.com"), false}
+             << Info{tr("Author"), QString(SAK_AUTHOR), false}
+             << Info{tr("Email"), QString(SAK_AUTHOR_EMAIL), false}
              << Info{tr("QQ"), QString("QQ:2869470394"), false}
              << Info{tr("QQ Group"), QString("QQ:952218522"), false}
-             << Info{tr("Build Time"), dateaTime->toString(QLocale::system().dateTimeFormat()), false}
-             << Info{tr("Copyright"), tr("Copyright 2018-%1 Qter. All rights reserved.").arg(dateaTime->toString("yyyy")), false}
+             << Info{tr("Build Time"), dateTimeString, false}
+             << Info{tr("Copyright"), tr("Copyright 2018-%1 Qter. All rights reserved.").arg(sakApp->buildDate()->toString("yyyy")), false}
              << Info{tr("Gitee Url"), QString("<a href=%1>%1</a>").arg(SAK_GITEE_REPOSITORY_URL), true}
              << Info{tr("Gitbub Url"), QString("<a href=%1>%1</a>").arg(SAK_GITHUB_REPOSITORY_URL), true};
 
@@ -560,9 +569,12 @@ void SAKMainWindow::initializingMetaObject()
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{SAKSCTPClientDebugPage::staticMetaObject, tr("SCTP-C")});
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{SAKSCTPServerDebugPage::staticMetaObject, tr("SCTP-S")});
 #endif
-#ifdef SAK_IMPORT_BLUETOOTH_MODULE
-    mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeBluetoothClient, SAKBluetoothClientDebugPage::staticMetaObject, tr("Bluetooth-C")});
-    mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeBluetoothServer, SAKBluetoothServerDebugPage::staticMetaObject, tr("Bluetooth-S")});
+#ifdef SAK_IMPORT_MODULE_BLUETOOTH
+    mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeBluetoothClient, SAKBluetoothClientDebugPage::staticMetaObject, tr("BT-C")});
+    mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeBluetoothServer, SAKBluetoothServerDebugPage::staticMetaObject, tr("BT-S")});
+#endif
+#ifdef SAK_IMPORT_MODULE_BLUETOOTHLOWENERGY
+    mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeBluetoothLowEnergy, SAKBluetoothLowEnergyDebugPage::staticMetaObject, tr("BLE")});
 #endif
 #ifdef SAK_IMPORT_MODULE_WEBSOCKET
     mDebugPageMetaInfoList.append(SAKDebugPageMetaInfo{DebugPageTypeWebSocketClient, SAKWebSocketClientDebugPage::staticMetaObject, tr("WS-C")});

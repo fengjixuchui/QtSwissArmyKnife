@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved.
+ * Copyright 2018-2021 Qter(qsaker@qq.com). All rights reserved.
  *
  * The file is encoded using "utf8 with bom", it is a part
  * of QtSwissArmyKnife project.
@@ -244,9 +244,9 @@ protected:
     QCheckBox *mShowRxDataCheckBox;
     QCheckBox *mShowTxDataCheckBox;
     QCheckBox *mSaveOutputToFileCheckBox;
-    QPushButton *mOutputFilePathPushButton;
+    QCheckBox *mRawDataCheckBox;
+    QPushButton *mMoreOutputSettingsPushButton;
     QPushButton *mClearOutputPushButton;
-    QPushButton *mSaveOutputPushButton;
     QTextBrowser *mOutputTextBroswer;
     /*************************************************************************/
     // Data statistics module

@@ -53,6 +53,7 @@ include(SAKCharts.pri)
 include(SAKModbus.pri)
 include(SAKWebSocket.pri)
 include(SAKSerialPort.pri)
+include(SAKBluetoothLowEnergy.pri)
 
 exists(private/SAKPrivate.pri){
     include(private/SAKPrivate.pri)
@@ -69,7 +70,7 @@ QSAK_APP_NAME        = "QtSwissArmyKnife"
 QSAK_ORG_NAME        = "Qter"
 QSAK_ORG_DOMAIN      = "IT"
 QSAK_APP_DESCRIPTION = "Qt Swiss Army Knife"
-QSAK_APP_COPYRIGHT   = "Copyright 2018-2020 Qter(qsaker@qq.com). All rights reserved."
+QSAK_APP_COPYRIGHT   = "Copyright 2018-2021 Qter(qsaker@qq.com). All rights reserved."
 
 win32 {
     QMAKE_TARGET_COMPANY        = "$${QSAK_ORG_NAME}"
@@ -95,6 +96,8 @@ win32 {
             QMAKE_CXXFLAGS += -execution-charset:utf-8
         }
     }
+
+    include(libs/windows_openssl/SAKWindowsOpenSSL.pri)
 }
 
 #--------------------------------------------------------------------------------------------
@@ -128,6 +131,7 @@ INCLUDEPATH += \
     src/pages/page/other/transmission \
     src/pages/page/output \
     src/pages/page/output/save2file \
+    src/pages/page/output/log \
     src/pages/page/statistics \
     src/pages/test \
     src/update
@@ -151,6 +155,7 @@ FORMS += \
     src/pages/page/other/transmission/SAKOtherTransmissionItemUdp.ui \
     src/pages/page/other/transmission/SAKOtherTransmissionPage.ui \
     src/pages/page/other/transmission/SAKOtherTransmissionPageViewer.ui \
+    src/pages/page/output/log/SAKOutputLogDialog.ui \
     src/pages/page/output/save2file/SAKOutputSave2FileDialog.ui \
     src/pages/test/SAKTestDeviceController.ui \
     src/update/SAKDownloadItemWidget.ui \
@@ -189,6 +194,7 @@ HEADERS += \
     src/pages/page/other/transmission/SAKOtherTransmissionPage.hh \
     src/pages/page/other/transmission/SAKOtherTransmissionPageViewer.hh \
     src/pages/page/output/SAKDebugPageOutputController.hh \
+    src/pages/page/output/log/SAKOutputLogDialog.hh \
     src/pages/page/output/save2file/SAKOutputSave2FileDialog.hh \
     src/pages/page/output/save2file/SAKOutputSave2FileThread.hh \
     src/pages/page/statistics/SAKDebugPageStatisticsController.hh \
@@ -231,6 +237,7 @@ SOURCES += \
     src/pages/page/other/transmission/SAKOtherTransmissionPage.cc \
     src/pages/page/other/transmission/SAKOtherTransmissionPageViewer.cc \
     src/pages/page/output/SAKDebugPageOutputController.cc \
+    src/pages/page/output/log/SAKOutputLogDialog.cc \
     src/pages/page/output/save2file/SAKOutputSave2FileDialog.cc \
     src/main.cc \
     src/pages/page/output/save2file/SAKOutputSave2FileThread.cc \

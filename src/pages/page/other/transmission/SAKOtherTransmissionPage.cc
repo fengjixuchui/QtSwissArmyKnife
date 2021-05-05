@@ -8,6 +8,7 @@
  * the file LICENCE in the root of the source code directory.
  */
 #include <QDateTime>
+#include <QFileDialog>
 
 #include "SAKOtherTransmissionPage.hh"
 #include "SAKOtherTransmissionItemUdp.hh"
@@ -40,6 +41,16 @@ SAKOtherTransmissionPage::~SAKOtherTransmissionPage()
 void SAKOtherTransmissionPage::setTransmissionType(TransmissionType type)
 {
     mTransmissionType = type;
+}
+
+void SAKOtherTransmissionPage::import(const QString fileName)
+{
+    Q_UNUSED(fileName);
+}
+
+void SAKOtherTransmissionPage::outport(const QString fileName)
+{
+    Q_UNUSED(fileName);
 }
 
 void SAKOtherTransmissionPage::outputMessage(QString msg, bool isInfo)
@@ -80,10 +91,13 @@ void SAKOtherTransmissionPage::on_addItemPushButton_clicked()
         Q_ASSERT_X(false, __FUNCTION__, "Unknown transmissioin type");
         break;
     }
-    item->setSizeHint(QSize(itemWidget->width(), itemWidget->height()));
-    mListWidget->setItemWidget(item, itemWidget);
-    SAKOtherTransmissionItem *baseItemWidget = reinterpret_cast<SAKOtherTransmissionItem*>(itemWidget);
-    connect(baseItemWidget, &SAKOtherTransmissionItem::requestOutputMessage, this, &SAKOtherTransmissionPage::outputMessage);
+
+    if (itemWidget){
+        item->setSizeHint(QSize(itemWidget->width(), itemWidget->height()));
+        mListWidget->setItemWidget(item, itemWidget);
+        SAKOtherTransmissionItem *baseItemWidget = reinterpret_cast<SAKOtherTransmissionItem*>(itemWidget);
+        connect(baseItemWidget, &SAKOtherTransmissionItem::requestOutputMessage, this, &SAKOtherTransmissionPage::outputMessage);
+    }
 }
 
 void SAKOtherTransmissionPage::on_deleteItemPushButton_clicked()
@@ -91,4 +105,25 @@ void SAKOtherTransmissionPage::on_deleteItemPushButton_clicked()
     QListWidgetItem *item = mListWidget->currentItem();
     mListWidget->removeItemWidget(item);
     delete item;
+}
+
+void SAKOtherTransmissionPage::on_closePushButton_clicked()
+{
+    emit invokeClose();
+}
+
+void SAKOtherTransmissionPage::on_importPushButton_clicked()
+{
+    auto fileName = QFileDialog::getSaveFileName(this, tr("Import file"), "./", QString("Json (*.json)"));
+    if (fileName.length()) {
+        import(fileName);
+    }
+}
+
+void SAKOtherTransmissionPage::on_outportPushButton_clicked()
+{
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Import file"), "./", QString("Json (*.json)"));
+    if (fileName.length()) {
+        outport(fileName);
+    }
 }

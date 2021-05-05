@@ -34,6 +34,8 @@ public:
     };
 
     void setTransmissionType(TransmissionType type);
+    void import(const QString fileName);
+    void outport(const QString fileName);
 private:
     QPushButton *mAddItemPushButton;
     QPushButton *mDeleteItemPushButton;
@@ -51,6 +53,11 @@ private:
 private slots:
     void on_addItemPushButton_clicked();
     void on_deleteItemPushButton_clicked();
+    void on_closePushButton_clicked();
+    void on_importPushButton_clicked();
+    void on_outportPushButton_clicked();
+signals:
+    void invokeClose();
 };
 
 #endif
